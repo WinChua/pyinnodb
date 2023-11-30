@@ -1,20 +1,22 @@
 from elftools import construct
-from .metaclass import Struct, Field
+from .meta import *
 from .list import ListBaseNode, ListNode
 
-class FspHeader(Struct):
-    space_id = Field(construct.UBInt32)
-    unused   = Field(construct.UBInt32)
-    highest_page_number = Field(construct.UBInt32)
-    highest_page_number_init = Field(construct.UBInt32)
-    flags = Field(construct.UBInt32)
-    free_frag_page_number = Field(construct.UBInt32)
-    list_base_free = Field(ListBaseNode)
-    list_base_free_frag = Field(ListBaseNode)
-    list_base_full_frag = Field(ListBaseNode)
-    next_seg_id = Field(construct.UBInt64)
-    list_base_full_inode = Field(ListBaseNode)
-    list_base_free_inode = Field(ListBaseNode)
+
+class FspHeader(OStruct):
+    space_id = UBInt32
+    unused = UBInt32
+    highest_page_number = UBInt32
+    highest_page_number_init = UBInt32
+    flags = UBInt32
+    free_frag_page_number = UBInt32
+    list_base_free = ListBaseNode
+    list_base_free_frag = ListBaseNode
+    list_base_full_frag = ListBaseNode
+    next_seg_id = UBInt64
+    list_base_full_inode = ListBaseNode
+    list_base_free_inode = ListBaseNode
+
 
 # FSP_HEADER = construct.Struct("FSP_HEADER",
 #         construct.UBInt32("space_id"),
