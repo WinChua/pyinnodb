@@ -26,6 +26,10 @@ UBInt32 = AttrNameCall(lambda name: OrderFormatField(name, ">", "L"))
 UBInt64 = AttrNameCall(lambda name: OrderFormatField(name, ">", "Q"))
 OBits = lambda length: AttrNameCall(lambda name: OMBits(name, length))
 
+SBInt8 = AttrNameCall(lambda name: OrderFormatField(name, ">", "b"))
+SBInt16= AttrNameCall(lambda name: OrderFormatField(name, ">", "h"))
+SBInt32= AttrNameCall(lambda name: OrderFormatField(name, ">", "l"))
+SBInt64= AttrNameCall(lambda name: OrderFormatField(name, ">", "q"))
 
 class Array(Construct):
     def __init__(self, size, constructor):
@@ -119,6 +123,18 @@ class OrderParseMeta(type):
 
             return True
 
+        def _repr_html_(self):
+            data = []
+            for f in self._attr_order:
+                value = getattr(self, f)
+                s = str(value)
+                if hasattr(value, "_repr_html_"):
+                    s = value._repr_html_()
+                if isinstance(value, list) and len(value) > 5:
+                    s = f"[{value[0]},{value[1]},...,{value[-1]}]"
+                data.append("<tr><td>"+f+"</td><td>"+s+"</td></tr>")
+            return "<table>"+'\n'.join(data)+"</table>"
+        klass._repr_html_ = _repr_html_
         klass.__eq__ = __eq__
         klass.__str__ = __str__
         klass.__repr__ = __str__

@@ -8,7 +8,7 @@ from .meta import *
 class InodeEntry(OStruct):
     fseg_id = UBInt64
     not_full_list_used_page = UBInt32
-    list_base_free = ListBaseNode
+    list_base_free = ListBaseNode # 当前segment下没有使用的extent
     list_base_not_full = ListBaseNode
     list_base_full = ListBaseNode
     magic_number = UBInt32  # 97937874
