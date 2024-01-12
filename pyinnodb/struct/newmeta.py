@@ -39,8 +39,11 @@ class Array(Construct):
 
     def _parse(self, stream, context=None):
         result = []
+        print("construct is ", self.constructor)
         for i in range(self.size):
-            result.append(self.constructor.parse_stream(stream))
+            v = self.constructor.parse_stream(stream)
+            print("value is v", v)
+            result.append(v)
         return result
 
     def _build(self, obj, stream, context=None):
@@ -101,6 +104,12 @@ class OrderParseMeta(type):
                 parser_fields.append((attr_name, parser))
 
         # parser_fields.sort(key = lambda x: x[1])
+        if len(bits_fields) > 0:
+            bits_parser = construct.EmbeddedBitStruct(
+                *[f[1]._make_con() for f in bits_fields]    
+            )
+            parser_fields.append(("", bits_parser))
+            bits_fields = []
 
         klass._attr_order = keys_order
         klass._parse_order = []
