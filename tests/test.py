@@ -19,6 +19,7 @@ FIL = construct.Struct(
     construct.UBInt32("spaceid"),
 )
 
+
 LIST_BASE_NODE = [
     construct.UBInt32("len"),
     construct.UBInt32("first_page_number"),
@@ -34,9 +35,9 @@ LIST_NODE = [
     construct.UBInt16("next_page_offset"),
 ]
 
-## 一个page有initilized和allocated两种状态
-## initilized, 被使用了, 但是有可能磁盘上没有分配
-## allocated则是在磁盘上分配且使用了
+# 一个page有initilized和allocated两种状态
+# initilized, 被使用了, 但是有可能磁盘上没有分配
+# allocated则是在磁盘上分配且使用了
 
 FSP_HEADER = construct.Struct(
     "FSP_HEADER",
@@ -48,15 +49,15 @@ FSP_HEADER = construct.Struct(
     construct.UBInt32("free_frag_page_number"),
     construct.Struct(
         "list_base_node_free", *LIST_BASE_NODE
-    ),  ## 所有完全没有使用的extent, 可以完全用作同一个用途
+    ),  # 所有完全没有使用的extent, 可以完全用作同一个用途
     construct.Struct(
         "list_base_node_free_frag", *LIST_BASE_NODE
-    ),  ## 所有, 已经被部分使用的extent, 这些extent的page可能有不同用途
-    ## eg: Page(0)分配用于记录extent信息, 所属的extent剩余的其他page,可以
-    ## 分配用于其他用途
+    ),  # 所有, 已经被部分使用的extent, 这些extent的page可能有不同用途
+    # eg: Page(0)分配用于记录extent信息, 所属的extent剩余的其他page,可以
+    # 分配用于其他用途
     construct.Struct(
         "list_base_node_full_frag", *LIST_BASE_NODE
-    ),  ## free_frag中已经满了的page会移动到这里来
+    ),  # free_frag中已经满了的page会移动到这里来
     construct.UBInt64("next_unused_segment_id"),
     construct.Struct("list_base_node_full_inodes", *LIST_BASE_NODE),
     construct.Struct("list_base_node_free_inodes", *LIST_BASE_NODE),
@@ -77,7 +78,7 @@ XDES = construct.Struct(
             construct.Bits("p3", 2),
         ),
     ),
-    ##construct.Array(8, construct.Bits("page_state_bitmap", 2)),
+    # construct.Array(8, construct.Bits("page_state_bitmap", 2)),
 )
 
 INODE_ENTRY = construct.Struct(
@@ -91,41 +92,43 @@ INODE_ENTRY = construct.Struct(
 )
 
 
-FIL_PAGE_INDEX = 17855  ## B-tree node */
-FIL_PAGE_RTREE = 17854  ## R-tree node */
-FIL_PAGE_SDI = 17853  ## Tablespace SDI Index page */
-FIL_PAGE_UNDO_LOG = 2  ## Undo log page */
-FIL_PAGE_INODE = 3  ## Index node */
-FIL_PAGE_IBUF_FREE_LIST = 4  ## Insert buffer free list */
+FIL_PAGE_INDEX = 17855  # B-tree node */
+FIL_PAGE_RTREE = 17854  # R-tree node */
+FIL_PAGE_SDI = 17853  # Tablespace SDI Index page */
+FIL_PAGE_UNDO_LOG = 2  # Undo log page */
+FIL_PAGE_INODE = 3  # Index node */
+FIL_PAGE_IBUF_FREE_LIST = 4  # Insert buffer free list */
 
-##  File page types introduced in MySQL/InnoDB 5.1.7 */
-FIL_PAGE_TYPE_ALLOCATED = 0  ## Freshly allocated page */
-FIL_PAGE_IBUF_BITMAP = 5  ## Insert buffer bitmap */
-FIL_PAGE_TYPE_SYS = 6  ## System page */
-FIL_PAGE_TYPE_TRX_SYS = 7  ## Transaction system data */
-FIL_PAGE_TYPE_FSP_HDR = 8  ## File space header */
-FIL_PAGE_TYPE_XDES = 9  ## Extent descriptor page */
-FIL_PAGE_TYPE_BLOB = 10  ## Uncompressed BLOB page */
-FIL_PAGE_TYPE_ZBLOB = 11  ## First compressed BLOB page */
-FIL_PAGE_TYPE_ZBLOB2 = 12  ## Subsequent compressed BLOB page */
-FIL_PAGE_TYPE_UNKNOWN = 13  ## In old tablespaces, garbage in FIL_PAGE_TYPE is replaced with this value when flushing pages. */
-FIL_PAGE_COMPRESSED = 14  ## Compressed page */
-FIL_PAGE_ENCRYPTED = 15  ## Encrypted page */
-FIL_PAGE_COMPRESSED_AND_ENCRYPTED = 16  ## Compressed and Encrypted page */
-FIL_PAGE_ENCRYPTED_RTREE = 17  ## Encrypted R-tree page */
-FIL_PAGE_SDI_BLOB = 18  ## Uncompressed SDI BLOB page */
-FIL_PAGE_SDI_ZBLOB = 19  ## Commpressed SDI BLOB page */
-FIL_PAGE_TYPE_UNUSED = 20  ## Available for future use */
-FIL_PAGE_TYPE_RSEG_ARRAY = 21  ## Rollback Segment Array page */
-FIL_PAGE_TYPE_LOB_INDEX = 22  ## Index pages of uncompressed LOB */
-FIL_PAGE_TYPE_LOB_DATA = 23  ## Data pages of uncompressed LOB */
-FIL_PAGE_TYPE_LOB_FIRST = 24  ## The first page of an uncompressed LOB */
-FIL_PAGE_TYPE_ZLOB_FIRST = 25  ## The first page of a compressed LOB */
-FIL_PAGE_TYPE_ZLOB_DATA = 26  ## Data pages of compressed LOB */
-FIL_PAGE_TYPE_ZLOB_INDEX = 27  ## Index pages of compressed LOB. This page contains an array of z_index_entry_t objects.*/
-FIL_PAGE_TYPE_ZLOB_FRAG = 28  ## Fragment pages of compressed LOB. */
+# File page types introduced in MySQL/InnoDB 5.1.7 */
+FIL_PAGE_TYPE_ALLOCATED = 0  # Freshly allocated page */
+FIL_PAGE_IBUF_BITMAP = 5  # Insert buffer bitmap */
+FIL_PAGE_TYPE_SYS = 6  # System page */
+FIL_PAGE_TYPE_TRX_SYS = 7  # Transaction system data */
+FIL_PAGE_TYPE_FSP_HDR = 8  # File space header */
+FIL_PAGE_TYPE_XDES = 9  # Extent descriptor page */
+FIL_PAGE_TYPE_BLOB = 10  # Uncompressed BLOB page */
+FIL_PAGE_TYPE_ZBLOB = 11  # First compressed BLOB page */
+FIL_PAGE_TYPE_ZBLOB2 = 12  # Subsequent compressed BLOB page */
+# In old tablespaces, garbage in FIL_PAGE_TYPE is replaced with this value when flushing pages. */
+FIL_PAGE_TYPE_UNKNOWN = 13
+FIL_PAGE_COMPRESSED = 14  # Compressed page */
+FIL_PAGE_ENCRYPTED = 15  # Encrypted page */
+FIL_PAGE_COMPRESSED_AND_ENCRYPTED = 16  # Compressed and Encrypted page */
+FIL_PAGE_ENCRYPTED_RTREE = 17  # Encrypted R-tree page */
+FIL_PAGE_SDI_BLOB = 18  # Uncompressed SDI BLOB page */
+FIL_PAGE_SDI_ZBLOB = 19  # Commpressed SDI BLOB page */
+FIL_PAGE_TYPE_UNUSED = 20  # Available for future use */
+FIL_PAGE_TYPE_RSEG_ARRAY = 21  # Rollback Segment Array page */
+FIL_PAGE_TYPE_LOB_INDEX = 22  # Index pages of uncompressed LOB */
+FIL_PAGE_TYPE_LOB_DATA = 23  # Data pages of uncompressed LOB */
+FIL_PAGE_TYPE_LOB_FIRST = 24  # The first page of an uncompressed LOB */
+FIL_PAGE_TYPE_ZLOB_FIRST = 25  # The first page of a compressed LOB */
+FIL_PAGE_TYPE_ZLOB_DATA = 26  # Data pages of compressed LOB */
+# Index pages of compressed LOB. This page contains an array of z_index_entry_t objects.*/
+FIL_PAGE_TYPE_ZLOB_INDEX = 27
+FIL_PAGE_TYPE_ZLOB_FRAG = 28  # Fragment pages of compressed LOB. */
 FIL_PAGE_TYPE_ZLOB_FRAG_ENTRY = (
-    29  ## Index pages of fragment pages (compressed LOB). */
+    29  # Index pages of fragment pages (compressed LOB). */
 )
 FIL_PAGE_TYPE_LAST = FIL_PAGE_TYPE_ZLOB_FRAG_ENTRY
 
@@ -225,7 +228,8 @@ def list_fsp(f):
 
 def get_seek(list_base_node):
     return (
-        list_base_node.first_page_number * 1024 * 16 + list_base_node.first_page_offset,
+        list_base_node.first_page_number * 1024 *
+        16 + list_base_node.first_page_offset,
         list_base_node.last_page_number * 1024 * 16 + list_base_node.last_page_offset,
     )
 

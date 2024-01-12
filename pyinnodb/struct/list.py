@@ -21,16 +21,8 @@ class ListBaseNode(OStruct):
     length = UBInt32
     first = Pointer
     last = Pointer
-    # first_page_number = Field(construct.UBInt32)
-    # first_page_offset = Field(construct.UBInt16)
-    # last_page_number  = Field(construct.UBInt32)
-    # last_page_offset  = Field(construct.UBInt16)
 
 
 class ListNode(OStruct):
     prev = Pointer
     next = Pointer
-    # prev_page_number = Field(construct.UBInt32)
-    # prev_page_offset = Field(construct.UBInt16)
-    # next_page_number = Field(construct.UBInt32)
-    # next_page_offset = Field(construct.UBInt16)
