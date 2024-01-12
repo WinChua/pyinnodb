@@ -1,24 +1,24 @@
 from elftools import construct
-from .metaclass import Struct, Field, ArrayEntry
 from .list import ListBaseNode, ListNode
 from .fil import Fil, FilTrailer
 
+from .meta import *
 
-class InodeEntry(Struct):
-    fseg_id = Field(construct.UBInt64)
-    not_full_list_used_page = Field(construct.UBInt32)
-    list_base_free = Field(ListBaseNode)
-    list_base_not_full = Field(ListBaseNode)
-    list_base_full = Field(ListBaseNode)
-    magic_number = Field(construct.UBInt32) # 97937874
-    fragment_array = Field(
-            lambda name:
-                construct.Array(32, construct.UBInt32(name))
-    )
 
-class InodePage(Struct):
-    fil_header = Field(Fil)
-    list_node_inode_page = Field(ListNode)
-    inodes = Field(lambda name: construct.Array(85, ArrayEntry(InodeEntry)))
-    empty_space = Field(lambda name: construct.Field(name, 6))
-    fil_tailer = Field(FilTrailer)
+class InodeEntry(OStruct):
+    fseg_id = UBInt64
+    not_full_list_used_page = UBInt32
+    list_base_free = ListBaseNode # 当前segment下没有使用的extent
+    list_base_not_full = ListBaseNode
+    list_base_full = ListBaseNode
+    magic_number = UBInt32  # 97937874
+    fragment_array = Array(32, UBInt32(""))
+
+
+class InodePage(OStruct):
+    fil_header = Fil
+    list_node_inode_page = ListNode
+    inodes = Array(85, InodeEntry)
+    empty_space = Array(6, UBInt8(""))
+    # empty_space = Field(lambda name: construct.Field(name, 6))
+    fil_tailer = FilTrailer

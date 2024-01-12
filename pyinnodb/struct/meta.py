@@ -1,5 +1,4 @@
-from elftools import construct
-from elftools.construct import Construct
+from .newmeta import *
 
 import logging
 
