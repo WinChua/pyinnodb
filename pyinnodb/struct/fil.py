@@ -1,22 +1,17 @@
-from .meta import *
-
-# Fil size 38
+from ..mconstruct import *
 
 
-class Fil(OStruct):
-    checksum = UBInt32
-    offset = UBInt32  # page_number, once the page initialized, it'll stored in header => indicator for if the page had been initialized
-    pre_page = UBInt32  # pre_page of the same page_type
-    next_page = UBInt32  # next_page of the same page_type, usefule for index page to
-    # link all the page in the same level, not all page type use it
-    lsn = UBInt64
-    page_type = UBInt16  # determine how to parse the reset of the page,
-    # allocated for filespace/extent management, transaction system
-    # data dictionary, undo log, blobs, corse indexes
-    flush_lsn = UBInt64  # only for page 0 of space 0
-    spaceid = UBInt32
+class MFil(CC):
+    checksum: int = cfield(cs.Int32ub)
+    offset: int = cfield(cs.Int32ub)
+    pre_page: int = cfield(cs.Int32ub)
+    next_page: int = cfield(cs.Int32ub)
+    lsn: int = cfield(cs.Int64ub)
+    page_type: int = cfield(cs.Int16ub)
+    flush_lsn: int = cfield(cs.Int64ub)
+    spaceid: int = cfield(cs.Int32ub)
 
 
-class FilTrailer(OStruct):
-    old_checksum = UBInt32
-    low_32_bits_lsn = UBInt32
+class MFilTrailer(CC):
+    old_checksum: int = cfield(cs.Int32ub)
+    low_32_bits_lsn: int = cfield(cs.Int32ub)

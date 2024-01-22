@@ -1,10 +1,18 @@
 from bisect import bisect
 from io import BytesIO
-import types
-
 from elftools import construct
 from elftools.construct import Construct
 import logging
+
+'''
+metaclass usage:
+class A(metaclass=Meta):
+    field = ParseClass
+
+every field should be the class, and the field will
+be set with the instance of class during parsing
+'''
+
 
 logger = logging.Logger(__name__)
 

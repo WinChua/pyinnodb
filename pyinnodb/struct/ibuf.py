@@ -1,18 +1,18 @@
-from .meta import *
-from .fil import Fil
-
-import logging
-
-
-class IBufEntry2(OStruct):
-    free_space_0 = OBits(2)
-    buffer_flag_0 = OBits(1)
-    change_buffer_flag_0 = OBits(1)
-    free_space_1 = OBits(2)
-    buffer_flag_1 = OBits(1)
-    change_buffer_flag_1 = OBits(1)
+from .fil import MFil
+from ..mconstruct import *
+import typing as t
 
 
-class IBufPage(OStruct):
-    fil = Fil
-    change_buffer_bitmap = Array(4096, IBufEntry2)
+class MIBufEntry2(CC):
+    free_space_0: int = cfield(cs.BitsInteger(2))
+    buffer_flag_0: int = cfield(cs.BitsInteger(1))
+    change_buffer_flag_0: int = cfield(cs.BitsInteger(1))
+    free_space_1: int = cfield(cs.BitsInteger(2))
+    buffer_flag_1: int = cfield(cs.BitsInteger(1))
+    change_buffer_flag_1: int = cfield(cs.BitsInteger(1))
+
+
+class MIBufPage(CC):
+    fil: MFil = cfield(MFil)
+    change_buffer_bitmap: t.List[MIBufEntry2] = cfield(
+        carray(4096, MIBufEntry2))
