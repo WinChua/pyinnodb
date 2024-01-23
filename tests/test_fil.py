@@ -1,10 +1,10 @@
 from context import *
-from pyinnodb.struct import Fil
+from pyinnodb.struct.fil import MFil
 
 test_fil_case = [
     (
         b"\x86$\xad\x90\x00\x00\x00\x00\x00\x018\xe4\x00\x00\x00\x01\x00\x00\x00\x00\x01*\x07\xa2\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03",
-        Fil(
+        MFil(
             checksum=2250550672,
             offset=0,
             pre_page=80100,
@@ -17,7 +17,7 @@ test_fil_case = [
     ),
     (
         b":8\rX\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01)\xfaN\x00\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03",
-        Fil(
+        MFil(
             checksum=976751960,
             offset=1,
             pre_page=0,
@@ -30,7 +30,7 @@ test_fil_case = [
     ),
     (
         b"\t\xbd\xae\xf0\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01*\x07\xa2\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03",
-        Fil(
+        MFil(
             checksum=163426032,
             offset=2,
             pre_page=0,
@@ -43,7 +43,7 @@ test_fil_case = [
     ),
     (
         b"Ezp\xec\x00\x00\x00\x03\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x00\x00\x01*\x1f\xcbE\xbd\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03",
-        Fil(
+        MFil(
             checksum=1165652204,
             offset=3,
             pre_page=4294967295,
@@ -56,7 +56,7 @@ test_fil_case = [
     ),
     (
         b"2\x17X&\x00\x00\x00\x04\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x00\x00\x01*,\xa2E\xbf\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03",
-        Fil(
+        MFil(
             checksum=840390694,
             offset=4,
             pre_page=4294967295,
@@ -69,7 +69,7 @@ test_fil_case = [
     ),
     (
         b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-        Fil(
+        MFil(
             checksum=0,
             offset=0,
             pre_page=0,
@@ -83,5 +83,8 @@ test_fil_case = [
 ]
 
 
-def test_fil():
-    totest(Fil, test_fil_case)
+def test_mfil():
+    for data in test_fil_case:
+        assert MFil.parse(data[0]) == data[-1]
+        data[-1].build() == data[0]
+        logger.info("data[-1] is %s", data[-1])

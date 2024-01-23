@@ -1,15 +1,14 @@
-from elftools import construct
-from elftools.common.utils import struct_parse
-from .meta import *
-from .metaclass import Struct, Field
+from ..mconstruct import *
+
+from .. import const
 
 
-class Pointer(OStruct):
-    page_number = UBInt32
-    page_offset = UBInt16
+class MPointer(CC):
+    page_number: int = cfield(cs.Int32ub)
+    page_offset: int = cfield(cs.Int16ub)
 
     def seek_loc(self):
-        return self.page_number * 16 * 1024 + self.page_offset
+        return self.page_number * const.PAGE_SIZE + self.page_offset
 
     def inode_idx(self):
         return self.page_number, int(
@@ -17,12 +16,12 @@ class Pointer(OStruct):
         )  # 50: sizeof(fil) + sizeof(list), 192: sizeof(INODE_ENTRY)
 
 
-class ListBaseNode(OStruct):
-    length = UBInt32
-    first = Pointer
-    last = Pointer
+class MListBaseNode(CC):
+    length: int = cfield(cs.Int32ub)
+    first: MPointer = cfield(MPointer)
+    last: MPointer = cfield(MPointer)
 
 
-class ListNode(OStruct):
-    prev = Pointer
-    next = Pointer
+class MListNode(CC):
+    prev: MPointer = cfield(MPointer)
+    next: MPointer = cfield(MPointer)

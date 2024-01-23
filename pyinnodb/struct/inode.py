@@ -1,24 +1,23 @@
-from elftools import construct
-from .list import ListBaseNode, ListNode
-from .fil import Fil, FilTrailer
+from .list import MListBaseNode, MListNode
+from .fil import MFil, MFilTrailer
+from ..mconstruct import *
 
-from .meta import *
-
-
-class InodeEntry(OStruct):
-    fseg_id = UBInt64
-    not_full_list_used_page = UBInt32
-    list_base_free = ListBaseNode  # 当前segment下没有使用的extent
-    list_base_not_full = ListBaseNode
-    list_base_full = ListBaseNode
-    magic_number = UBInt32  # 97937874
-    fragment_array = Array(32, UBInt32(""))
+import typing as t
 
 
-class InodePage(OStruct):
-    fil_header = Fil
-    list_node_inode_page = ListNode
-    inodes = Array(85, InodeEntry)
-    empty_space = Array(6, UBInt8(""))
-    # empty_space = Field(lambda name: construct.Field(name, 6))
-    fil_tailer = FilTrailer
+class MInodeEntry(CC):
+    fseg_id: int = cfield(cs.Int64ub)
+    not_full_list_used_page: int = cfield(cs.Int32ub)
+    list_base_free: MListBaseNode = cfield(MListBaseNode)
+    list_base_not_full: MListBaseNode = cfield(MListBaseNode)
+    list_base_full: MListBaseNode = cfield(MListBaseNode)
+    magic_number: int = cfield(cs.Int32ub)
+    fragment_array: t.List[int] = cfield(carray(32, cs.Int32ub))
+
+
+class MInodePage(CC):
+    fil_header: MFil = cfield(MFil)
+    list_node_inode_page: MListNode = cfield(MListNode)
+    inodes: t.List[MInodeEntry] = cfield(carray(85, MInodeEntry))
+    empty_space: t.List[int] = cfield(carray(6, cs.Int8ub))
+    fil_tailer: MFilTrailer = cfield(MFilTrailer)

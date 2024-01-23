@@ -3,146 +3,49 @@ from pyinnodb.struct import *
 from pyinnodb.const import get_page_type_name
 from pyinnodb import const
 
+from pyinnodb.struct.index import *
+from pyinnodb.struct.fil import *
 
-def test_list_page():
+
+def test_list_mpage():
     with open(test_filename, "rb") as f:
-        fil = Fil.parse_stream(f)
-        logger.info(fil)
-        fsp_header = struct_parse(FspHeader, f)
-        logger.info(fsp_header)
-        for i in range(fsp_header.highest_page_number):
-            f.seek(i * 16 * 1024)
-            page_fil = struct_parse(Fil(), f)
-            logger.info("offset: %d, page_type: %s",
-                        page_fil.offset,
-                        const.get_page_type_name(page_fil.page_type),)
+        mfil = MFil.parse_stream(f)
+        logger.info(fil,)
+        logger.info(mfil)
+        mfsp_header = MFspHeader.parse_stream(f)
+        logger.info(mfsp_header)
+        for i in range(mfsp_header.highest_page_number):
+            f.seek(i * const.PAGE_SIZE)
+            mfili = MFil.parse_stream(f)
+            logger.info("offset: %d, page_type: %s", mfili.offset,
+                        const.get_page_type_name(mfili.page_type))
 
 
-def test_fsp_header():
+def test_fsp_mheader():
     with open(test_filename, "rb") as f:
-        fil = Fil.parse_stream(f)
-        fsp_header = FspHeader.parse_stream(f)
-        logger.info("fsp_header is %s", fsp_header)
-        xdess = []
+        mfil = MFil.parse_stream(f)
+        mfsp_header = MFspHeader.parse_stream(f)
+        logger.info("fsp_header is %s", mfsp_header)
+        xdess: t.List[MXdesEntry] = []
         for i in range(256):
-            xdess.append(XdesEntry.parse_stream(f))
+            xdess.append(MXdesEntry.parse_stream(f))
             logger.info("idx: %d, segid: %d", i, xdess[-1].fseg_id)
+            break
 
 
-def test_sdi_page():
+def test_msdi_page():
     with open(test_filename, "rb") as f:
-        f.seek(3 * 16 * 1024)
-        index_page = SDIPage._parse(f)
-        # logger.info("index page size %d", len(index_page.build()))
-        # logger.info("page_type %s", get_page_type_name(index_page.fil.page_type))
-        # logger.info("fil size %d, index_header size %d, fseg_header size %d", len(index_page.fil.build()), len(index_page.index_header.build()), len(index_page.fseg_header.build()))
-        # logger.info("infimum size %d", len(index_page.system_records.infimum.build()))
-        logger.info("leaf pointer: %s", index_page.fseg_header.leaf_pointer)
-        logger.info("internal_pointer %s",
-                    index_page.fseg_header.internal_pointer)
-        logger.info("fil: %d, index_header: %d, fseg_header: %d", index_page.fil._consume_num,
-                    index_page.index_header._consume_num, index_page.fseg_header._consume_num)
-        logger.info("system.infimum: %d, system.supremum: %d",
-                    index_page.system_records.infimum._consume_num, index_page.system_records.supremum._consume_num)
-        logger.info("infimum is %s", index_page.system_records.infimum)
-        logger.info("supremum is %s", index_page.system_records.supremum)
-        assert index_page.system_records.infimum.marker == b"infimum\x00"
-        assert index_page.system_records.infimum.record_type == 2
-        assert index_page.system_records.supremum.marker == b"supremum"
-        assert index_page.system_records.supremum.record_type == 3
-        logger.info("index_header is %s", index_page.index_header)
-        logger.info("index_page.consumer is %d", index_page._consume_num)
-        logger.info("tail is %s", index_page.fil_tailer)
+        f.seek(3 * const.PAGE_SIZE)
+        sdi_page = MSDIPage.parse_stream(f)
+        logger.info("sdi_page is %s", sdi_page)
+        logger.info("sdi_page ddl is %s", sdi_page.ddl)
 
 
 test_index_page_data = b"2\x17X&\x00\x00\x00\x04\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x00\x00\x01*,\xa2E\xbf\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x02\x00\xcf\x80\x05\x00\x00\x00\x00\x00\xb9\x00\x05\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9c\x00\x00\x00\x03\x00\x00\x00\x02\x02r\x00\x00\x00\x03\x00\x00\x00\x02\x01\xb2\x01\x00\x02\x00\x1cinfimum\x00\x04\x00\x0b\x00\x00supremum"
 
 
-def test_index_page():
-    with open(test_filename, "rb") as f:
-        f.seek(4 * 16 * 1024)
-        index_page = IndexPage.parse_stream(f)
-        # logger.info("index page size %d", len(index_page.build()))
-        # logger.info("page_type %s", get_page_type_name(index_page.fil.page_type))
-        # logger.info("fil size %d, index_header size %d, fseg_header size %d", len(index_page.fil.build()), len(index_page.index_header.build()), len(index_page.fseg_header.build()))
-        # logger.info("infimum size %d", len(index_page.system_records.infimum.build()))
-        logger.info("leaf pointer: %s", index_page.fseg_header.leaf_pointer)
-        logger.info("internal_pointer %s",
-                    index_page.fseg_header.internal_pointer)
-        logger.info("infimum is %s", index_page.system_records.infimum)
-        logger.info("supremum is %s", index_page.system_records.supremum)
-
-
-def test_inode_page():
+def test_minode_page():
     with open(test_filename2, "rb") as f:
-        f.seek(2 * 16 * 1024)
-        inode_page = InodePage.parse_stream(f)
-        logger.info(
-            "consume_num: fil_header: %d, list_node_inode_page: %d, inodes[0]: %d",
-            inode_page.fil_header._consume_num,
-            inode_page.list_node_inode_page._consume_num,
-            inode_page.inodes[0]._consume_num,
-        )
-        logger.debug(
-            "consume befor inodes is %d",
-            inode_page.fil_header._consume_num
-            + inode_page.list_node_inode_page._consume_num,
-        )
-        f.seek(4 * 16 * 1024)
-        index_page = IndexPage.parse_stream(f)
-        logger.debug("leaf_pointer: %s", index_page.fseg_header.leaf_pointer)
-        logger.debug("internal_pointer: %s",
-                     index_page.fseg_header.internal_pointer)
-        _, idx = index_page.fseg_header.leaf_pointer.inode_idx()
-        logger.debug("inode_entry is %s", inode_page.inodes[idx])
-        _, idx = index_page.fseg_header.internal_pointer.inode_idx()
-        logger.debug("internal entry is %s", inode_page.inodes[idx])
-
-
-def test_inode_entry():
-    with open(test_filename1, "rb") as f:
-        f.seek(2 * 16 * 1024 + 50)
-        data = f.read(192)
-        inode_entry = InodeEntry.parse_stream(BytesIO(data))
-        logger.debug("inode entry is %s", inode_entry)
-
-
-def test_index_iter():
-    with open(test_filename1, "rb") as f:
-        f.seek(3 * 16 * 1024)
-        index_page = SDIPage.parse_stream(f)
-        f.seek(index_page.fseg_header.leaf_pointer.seek_loc())
-        leaf_inode = InodeEntry()
-        leaf_inode.parse_stream(f)
-        f.seek(index_page.fseg_header.internal_pointer.seek_loc())
-        internal_inode = InodeEntry.parse_stream(f)
-        logger.info("leaf_inode %s", leaf_inode)
-        logger.info("leaf_space_id %d", index_page.fseg_header.leaf_space_id)
-        logger.info("root page is %d", internal_inode.fragment_array[0])
-
-
-def test_iter_record():
-    with open(test_filename, "rb") as f:
-        f.seek(4 * 16 * 1024)
-        index_page = IndexPage.parse_stream(f)
-        logger.info("fseg_header is %s", index_page.fseg_header)
-        logger.info("infimum is %s", index_page.system_records.infimum)
-        logger.info("supremum is %s", index_page.system_records.supremum)
-        logger.info("page_dir is %s", index_page.page_directory)
-        logger.info("infimum consume %d", index_page.fil._consume_num + index_page.index_header._consume_num
-                    + index_page.fseg_header._consume_num + index_page.system_records.infimum._consume_num-8)
-        f.seek(4 * 16 * 1024
-               + index_page.fil._consume_num
-               + index_page.index_header._consume_num
-               + index_page.fseg_header._consume_num
-               + index_page.system_records.infimum._consume_num-8)
-        next_record_offset = index_page.system_records.infimum.next_record_offset
-        cnt = 0
-        while next_record_offset != 0:
-            f.seek(next_record_offset - 5, 1)
-            rh = RecordHeader.parse_stream(f)
-            cnt += 1
-            if cnt >= 10:
-                break
-            logger.info("rh is %s", rh)
-            next_record_offset = rh.next_record_offset
+        f.seek(2 * const.PAGE_SIZE)
+        inode_page = MInodePage.parse_stream(f)
+        logger.info(inode_page)

@@ -3,6 +3,7 @@ from elftools.common.utils import struct_parse
 import logging
 import os
 import sys
+from pyinnodb import const
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, parent_dir)
