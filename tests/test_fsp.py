@@ -1,6 +1,6 @@
 from context import *
 
-from pyinnodb.struct.fsp import MFspHeader
+from pyinnodb.struct.fsp import MFspHeader, MFspPage
 from pyinnodb.struct.list import MListBaseNode, MPointer
 from pyinnodb.struct.inode import MInodeEntry
 
@@ -48,3 +48,10 @@ def test_minode():
     )
     logger.debug("inode is %s", inode)
     assert len(inode.build()) == 192
+
+
+def test_mfsp_page():
+    with open(test_filename, "rb") as f:
+        fsp_page = MFspPage.parse_stream(f)
+        logger.info(fsp_page.has_sdi_page)
+        logger.info(fsp_page.sdi_page_no)

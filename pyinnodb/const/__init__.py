@@ -1,4 +1,5 @@
 from enum import Enum
+import crcmod
 
 PAGE_SIZE = 16 * 1024
 
@@ -135,6 +136,15 @@ class RecordType(Enum):
     Supremum = 3
 
 
+class PageState:
+    Free = 0x01   # not be used
+    Clean = 0x02  # for page that has no un-flushed data, currently always 1
+
+    @classmethod
+    def is_page_free(cls, state):
+        return bool(state & cls.Free)
+
+
 def parse_mysql_unsigned(data):
     return parse_mysql_int(data, signed=False)
 
@@ -154,3 +164,36 @@ def encode_mysql_int(value, length, signed=True):
     if signed:
         data = int.to_bytes(data[0] ^ 0x80) + data[1:]
     return data
+
+
+crc32c = crcmod.Crc(poly=0x11EDC6F41, rev=True,
+                    initCrc=0, xorOut=0xFFFFFFFF)
+
+
+def page_checksum_crc32c(page_data):
+    body = page_data[38:PAGE_SIZE-8]
+    header = page_data[4:26]
+    return crc32c.new(header).crcValue ^ crc32c.new(body).crcValue
+
+
+def show_start_end_format(start, end):
+    return f"{start}" if start == end else f"{start}-{end}"
+
+
+def show_seq_page_list(page_list):
+    page_list = sorted(page_list)
+    if len(page_list) == 0:
+        return "empty"
+    start = page_list[0]
+    end = start
+    lines = []
+
+    for page_no in page_list[1:]:
+        if page_no == end+1:
+            end = page_no
+        else:
+            lines.append(show_start_end_format(start, end))
+            start = page_no
+            end = start
+    lines.append(show_start_end_format(start, end))
+    return "/".join(lines)
