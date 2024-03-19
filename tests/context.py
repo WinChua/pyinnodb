@@ -15,3 +15,5 @@ test_filename = os.path.join(parent_dir, "data", "t2.ibd")
 test_filename1 = os.path.join(parent_dir, "data", "t1.ibd")
 test_filename2 = test_filename
 
+locate_filename = "/opt/homebrew/var/mysql/test/t1.ibd"
+test_filename = locate_filename
