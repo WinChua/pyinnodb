@@ -1,6 +1,6 @@
 from context import *
 
-from pyinnodb.struct.list import MListBaseNode, MListNode, MPointer
+from pyinnodb.disk_struct.list import MListBaseNode, MListNode, MPointer
 
 
 def test_mlist():

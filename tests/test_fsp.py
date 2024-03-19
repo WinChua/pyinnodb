@@ -1,8 +1,8 @@
 from context import *
 
-from pyinnodb.struct.fsp import MFspHeader, MFspPage
-from pyinnodb.struct.list import MListBaseNode, MPointer
-from pyinnodb.struct.inode import MInodeEntry
+from pyinnodb.disk_struct.fsp import MFspHeader, MFspPage
+from pyinnodb.disk_struct.list import MListBaseNode, MPointer
+from pyinnodb.disk_struct.inode import MInodeEntry
 
 mtest_list_base_node = MListBaseNode(
     length=6,
