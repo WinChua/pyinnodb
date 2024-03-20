@@ -15,7 +15,7 @@ f'''def get_collation_by_id(colid):
 ]
 
 from collections import namedtuple
-collation = namedtuple("collations", fields)
+collation = namedtuple("collation", fields)
 
 with MySqlContainer("mysql:8.0.35") as mysql:
     engine = sqlalchemy.create_engine(mysql.get_connection_url())
