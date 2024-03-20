@@ -7,7 +7,6 @@ authors = [
 ]
 dependencies = [
     "crcmod>=1.7",
-    "pyelftools>=0.31",
     "construct==2.10.68",
     "construct-typing>=0.6.2",
     "click>=8.1.7",
@@ -33,9 +32,12 @@ dev-dependencies = [
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pyinnodb"]
+packages = ["pyinnodb"]
 
 [tool.rye.scripts]
 gencols = { chain = ["gencols:cols", "gencols:fmt"] }
 "gencols:cols" = "python devtools/gen-collations.py"
 "gencols:fmt" = "rye fmt pyinnodb/const/collations.py"
+
+[project.scripts]
+cli = "pyinnodb:cli"
