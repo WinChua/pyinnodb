@@ -13,7 +13,7 @@ def get_collation_by_id(colid):
 
 
 collations_mapper = {
-    64: collations(
+    64: collation(
         COLLATION_NAME="armscii8_bin",
         CHARACTER_SET_NAME="armscii8",
         ID=64,
@@ -22,7 +22,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    32: collations(
+    32: collation(
         COLLATION_NAME="armscii8_general_ci",
         CHARACTER_SET_NAME="armscii8",
         ID=32,
@@ -31,7 +31,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    65: collations(
+    65: collation(
         COLLATION_NAME="ascii_bin",
         CHARACTER_SET_NAME="ascii",
         ID=65,
@@ -40,7 +40,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    11: collations(
+    11: collation(
         COLLATION_NAME="ascii_general_ci",
         CHARACTER_SET_NAME="ascii",
         ID=11,
@@ -49,7 +49,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    84: collations(
+    84: collation(
         COLLATION_NAME="big5_bin",
         CHARACTER_SET_NAME="big5",
         ID=84,
@@ -58,7 +58,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    1: collations(
+    1: collation(
         COLLATION_NAME="big5_chinese_ci",
         CHARACTER_SET_NAME="big5",
         ID=1,
@@ -67,7 +67,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    63: collations(
+    63: collation(
         COLLATION_NAME="binary",
         CHARACTER_SET_NAME="binary",
         ID=63,
@@ -76,7 +76,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    66: collations(
+    66: collation(
         COLLATION_NAME="cp1250_bin",
         CHARACTER_SET_NAME="cp1250",
         ID=66,
@@ -85,7 +85,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    44: collations(
+    44: collation(
         COLLATION_NAME="cp1250_croatian_ci",
         CHARACTER_SET_NAME="cp1250",
         ID=44,
@@ -94,7 +94,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    34: collations(
+    34: collation(
         COLLATION_NAME="cp1250_czech_cs",
         CHARACTER_SET_NAME="cp1250",
         ID=34,
@@ -103,7 +103,7 @@ collations_mapper = {
         SORTLEN=2,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    26: collations(
+    26: collation(
         COLLATION_NAME="cp1250_general_ci",
         CHARACTER_SET_NAME="cp1250",
         ID=26,
@@ -112,7 +112,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    99: collations(
+    99: collation(
         COLLATION_NAME="cp1250_polish_ci",
         CHARACTER_SET_NAME="cp1250",
         ID=99,
@@ -121,7 +121,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    50: collations(
+    50: collation(
         COLLATION_NAME="cp1251_bin",
         CHARACTER_SET_NAME="cp1251",
         ID=50,
@@ -130,7 +130,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    14: collations(
+    14: collation(
         COLLATION_NAME="cp1251_bulgarian_ci",
         CHARACTER_SET_NAME="cp1251",
         ID=14,
@@ -139,7 +139,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    51: collations(
+    51: collation(
         COLLATION_NAME="cp1251_general_ci",
         CHARACTER_SET_NAME="cp1251",
         ID=51,
@@ -148,7 +148,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    52: collations(
+    52: collation(
         COLLATION_NAME="cp1251_general_cs",
         CHARACTER_SET_NAME="cp1251",
         ID=52,
@@ -157,7 +157,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    23: collations(
+    23: collation(
         COLLATION_NAME="cp1251_ukrainian_ci",
         CHARACTER_SET_NAME="cp1251",
         ID=23,
@@ -166,7 +166,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    67: collations(
+    67: collation(
         COLLATION_NAME="cp1256_bin",
         CHARACTER_SET_NAME="cp1256",
         ID=67,
@@ -175,7 +175,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    57: collations(
+    57: collation(
         COLLATION_NAME="cp1256_general_ci",
         CHARACTER_SET_NAME="cp1256",
         ID=57,
@@ -184,7 +184,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    58: collations(
+    58: collation(
         COLLATION_NAME="cp1257_bin",
         CHARACTER_SET_NAME="cp1257",
         ID=58,
@@ -193,7 +193,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    59: collations(
+    59: collation(
         COLLATION_NAME="cp1257_general_ci",
         CHARACTER_SET_NAME="cp1257",
         ID=59,
@@ -202,7 +202,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    29: collations(
+    29: collation(
         COLLATION_NAME="cp1257_lithuanian_ci",
         CHARACTER_SET_NAME="cp1257",
         ID=29,
@@ -211,7 +211,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    80: collations(
+    80: collation(
         COLLATION_NAME="cp850_bin",
         CHARACTER_SET_NAME="cp850",
         ID=80,
@@ -220,7 +220,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    4: collations(
+    4: collation(
         COLLATION_NAME="cp850_general_ci",
         CHARACTER_SET_NAME="cp850",
         ID=4,
@@ -229,7 +229,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    81: collations(
+    81: collation(
         COLLATION_NAME="cp852_bin",
         CHARACTER_SET_NAME="cp852",
         ID=81,
@@ -238,7 +238,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    40: collations(
+    40: collation(
         COLLATION_NAME="cp852_general_ci",
         CHARACTER_SET_NAME="cp852",
         ID=40,
@@ -247,7 +247,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    68: collations(
+    68: collation(
         COLLATION_NAME="cp866_bin",
         CHARACTER_SET_NAME="cp866",
         ID=68,
@@ -256,7 +256,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    36: collations(
+    36: collation(
         COLLATION_NAME="cp866_general_ci",
         CHARACTER_SET_NAME="cp866",
         ID=36,
@@ -265,7 +265,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    96: collations(
+    96: collation(
         COLLATION_NAME="cp932_bin",
         CHARACTER_SET_NAME="cp932",
         ID=96,
@@ -274,7 +274,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    95: collations(
+    95: collation(
         COLLATION_NAME="cp932_japanese_ci",
         CHARACTER_SET_NAME="cp932",
         ID=95,
@@ -283,7 +283,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    69: collations(
+    69: collation(
         COLLATION_NAME="dec8_bin",
         CHARACTER_SET_NAME="dec8",
         ID=69,
@@ -292,7 +292,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    3: collations(
+    3: collation(
         COLLATION_NAME="dec8_swedish_ci",
         CHARACTER_SET_NAME="dec8",
         ID=3,
@@ -301,7 +301,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    98: collations(
+    98: collation(
         COLLATION_NAME="eucjpms_bin",
         CHARACTER_SET_NAME="eucjpms",
         ID=98,
@@ -310,7 +310,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    97: collations(
+    97: collation(
         COLLATION_NAME="eucjpms_japanese_ci",
         CHARACTER_SET_NAME="eucjpms",
         ID=97,
@@ -319,7 +319,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    85: collations(
+    85: collation(
         COLLATION_NAME="euckr_bin",
         CHARACTER_SET_NAME="euckr",
         ID=85,
@@ -328,7 +328,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    19: collations(
+    19: collation(
         COLLATION_NAME="euckr_korean_ci",
         CHARACTER_SET_NAME="euckr",
         ID=19,
@@ -337,7 +337,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    249: collations(
+    249: collation(
         COLLATION_NAME="gb18030_bin",
         CHARACTER_SET_NAME="gb18030",
         ID=249,
@@ -346,7 +346,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    248: collations(
+    248: collation(
         COLLATION_NAME="gb18030_chinese_ci",
         CHARACTER_SET_NAME="gb18030",
         ID=248,
@@ -355,7 +355,7 @@ collations_mapper = {
         SORTLEN=2,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    250: collations(
+    250: collation(
         COLLATION_NAME="gb18030_unicode_520_ci",
         CHARACTER_SET_NAME="gb18030",
         ID=250,
@@ -364,7 +364,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    86: collations(
+    86: collation(
         COLLATION_NAME="gb2312_bin",
         CHARACTER_SET_NAME="gb2312",
         ID=86,
@@ -373,7 +373,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    24: collations(
+    24: collation(
         COLLATION_NAME="gb2312_chinese_ci",
         CHARACTER_SET_NAME="gb2312",
         ID=24,
@@ -382,7 +382,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    87: collations(
+    87: collation(
         COLLATION_NAME="gbk_bin",
         CHARACTER_SET_NAME="gbk",
         ID=87,
@@ -391,7 +391,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    28: collations(
+    28: collation(
         COLLATION_NAME="gbk_chinese_ci",
         CHARACTER_SET_NAME="gbk",
         ID=28,
@@ -400,7 +400,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    93: collations(
+    93: collation(
         COLLATION_NAME="geostd8_bin",
         CHARACTER_SET_NAME="geostd8",
         ID=93,
@@ -409,7 +409,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    92: collations(
+    92: collation(
         COLLATION_NAME="geostd8_general_ci",
         CHARACTER_SET_NAME="geostd8",
         ID=92,
@@ -418,7 +418,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    70: collations(
+    70: collation(
         COLLATION_NAME="greek_bin",
         CHARACTER_SET_NAME="greek",
         ID=70,
@@ -427,7 +427,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    25: collations(
+    25: collation(
         COLLATION_NAME="greek_general_ci",
         CHARACTER_SET_NAME="greek",
         ID=25,
@@ -436,7 +436,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    71: collations(
+    71: collation(
         COLLATION_NAME="hebrew_bin",
         CHARACTER_SET_NAME="hebrew",
         ID=71,
@@ -445,7 +445,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    16: collations(
+    16: collation(
         COLLATION_NAME="hebrew_general_ci",
         CHARACTER_SET_NAME="hebrew",
         ID=16,
@@ -454,7 +454,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    72: collations(
+    72: collation(
         COLLATION_NAME="hp8_bin",
         CHARACTER_SET_NAME="hp8",
         ID=72,
@@ -463,7 +463,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    6: collations(
+    6: collation(
         COLLATION_NAME="hp8_english_ci",
         CHARACTER_SET_NAME="hp8",
         ID=6,
@@ -472,7 +472,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    73: collations(
+    73: collation(
         COLLATION_NAME="keybcs2_bin",
         CHARACTER_SET_NAME="keybcs2",
         ID=73,
@@ -481,7 +481,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    37: collations(
+    37: collation(
         COLLATION_NAME="keybcs2_general_ci",
         CHARACTER_SET_NAME="keybcs2",
         ID=37,
@@ -490,7 +490,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    74: collations(
+    74: collation(
         COLLATION_NAME="koi8r_bin",
         CHARACTER_SET_NAME="koi8r",
         ID=74,
@@ -499,7 +499,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    7: collations(
+    7: collation(
         COLLATION_NAME="koi8r_general_ci",
         CHARACTER_SET_NAME="koi8r",
         ID=7,
@@ -508,7 +508,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    75: collations(
+    75: collation(
         COLLATION_NAME="koi8u_bin",
         CHARACTER_SET_NAME="koi8u",
         ID=75,
@@ -517,7 +517,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    22: collations(
+    22: collation(
         COLLATION_NAME="koi8u_general_ci",
         CHARACTER_SET_NAME="koi8u",
         ID=22,
@@ -526,7 +526,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    47: collations(
+    47: collation(
         COLLATION_NAME="latin1_bin",
         CHARACTER_SET_NAME="latin1",
         ID=47,
@@ -535,7 +535,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    15: collations(
+    15: collation(
         COLLATION_NAME="latin1_danish_ci",
         CHARACTER_SET_NAME="latin1",
         ID=15,
@@ -544,7 +544,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    48: collations(
+    48: collation(
         COLLATION_NAME="latin1_general_ci",
         CHARACTER_SET_NAME="latin1",
         ID=48,
@@ -553,7 +553,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    49: collations(
+    49: collation(
         COLLATION_NAME="latin1_general_cs",
         CHARACTER_SET_NAME="latin1",
         ID=49,
@@ -562,7 +562,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    5: collations(
+    5: collation(
         COLLATION_NAME="latin1_german1_ci",
         CHARACTER_SET_NAME="latin1",
         ID=5,
@@ -571,7 +571,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    31: collations(
+    31: collation(
         COLLATION_NAME="latin1_german2_ci",
         CHARACTER_SET_NAME="latin1",
         ID=31,
@@ -580,7 +580,7 @@ collations_mapper = {
         SORTLEN=2,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    94: collations(
+    94: collation(
         COLLATION_NAME="latin1_spanish_ci",
         CHARACTER_SET_NAME="latin1",
         ID=94,
@@ -589,7 +589,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    8: collations(
+    8: collation(
         COLLATION_NAME="latin1_swedish_ci",
         CHARACTER_SET_NAME="latin1",
         ID=8,
@@ -598,7 +598,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    77: collations(
+    77: collation(
         COLLATION_NAME="latin2_bin",
         CHARACTER_SET_NAME="latin2",
         ID=77,
@@ -607,7 +607,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    27: collations(
+    27: collation(
         COLLATION_NAME="latin2_croatian_ci",
         CHARACTER_SET_NAME="latin2",
         ID=27,
@@ -616,7 +616,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    2: collations(
+    2: collation(
         COLLATION_NAME="latin2_czech_cs",
         CHARACTER_SET_NAME="latin2",
         ID=2,
@@ -625,7 +625,7 @@ collations_mapper = {
         SORTLEN=4,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    9: collations(
+    9: collation(
         COLLATION_NAME="latin2_general_ci",
         CHARACTER_SET_NAME="latin2",
         ID=9,
@@ -634,7 +634,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    21: collations(
+    21: collation(
         COLLATION_NAME="latin2_hungarian_ci",
         CHARACTER_SET_NAME="latin2",
         ID=21,
@@ -643,7 +643,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    78: collations(
+    78: collation(
         COLLATION_NAME="latin5_bin",
         CHARACTER_SET_NAME="latin5",
         ID=78,
@@ -652,7 +652,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    30: collations(
+    30: collation(
         COLLATION_NAME="latin5_turkish_ci",
         CHARACTER_SET_NAME="latin5",
         ID=30,
@@ -661,7 +661,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    79: collations(
+    79: collation(
         COLLATION_NAME="latin7_bin",
         CHARACTER_SET_NAME="latin7",
         ID=79,
@@ -670,7 +670,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    20: collations(
+    20: collation(
         COLLATION_NAME="latin7_estonian_cs",
         CHARACTER_SET_NAME="latin7",
         ID=20,
@@ -679,7 +679,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    41: collations(
+    41: collation(
         COLLATION_NAME="latin7_general_ci",
         CHARACTER_SET_NAME="latin7",
         ID=41,
@@ -688,7 +688,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    42: collations(
+    42: collation(
         COLLATION_NAME="latin7_general_cs",
         CHARACTER_SET_NAME="latin7",
         ID=42,
@@ -697,7 +697,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    43: collations(
+    43: collation(
         COLLATION_NAME="macce_bin",
         CHARACTER_SET_NAME="macce",
         ID=43,
@@ -706,7 +706,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    38: collations(
+    38: collation(
         COLLATION_NAME="macce_general_ci",
         CHARACTER_SET_NAME="macce",
         ID=38,
@@ -715,7 +715,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    53: collations(
+    53: collation(
         COLLATION_NAME="macroman_bin",
         CHARACTER_SET_NAME="macroman",
         ID=53,
@@ -724,7 +724,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    39: collations(
+    39: collation(
         COLLATION_NAME="macroman_general_ci",
         CHARACTER_SET_NAME="macroman",
         ID=39,
@@ -733,7 +733,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    88: collations(
+    88: collation(
         COLLATION_NAME="sjis_bin",
         CHARACTER_SET_NAME="sjis",
         ID=88,
@@ -742,7 +742,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    13: collations(
+    13: collation(
         COLLATION_NAME="sjis_japanese_ci",
         CHARACTER_SET_NAME="sjis",
         ID=13,
@@ -751,7 +751,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    82: collations(
+    82: collation(
         COLLATION_NAME="swe7_bin",
         CHARACTER_SET_NAME="swe7",
         ID=82,
@@ -760,7 +760,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    10: collations(
+    10: collation(
         COLLATION_NAME="swe7_swedish_ci",
         CHARACTER_SET_NAME="swe7",
         ID=10,
@@ -769,7 +769,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    89: collations(
+    89: collation(
         COLLATION_NAME="tis620_bin",
         CHARACTER_SET_NAME="tis620",
         ID=89,
@@ -778,7 +778,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    18: collations(
+    18: collation(
         COLLATION_NAME="tis620_thai_ci",
         CHARACTER_SET_NAME="tis620",
         ID=18,
@@ -787,7 +787,7 @@ collations_mapper = {
         SORTLEN=4,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    90: collations(
+    90: collation(
         COLLATION_NAME="ucs2_bin",
         CHARACTER_SET_NAME="ucs2",
         ID=90,
@@ -796,7 +796,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    149: collations(
+    149: collation(
         COLLATION_NAME="ucs2_croatian_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=149,
@@ -805,7 +805,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    138: collations(
+    138: collation(
         COLLATION_NAME="ucs2_czech_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=138,
@@ -814,7 +814,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    139: collations(
+    139: collation(
         COLLATION_NAME="ucs2_danish_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=139,
@@ -823,7 +823,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    145: collations(
+    145: collation(
         COLLATION_NAME="ucs2_esperanto_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=145,
@@ -832,7 +832,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    134: collations(
+    134: collation(
         COLLATION_NAME="ucs2_estonian_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=134,
@@ -841,7 +841,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    35: collations(
+    35: collation(
         COLLATION_NAME="ucs2_general_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=35,
@@ -850,7 +850,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    159: collations(
+    159: collation(
         COLLATION_NAME="ucs2_general_mysql500_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=159,
@@ -859,7 +859,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    148: collations(
+    148: collation(
         COLLATION_NAME="ucs2_german2_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=148,
@@ -868,7 +868,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    146: collations(
+    146: collation(
         COLLATION_NAME="ucs2_hungarian_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=146,
@@ -877,7 +877,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    129: collations(
+    129: collation(
         COLLATION_NAME="ucs2_icelandic_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=129,
@@ -886,7 +886,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    130: collations(
+    130: collation(
         COLLATION_NAME="ucs2_latvian_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=130,
@@ -895,7 +895,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    140: collations(
+    140: collation(
         COLLATION_NAME="ucs2_lithuanian_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=140,
@@ -904,7 +904,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    144: collations(
+    144: collation(
         COLLATION_NAME="ucs2_persian_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=144,
@@ -913,7 +913,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    133: collations(
+    133: collation(
         COLLATION_NAME="ucs2_polish_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=133,
@@ -922,7 +922,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    131: collations(
+    131: collation(
         COLLATION_NAME="ucs2_romanian_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=131,
@@ -931,7 +931,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    143: collations(
+    143: collation(
         COLLATION_NAME="ucs2_roman_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=143,
@@ -940,7 +940,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    147: collations(
+    147: collation(
         COLLATION_NAME="ucs2_sinhala_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=147,
@@ -949,7 +949,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    141: collations(
+    141: collation(
         COLLATION_NAME="ucs2_slovak_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=141,
@@ -958,7 +958,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    132: collations(
+    132: collation(
         COLLATION_NAME="ucs2_slovenian_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=132,
@@ -967,7 +967,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    142: collations(
+    142: collation(
         COLLATION_NAME="ucs2_spanish2_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=142,
@@ -976,7 +976,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    135: collations(
+    135: collation(
         COLLATION_NAME="ucs2_spanish_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=135,
@@ -985,7 +985,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    136: collations(
+    136: collation(
         COLLATION_NAME="ucs2_swedish_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=136,
@@ -994,7 +994,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    137: collations(
+    137: collation(
         COLLATION_NAME="ucs2_turkish_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=137,
@@ -1003,7 +1003,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    150: collations(
+    150: collation(
         COLLATION_NAME="ucs2_unicode_520_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=150,
@@ -1012,7 +1012,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    128: collations(
+    128: collation(
         COLLATION_NAME="ucs2_unicode_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=128,
@@ -1021,7 +1021,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    151: collations(
+    151: collation(
         COLLATION_NAME="ucs2_vietnamese_ci",
         CHARACTER_SET_NAME="ucs2",
         ID=151,
@@ -1030,7 +1030,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    91: collations(
+    91: collation(
         COLLATION_NAME="ujis_bin",
         CHARACTER_SET_NAME="ujis",
         ID=91,
@@ -1039,7 +1039,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    12: collations(
+    12: collation(
         COLLATION_NAME="ujis_japanese_ci",
         CHARACTER_SET_NAME="ujis",
         ID=12,
@@ -1048,7 +1048,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    62: collations(
+    62: collation(
         COLLATION_NAME="utf16le_bin",
         CHARACTER_SET_NAME="utf16le",
         ID=62,
@@ -1057,7 +1057,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    56: collations(
+    56: collation(
         COLLATION_NAME="utf16le_general_ci",
         CHARACTER_SET_NAME="utf16le",
         ID=56,
@@ -1066,7 +1066,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    55: collations(
+    55: collation(
         COLLATION_NAME="utf16_bin",
         CHARACTER_SET_NAME="utf16",
         ID=55,
@@ -1075,7 +1075,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    122: collations(
+    122: collation(
         COLLATION_NAME="utf16_croatian_ci",
         CHARACTER_SET_NAME="utf16",
         ID=122,
@@ -1084,7 +1084,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    111: collations(
+    111: collation(
         COLLATION_NAME="utf16_czech_ci",
         CHARACTER_SET_NAME="utf16",
         ID=111,
@@ -1093,7 +1093,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    112: collations(
+    112: collation(
         COLLATION_NAME="utf16_danish_ci",
         CHARACTER_SET_NAME="utf16",
         ID=112,
@@ -1102,7 +1102,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    118: collations(
+    118: collation(
         COLLATION_NAME="utf16_esperanto_ci",
         CHARACTER_SET_NAME="utf16",
         ID=118,
@@ -1111,7 +1111,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    107: collations(
+    107: collation(
         COLLATION_NAME="utf16_estonian_ci",
         CHARACTER_SET_NAME="utf16",
         ID=107,
@@ -1120,7 +1120,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    54: collations(
+    54: collation(
         COLLATION_NAME="utf16_general_ci",
         CHARACTER_SET_NAME="utf16",
         ID=54,
@@ -1129,7 +1129,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    121: collations(
+    121: collation(
         COLLATION_NAME="utf16_german2_ci",
         CHARACTER_SET_NAME="utf16",
         ID=121,
@@ -1138,7 +1138,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    119: collations(
+    119: collation(
         COLLATION_NAME="utf16_hungarian_ci",
         CHARACTER_SET_NAME="utf16",
         ID=119,
@@ -1147,7 +1147,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    102: collations(
+    102: collation(
         COLLATION_NAME="utf16_icelandic_ci",
         CHARACTER_SET_NAME="utf16",
         ID=102,
@@ -1156,7 +1156,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    103: collations(
+    103: collation(
         COLLATION_NAME="utf16_latvian_ci",
         CHARACTER_SET_NAME="utf16",
         ID=103,
@@ -1165,7 +1165,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    113: collations(
+    113: collation(
         COLLATION_NAME="utf16_lithuanian_ci",
         CHARACTER_SET_NAME="utf16",
         ID=113,
@@ -1174,7 +1174,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    117: collations(
+    117: collation(
         COLLATION_NAME="utf16_persian_ci",
         CHARACTER_SET_NAME="utf16",
         ID=117,
@@ -1183,7 +1183,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    106: collations(
+    106: collation(
         COLLATION_NAME="utf16_polish_ci",
         CHARACTER_SET_NAME="utf16",
         ID=106,
@@ -1192,7 +1192,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    104: collations(
+    104: collation(
         COLLATION_NAME="utf16_romanian_ci",
         CHARACTER_SET_NAME="utf16",
         ID=104,
@@ -1201,7 +1201,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    116: collations(
+    116: collation(
         COLLATION_NAME="utf16_roman_ci",
         CHARACTER_SET_NAME="utf16",
         ID=116,
@@ -1210,7 +1210,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    120: collations(
+    120: collation(
         COLLATION_NAME="utf16_sinhala_ci",
         CHARACTER_SET_NAME="utf16",
         ID=120,
@@ -1219,7 +1219,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    114: collations(
+    114: collation(
         COLLATION_NAME="utf16_slovak_ci",
         CHARACTER_SET_NAME="utf16",
         ID=114,
@@ -1228,7 +1228,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    105: collations(
+    105: collation(
         COLLATION_NAME="utf16_slovenian_ci",
         CHARACTER_SET_NAME="utf16",
         ID=105,
@@ -1237,7 +1237,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    115: collations(
+    115: collation(
         COLLATION_NAME="utf16_spanish2_ci",
         CHARACTER_SET_NAME="utf16",
         ID=115,
@@ -1246,7 +1246,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    108: collations(
+    108: collation(
         COLLATION_NAME="utf16_spanish_ci",
         CHARACTER_SET_NAME="utf16",
         ID=108,
@@ -1255,7 +1255,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    109: collations(
+    109: collation(
         COLLATION_NAME="utf16_swedish_ci",
         CHARACTER_SET_NAME="utf16",
         ID=109,
@@ -1264,7 +1264,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    110: collations(
+    110: collation(
         COLLATION_NAME="utf16_turkish_ci",
         CHARACTER_SET_NAME="utf16",
         ID=110,
@@ -1273,7 +1273,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    123: collations(
+    123: collation(
         COLLATION_NAME="utf16_unicode_520_ci",
         CHARACTER_SET_NAME="utf16",
         ID=123,
@@ -1282,7 +1282,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    101: collations(
+    101: collation(
         COLLATION_NAME="utf16_unicode_ci",
         CHARACTER_SET_NAME="utf16",
         ID=101,
@@ -1291,7 +1291,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    124: collations(
+    124: collation(
         COLLATION_NAME="utf16_vietnamese_ci",
         CHARACTER_SET_NAME="utf16",
         ID=124,
@@ -1300,7 +1300,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    61: collations(
+    61: collation(
         COLLATION_NAME="utf32_bin",
         CHARACTER_SET_NAME="utf32",
         ID=61,
@@ -1309,7 +1309,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    181: collations(
+    181: collation(
         COLLATION_NAME="utf32_croatian_ci",
         CHARACTER_SET_NAME="utf32",
         ID=181,
@@ -1318,7 +1318,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    170: collations(
+    170: collation(
         COLLATION_NAME="utf32_czech_ci",
         CHARACTER_SET_NAME="utf32",
         ID=170,
@@ -1327,7 +1327,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    171: collations(
+    171: collation(
         COLLATION_NAME="utf32_danish_ci",
         CHARACTER_SET_NAME="utf32",
         ID=171,
@@ -1336,7 +1336,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    177: collations(
+    177: collation(
         COLLATION_NAME="utf32_esperanto_ci",
         CHARACTER_SET_NAME="utf32",
         ID=177,
@@ -1345,7 +1345,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    166: collations(
+    166: collation(
         COLLATION_NAME="utf32_estonian_ci",
         CHARACTER_SET_NAME="utf32",
         ID=166,
@@ -1354,7 +1354,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    60: collations(
+    60: collation(
         COLLATION_NAME="utf32_general_ci",
         CHARACTER_SET_NAME="utf32",
         ID=60,
@@ -1363,7 +1363,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    180: collations(
+    180: collation(
         COLLATION_NAME="utf32_german2_ci",
         CHARACTER_SET_NAME="utf32",
         ID=180,
@@ -1372,7 +1372,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    178: collations(
+    178: collation(
         COLLATION_NAME="utf32_hungarian_ci",
         CHARACTER_SET_NAME="utf32",
         ID=178,
@@ -1381,7 +1381,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    161: collations(
+    161: collation(
         COLLATION_NAME="utf32_icelandic_ci",
         CHARACTER_SET_NAME="utf32",
         ID=161,
@@ -1390,7 +1390,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    162: collations(
+    162: collation(
         COLLATION_NAME="utf32_latvian_ci",
         CHARACTER_SET_NAME="utf32",
         ID=162,
@@ -1399,7 +1399,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    172: collations(
+    172: collation(
         COLLATION_NAME="utf32_lithuanian_ci",
         CHARACTER_SET_NAME="utf32",
         ID=172,
@@ -1408,7 +1408,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    176: collations(
+    176: collation(
         COLLATION_NAME="utf32_persian_ci",
         CHARACTER_SET_NAME="utf32",
         ID=176,
@@ -1417,7 +1417,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    165: collations(
+    165: collation(
         COLLATION_NAME="utf32_polish_ci",
         CHARACTER_SET_NAME="utf32",
         ID=165,
@@ -1426,7 +1426,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    163: collations(
+    163: collation(
         COLLATION_NAME="utf32_romanian_ci",
         CHARACTER_SET_NAME="utf32",
         ID=163,
@@ -1435,7 +1435,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    175: collations(
+    175: collation(
         COLLATION_NAME="utf32_roman_ci",
         CHARACTER_SET_NAME="utf32",
         ID=175,
@@ -1444,7 +1444,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    179: collations(
+    179: collation(
         COLLATION_NAME="utf32_sinhala_ci",
         CHARACTER_SET_NAME="utf32",
         ID=179,
@@ -1453,7 +1453,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    173: collations(
+    173: collation(
         COLLATION_NAME="utf32_slovak_ci",
         CHARACTER_SET_NAME="utf32",
         ID=173,
@@ -1462,7 +1462,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    164: collations(
+    164: collation(
         COLLATION_NAME="utf32_slovenian_ci",
         CHARACTER_SET_NAME="utf32",
         ID=164,
@@ -1471,7 +1471,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    174: collations(
+    174: collation(
         COLLATION_NAME="utf32_spanish2_ci",
         CHARACTER_SET_NAME="utf32",
         ID=174,
@@ -1480,7 +1480,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    167: collations(
+    167: collation(
         COLLATION_NAME="utf32_spanish_ci",
         CHARACTER_SET_NAME="utf32",
         ID=167,
@@ -1489,7 +1489,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    168: collations(
+    168: collation(
         COLLATION_NAME="utf32_swedish_ci",
         CHARACTER_SET_NAME="utf32",
         ID=168,
@@ -1498,7 +1498,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    169: collations(
+    169: collation(
         COLLATION_NAME="utf32_turkish_ci",
         CHARACTER_SET_NAME="utf32",
         ID=169,
@@ -1507,7 +1507,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    182: collations(
+    182: collation(
         COLLATION_NAME="utf32_unicode_520_ci",
         CHARACTER_SET_NAME="utf32",
         ID=182,
@@ -1516,7 +1516,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    160: collations(
+    160: collation(
         COLLATION_NAME="utf32_unicode_ci",
         CHARACTER_SET_NAME="utf32",
         ID=160,
@@ -1525,7 +1525,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    183: collations(
+    183: collation(
         COLLATION_NAME="utf32_vietnamese_ci",
         CHARACTER_SET_NAME="utf32",
         ID=183,
@@ -1534,7 +1534,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    83: collations(
+    83: collation(
         COLLATION_NAME="utf8mb3_bin",
         CHARACTER_SET_NAME="utf8mb3",
         ID=83,
@@ -1543,7 +1543,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    213: collations(
+    213: collation(
         COLLATION_NAME="utf8mb3_croatian_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=213,
@@ -1552,7 +1552,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    202: collations(
+    202: collation(
         COLLATION_NAME="utf8mb3_czech_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=202,
@@ -1561,7 +1561,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    203: collations(
+    203: collation(
         COLLATION_NAME="utf8mb3_danish_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=203,
@@ -1570,7 +1570,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    209: collations(
+    209: collation(
         COLLATION_NAME="utf8mb3_esperanto_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=209,
@@ -1579,7 +1579,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    198: collations(
+    198: collation(
         COLLATION_NAME="utf8mb3_estonian_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=198,
@@ -1588,7 +1588,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    33: collations(
+    33: collation(
         COLLATION_NAME="utf8mb3_general_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=33,
@@ -1597,7 +1597,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    223: collations(
+    223: collation(
         COLLATION_NAME="utf8mb3_general_mysql500_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=223,
@@ -1606,7 +1606,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    212: collations(
+    212: collation(
         COLLATION_NAME="utf8mb3_german2_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=212,
@@ -1615,7 +1615,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    210: collations(
+    210: collation(
         COLLATION_NAME="utf8mb3_hungarian_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=210,
@@ -1624,7 +1624,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    193: collations(
+    193: collation(
         COLLATION_NAME="utf8mb3_icelandic_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=193,
@@ -1633,7 +1633,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    194: collations(
+    194: collation(
         COLLATION_NAME="utf8mb3_latvian_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=194,
@@ -1642,7 +1642,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    204: collations(
+    204: collation(
         COLLATION_NAME="utf8mb3_lithuanian_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=204,
@@ -1651,7 +1651,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    208: collations(
+    208: collation(
         COLLATION_NAME="utf8mb3_persian_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=208,
@@ -1660,7 +1660,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    197: collations(
+    197: collation(
         COLLATION_NAME="utf8mb3_polish_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=197,
@@ -1669,7 +1669,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    195: collations(
+    195: collation(
         COLLATION_NAME="utf8mb3_romanian_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=195,
@@ -1678,7 +1678,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    207: collations(
+    207: collation(
         COLLATION_NAME="utf8mb3_roman_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=207,
@@ -1687,7 +1687,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    211: collations(
+    211: collation(
         COLLATION_NAME="utf8mb3_sinhala_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=211,
@@ -1696,7 +1696,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    205: collations(
+    205: collation(
         COLLATION_NAME="utf8mb3_slovak_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=205,
@@ -1705,7 +1705,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    196: collations(
+    196: collation(
         COLLATION_NAME="utf8mb3_slovenian_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=196,
@@ -1714,7 +1714,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    206: collations(
+    206: collation(
         COLLATION_NAME="utf8mb3_spanish2_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=206,
@@ -1723,7 +1723,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    199: collations(
+    199: collation(
         COLLATION_NAME="utf8mb3_spanish_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=199,
@@ -1732,7 +1732,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    200: collations(
+    200: collation(
         COLLATION_NAME="utf8mb3_swedish_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=200,
@@ -1741,7 +1741,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    76: collations(
+    76: collation(
         COLLATION_NAME="utf8mb3_tolower_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=76,
@@ -1750,7 +1750,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    201: collations(
+    201: collation(
         COLLATION_NAME="utf8mb3_turkish_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=201,
@@ -1759,7 +1759,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    214: collations(
+    214: collation(
         COLLATION_NAME="utf8mb3_unicode_520_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=214,
@@ -1768,7 +1768,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    192: collations(
+    192: collation(
         COLLATION_NAME="utf8mb3_unicode_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=192,
@@ -1777,7 +1777,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    215: collations(
+    215: collation(
         COLLATION_NAME="utf8mb3_vietnamese_ci",
         CHARACTER_SET_NAME="utf8mb3",
         ID=215,
@@ -1786,7 +1786,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    255: collations(
+    255: collation(
         COLLATION_NAME="utf8mb4_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=255,
@@ -1795,7 +1795,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    305: collations(
+    305: collation(
         COLLATION_NAME="utf8mb4_0900_as_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=305,
@@ -1804,7 +1804,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    278: collations(
+    278: collation(
         COLLATION_NAME="utf8mb4_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=278,
@@ -1813,7 +1813,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    309: collations(
+    309: collation(
         COLLATION_NAME="utf8mb4_0900_bin",
         CHARACTER_SET_NAME="utf8mb4",
         ID=309,
@@ -1822,7 +1822,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    318: collations(
+    318: collation(
         COLLATION_NAME="utf8mb4_bg_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=318,
@@ -1831,7 +1831,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    319: collations(
+    319: collation(
         COLLATION_NAME="utf8mb4_bg_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=319,
@@ -1840,7 +1840,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    46: collations(
+    46: collation(
         COLLATION_NAME="utf8mb4_bin",
         CHARACTER_SET_NAME="utf8mb4",
         ID=46,
@@ -1849,7 +1849,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    316: collations(
+    316: collation(
         COLLATION_NAME="utf8mb4_bs_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=316,
@@ -1858,7 +1858,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    317: collations(
+    317: collation(
         COLLATION_NAME="utf8mb4_bs_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=317,
@@ -1867,7 +1867,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    245: collations(
+    245: collation(
         COLLATION_NAME="utf8mb4_croatian_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=245,
@@ -1876,7 +1876,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    266: collations(
+    266: collation(
         COLLATION_NAME="utf8mb4_cs_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=266,
@@ -1885,7 +1885,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    289: collations(
+    289: collation(
         COLLATION_NAME="utf8mb4_cs_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=289,
@@ -1894,7 +1894,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    234: collations(
+    234: collation(
         COLLATION_NAME="utf8mb4_czech_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=234,
@@ -1903,7 +1903,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    235: collations(
+    235: collation(
         COLLATION_NAME="utf8mb4_danish_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=235,
@@ -1912,7 +1912,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    267: collations(
+    267: collation(
         COLLATION_NAME="utf8mb4_da_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=267,
@@ -1921,7 +1921,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    290: collations(
+    290: collation(
         COLLATION_NAME="utf8mb4_da_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=290,
@@ -1930,7 +1930,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    256: collations(
+    256: collation(
         COLLATION_NAME="utf8mb4_de_pb_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=256,
@@ -1939,7 +1939,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    279: collations(
+    279: collation(
         COLLATION_NAME="utf8mb4_de_pb_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=279,
@@ -1948,7 +1948,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    273: collations(
+    273: collation(
         COLLATION_NAME="utf8mb4_eo_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=273,
@@ -1957,7 +1957,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    296: collations(
+    296: collation(
         COLLATION_NAME="utf8mb4_eo_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=296,
@@ -1966,7 +1966,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    241: collations(
+    241: collation(
         COLLATION_NAME="utf8mb4_esperanto_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=241,
@@ -1975,7 +1975,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    230: collations(
+    230: collation(
         COLLATION_NAME="utf8mb4_estonian_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=230,
@@ -1984,7 +1984,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    263: collations(
+    263: collation(
         COLLATION_NAME="utf8mb4_es_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=263,
@@ -1993,7 +1993,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    286: collations(
+    286: collation(
         COLLATION_NAME="utf8mb4_es_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=286,
@@ -2002,7 +2002,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    270: collations(
+    270: collation(
         COLLATION_NAME="utf8mb4_es_trad_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=270,
@@ -2011,7 +2011,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    293: collations(
+    293: collation(
         COLLATION_NAME="utf8mb4_es_trad_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=293,
@@ -2020,7 +2020,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    262: collations(
+    262: collation(
         COLLATION_NAME="utf8mb4_et_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=262,
@@ -2029,7 +2029,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    285: collations(
+    285: collation(
         COLLATION_NAME="utf8mb4_et_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=285,
@@ -2038,7 +2038,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    45: collations(
+    45: collation(
         COLLATION_NAME="utf8mb4_general_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=45,
@@ -2047,7 +2047,7 @@ collations_mapper = {
         SORTLEN=1,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    244: collations(
+    244: collation(
         COLLATION_NAME="utf8mb4_german2_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=244,
@@ -2056,7 +2056,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    320: collations(
+    320: collation(
         COLLATION_NAME="utf8mb4_gl_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=320,
@@ -2065,7 +2065,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    321: collations(
+    321: collation(
         COLLATION_NAME="utf8mb4_gl_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=321,
@@ -2074,7 +2074,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    275: collations(
+    275: collation(
         COLLATION_NAME="utf8mb4_hr_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=275,
@@ -2083,7 +2083,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    298: collations(
+    298: collation(
         COLLATION_NAME="utf8mb4_hr_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=298,
@@ -2092,7 +2092,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    242: collations(
+    242: collation(
         COLLATION_NAME="utf8mb4_hungarian_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=242,
@@ -2101,7 +2101,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    274: collations(
+    274: collation(
         COLLATION_NAME="utf8mb4_hu_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=274,
@@ -2110,7 +2110,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    297: collations(
+    297: collation(
         COLLATION_NAME="utf8mb4_hu_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=297,
@@ -2119,7 +2119,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    225: collations(
+    225: collation(
         COLLATION_NAME="utf8mb4_icelandic_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=225,
@@ -2128,7 +2128,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    257: collations(
+    257: collation(
         COLLATION_NAME="utf8mb4_is_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=257,
@@ -2137,7 +2137,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    280: collations(
+    280: collation(
         COLLATION_NAME="utf8mb4_is_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=280,
@@ -2146,7 +2146,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    303: collations(
+    303: collation(
         COLLATION_NAME="utf8mb4_ja_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=303,
@@ -2155,7 +2155,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    304: collations(
+    304: collation(
         COLLATION_NAME="utf8mb4_ja_0900_as_cs_ks",
         CHARACTER_SET_NAME="utf8mb4",
         ID=304,
@@ -2164,7 +2164,7 @@ collations_mapper = {
         SORTLEN=24,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    226: collations(
+    226: collation(
         COLLATION_NAME="utf8mb4_latvian_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=226,
@@ -2173,7 +2173,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    271: collations(
+    271: collation(
         COLLATION_NAME="utf8mb4_la_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=271,
@@ -2182,7 +2182,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    294: collations(
+    294: collation(
         COLLATION_NAME="utf8mb4_la_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=294,
@@ -2191,7 +2191,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    236: collations(
+    236: collation(
         COLLATION_NAME="utf8mb4_lithuanian_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=236,
@@ -2200,7 +2200,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    268: collations(
+    268: collation(
         COLLATION_NAME="utf8mb4_lt_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=268,
@@ -2209,7 +2209,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    291: collations(
+    291: collation(
         COLLATION_NAME="utf8mb4_lt_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=291,
@@ -2218,7 +2218,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    258: collations(
+    258: collation(
         COLLATION_NAME="utf8mb4_lv_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=258,
@@ -2227,7 +2227,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    281: collations(
+    281: collation(
         COLLATION_NAME="utf8mb4_lv_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=281,
@@ -2236,7 +2236,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    322: collations(
+    322: collation(
         COLLATION_NAME="utf8mb4_mn_cyrl_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=322,
@@ -2245,7 +2245,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    323: collations(
+    323: collation(
         COLLATION_NAME="utf8mb4_mn_cyrl_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=323,
@@ -2254,7 +2254,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    310: collations(
+    310: collation(
         COLLATION_NAME="utf8mb4_nb_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=310,
@@ -2263,7 +2263,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    311: collations(
+    311: collation(
         COLLATION_NAME="utf8mb4_nb_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=311,
@@ -2272,7 +2272,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    312: collations(
+    312: collation(
         COLLATION_NAME="utf8mb4_nn_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=312,
@@ -2281,7 +2281,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    313: collations(
+    313: collation(
         COLLATION_NAME="utf8mb4_nn_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=313,
@@ -2290,7 +2290,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    240: collations(
+    240: collation(
         COLLATION_NAME="utf8mb4_persian_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=240,
@@ -2299,7 +2299,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    261: collations(
+    261: collation(
         COLLATION_NAME="utf8mb4_pl_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=261,
@@ -2308,7 +2308,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    284: collations(
+    284: collation(
         COLLATION_NAME="utf8mb4_pl_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=284,
@@ -2317,7 +2317,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    229: collations(
+    229: collation(
         COLLATION_NAME="utf8mb4_polish_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=229,
@@ -2326,7 +2326,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    227: collations(
+    227: collation(
         COLLATION_NAME="utf8mb4_romanian_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=227,
@@ -2335,7 +2335,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    239: collations(
+    239: collation(
         COLLATION_NAME="utf8mb4_roman_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=239,
@@ -2344,7 +2344,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    259: collations(
+    259: collation(
         COLLATION_NAME="utf8mb4_ro_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=259,
@@ -2353,7 +2353,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    282: collations(
+    282: collation(
         COLLATION_NAME="utf8mb4_ro_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=282,
@@ -2362,7 +2362,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    306: collations(
+    306: collation(
         COLLATION_NAME="utf8mb4_ru_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=306,
@@ -2371,7 +2371,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    307: collations(
+    307: collation(
         COLLATION_NAME="utf8mb4_ru_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=307,
@@ -2380,7 +2380,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    243: collations(
+    243: collation(
         COLLATION_NAME="utf8mb4_sinhala_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=243,
@@ -2389,7 +2389,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    269: collations(
+    269: collation(
         COLLATION_NAME="utf8mb4_sk_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=269,
@@ -2398,7 +2398,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    292: collations(
+    292: collation(
         COLLATION_NAME="utf8mb4_sk_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=292,
@@ -2407,7 +2407,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    237: collations(
+    237: collation(
         COLLATION_NAME="utf8mb4_slovak_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=237,
@@ -2416,7 +2416,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    228: collations(
+    228: collation(
         COLLATION_NAME="utf8mb4_slovenian_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=228,
@@ -2425,7 +2425,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    260: collations(
+    260: collation(
         COLLATION_NAME="utf8mb4_sl_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=260,
@@ -2434,7 +2434,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    283: collations(
+    283: collation(
         COLLATION_NAME="utf8mb4_sl_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=283,
@@ -2443,7 +2443,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    238: collations(
+    238: collation(
         COLLATION_NAME="utf8mb4_spanish2_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=238,
@@ -2452,7 +2452,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    231: collations(
+    231: collation(
         COLLATION_NAME="utf8mb4_spanish_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=231,
@@ -2461,7 +2461,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    314: collations(
+    314: collation(
         COLLATION_NAME="utf8mb4_sr_latn_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=314,
@@ -2470,7 +2470,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    315: collations(
+    315: collation(
         COLLATION_NAME="utf8mb4_sr_latn_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=315,
@@ -2479,7 +2479,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    264: collations(
+    264: collation(
         COLLATION_NAME="utf8mb4_sv_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=264,
@@ -2488,7 +2488,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    287: collations(
+    287: collation(
         COLLATION_NAME="utf8mb4_sv_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=287,
@@ -2497,7 +2497,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    232: collations(
+    232: collation(
         COLLATION_NAME="utf8mb4_swedish_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=232,
@@ -2506,7 +2506,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    265: collations(
+    265: collation(
         COLLATION_NAME="utf8mb4_tr_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=265,
@@ -2515,7 +2515,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    288: collations(
+    288: collation(
         COLLATION_NAME="utf8mb4_tr_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=288,
@@ -2524,7 +2524,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    233: collations(
+    233: collation(
         COLLATION_NAME="utf8mb4_turkish_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=233,
@@ -2533,7 +2533,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    246: collations(
+    246: collation(
         COLLATION_NAME="utf8mb4_unicode_520_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=246,
@@ -2542,7 +2542,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    224: collations(
+    224: collation(
         COLLATION_NAME="utf8mb4_unicode_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=224,
@@ -2551,7 +2551,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    247: collations(
+    247: collation(
         COLLATION_NAME="utf8mb4_vietnamese_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=247,
@@ -2560,7 +2560,7 @@ collations_mapper = {
         SORTLEN=8,
         PAD_ATTRIBUTE="PAD SPACE",
     ),
-    277: collations(
+    277: collation(
         COLLATION_NAME="utf8mb4_vi_0900_ai_ci",
         CHARACTER_SET_NAME="utf8mb4",
         ID=277,
@@ -2569,7 +2569,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    300: collations(
+    300: collation(
         COLLATION_NAME="utf8mb4_vi_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=300,
@@ -2578,7 +2578,7 @@ collations_mapper = {
         SORTLEN=0,
         PAD_ATTRIBUTE="NO PAD",
     ),
-    308: collations(
+    308: collation(
         COLLATION_NAME="utf8mb4_zh_0900_as_cs",
         CHARACTER_SET_NAME="utf8mb4",
         ID=308,
