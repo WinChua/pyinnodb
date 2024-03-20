@@ -1,7 +1,7 @@
 from context import *
 
-from pyinnodb.struct.xdes import *
-from pyinnodb.struct.list import *
+from pyinnodb.disk_struct.xdes import *
+from pyinnodb.disk_struct.list import *
 
 
 def test_mxdes():

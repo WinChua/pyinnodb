@@ -1,7 +1,7 @@
 import click
 
-from pyinnodb.struct.inode import MInodePage
-from pyinnodb.struct.fsp import MFspPage
+from pyinnodb.disk_struct.inode import MInodePage
+from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb import const
 
 

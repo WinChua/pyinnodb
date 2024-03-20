@@ -1,6 +1,6 @@
 from context import *
 
-from pyinnodb.struct.index import *
+from pyinnodb.disk_struct.index import *
 
 
 def test_index_page_iter():

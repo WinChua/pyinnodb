@@ -1,7 +1,7 @@
 import click
 from . import static_usage
 from . import sql
-from pyinnodb.struct.fsp import MFspPage
+from pyinnodb.disk_struct.fsp import MFspPage
 
 
 @click.group()

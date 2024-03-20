@@ -1,8 +1,8 @@
 from context import *
-from pyinnodb.struct.inode import *
-from pyinnodb.struct.fsp import *
-from pyinnodb.struct.xdes import *
-from pyinnodb.struct.fil import *
+from pyinnodb.disk_struct.inode import *
+from pyinnodb.disk_struct.fsp import *
+from pyinnodb.disk_struct.xdes import *
+from pyinnodb.disk_struct.fil import *
 
 
 # inode is fseg
