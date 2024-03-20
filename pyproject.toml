@@ -34,3 +34,8 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyinnodb"]
+
+[tool.rye.scripts]
+gencols = { chain = ["gencols:cols", "gencols:fmt"] }
+"gencols:cols" = "python devtools/gen-collations.py"
+"gencols:fmt" = "rye fmt pyinnodb/const/collations.py"
