@@ -59,27 +59,37 @@ def gen_column(column, mysqld_version_id):
     for col in column:
         ddl_lines.append(f"`{col['name']}` {col['column_type_utf8']}")  # column name
         if False and col["type"] != "int":
-            ddl_lines.append(f" CHARACTER SET {col['character_set']} COLLATE {col['collation']}")
+            ddl_lines.append(
+                f" CHARACTER SET {col['character_set']} COLLATE {col['collation']}"
+            )
         if not col["is_virtual"] and col["default_option"] == "":
             # nullabel
             ddl_lines.append(f"{' NOT' if not col['is_nullable'] else ''} NULL")
         else:
             # 虚拟列 VIRTUAL
-            ddl_lines.append(f"{' GENERATED ALWAYS AS (' + col['generation_expression'] + ') VIRTUAL' if col['is_virtual'] else '' }")
+            ddl_lines.append(
+                f"{' GENERATED ALWAYS AS (' + col['generation_expression'] + ') VIRTUAL' if col['is_virtual'] else '' }"
+            )
         if col["default_option"] != "":
             # ddl_lines.append(f" DEFAULT ({col['default_option']})"
-            ddl_lines.append((
-                f" DEFAULT ({col['default_option']})"
-                if mysqld_version_id > 80012
-                else f" DEFAULT {col['default_option']}"
-            ))
+            ddl_lines.append(
+                (
+                    f" DEFAULT ({col['default_option']})"
+                    if mysqld_version_id > 80012
+                    else f" DEFAULT {col['default_option']}"
+                )
+            )
         else:
             # default
-            ddl_lines.append(f"{' DEFAULT '+repr(col['default']) if col['have_default'] else ''}")
+            ddl_lines.append(
+                f"{' DEFAULT '+repr(col['default']) if col['have_default'] else ''}"
+            )
         # auto_increment
         ddl_lines.append(f"{' AUTO_INCREMENT' if col['is_auto_increment'] else ''}")
         # comment
-        ddl_lines.append(f"{' COMMENT '+repr(col['comment']) if col['comment'] != '' else '' }")
+        ddl_lines.append(
+            f"{' COMMENT '+repr(col['comment']) if col['comment'] != '' else '' }"
+        )
         # COLUMN_FORMAT
         # STORAGE
         # SECONDARY_ENGINE_ATTRIBUTE

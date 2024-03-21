@@ -14,7 +14,7 @@ class MPointer(CC):
         # self.page_number / 64: page number start from 0
         # no.0 page store 256 xdes entries which
         # stand for 64 page; so: self.page_number / (256*64) * 256
-        return int(self.page_number/64) + int(
+        return int(self.page_number / 64) + int(
             (self.page_offset - 50 + 8) / 40
         )  # 50: sizeof(fil) + sizeof(list), 40: sizeof(MXdesEntry)
 
