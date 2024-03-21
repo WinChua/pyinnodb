@@ -31,5 +31,5 @@ with MySqlContainer("mysql:8.0.35") as mysql:
         lines.append(f'collations_mapper = {repr(m)}')
 
 current = pathlib.Path(__file__)
-with open(current.parent.parent / "pyinnodb" / "const" / "collations.py", "w") as f:
+with open(current.parent.parent / "src" / "pyinnodb" / "const" / "collations.py", "w") as f:
     f.write("\n".join(lines))

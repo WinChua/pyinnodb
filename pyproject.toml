@@ -32,7 +32,10 @@ dev-dependencies = [
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["pyinnodb"]
+packages = ["src/pyinnodb"]
+
+[tool.hatch.build]
+exclude = [".venv", "data"]
 
 [tool.rye.scripts]
 gencols = { chain = ["gencols:cols", "gencols:fmt"] }
