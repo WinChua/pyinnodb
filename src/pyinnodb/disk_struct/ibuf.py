@@ -14,5 +14,4 @@ class MIBufEntry2(CC):
 
 class MIBufPage(CC):
     fil: MFil = cfield(MFil)
-    change_buffer_bitmap: t.List[MIBufEntry2] = cfield(
-        carray(4096, MIBufEntry2))
+    change_buffer_bitmap: t.List[MIBufEntry2] = cfield(carray(4096, MIBufEntry2))

@@ -16,8 +16,7 @@ class MIndexHeader(CC):  # page0types.h call page header page_header_t
     dir_slot_number: int = cfield(cs.Int16ub)
     heap_top_pos: int = cfield(cs.Int16ub)
     record_format: int = cfield(cs.BitsInteger(1))
-    heap_records_number: int = cfield(
-        cs.BitsInteger(15))  # inf + sup + garbage
+    heap_records_number: int = cfield(cs.BitsInteger(15))  # inf + sup + garbage
     # pointer to first garbage entry, and form link list by next_record
     first_garbage: int = cfield(cs.Int16ub)
     garbage_space: int = cfield(cs.Int16ub)
@@ -56,7 +55,7 @@ class MSystemRecord(CC):
 
 class MIndexSystemRecord(CC):
     infimum: MSystemRecord = cfield(MSystemRecord)
-    supremum:  MSystemRecord = cfield(MSystemRecord)
+    supremum: MSystemRecord = cfield(MSystemRecord)
 
 
 class MIndexPage(CC):
@@ -68,9 +67,8 @@ class MIndexPage(CC):
     def _post_parsed(self, stream, context, path):
         n = self.index_header.dir_slot_number
         size = self.sizeof()
-        stream.seek(-size+const.PAGE_SIZE - 8 - (2 * n), 1)
-        self.page_directory = carray(
-            n, cs.Int16sb).parse_stream(stream, **context)
+        stream.seek(-size + const.PAGE_SIZE - 8 - (2 * n), 1)
+        self.page_directory = carray(n, cs.Int16sb).parse_stream(stream, **context)
 
     def iterate_record_header(self, f, value_parser=None):
         page_no = self.fil.offset
@@ -78,7 +76,7 @@ class MIndexPage(CC):
         f.seek(page_no * const.PAGE_SIZE + infimum_offset)
         next_offset = self.system_records.infimum.next_record_offset
         while next_offset > 0:
-            f.seek(next_offset-MRecordHeader.sizeof(), 1)
+            f.seek(next_offset - MRecordHeader.sizeof(), 1)
             rh = MRecordHeader.parse_stream(f)
             next_offset = rh.next_record_offset
 
@@ -98,10 +96,14 @@ class MIndexPage(CC):
             target_loc = cur_post + self.page_directory[target_idx]
             stream.seek(target_loc)
             target_key = stream.read(key_len)
-            logger.info("lidx: %d, hidx: %d, tidx: %d",
-                        low_idx, heigh_idx, target_idx)
-            logger.info("cnt %d, key is %s, target_key is %s, result is %d",
-                        cnt, const.parse_mysql_int(key), const.parse_mysql_int(target_key), key < target_key)
+            logger.info("lidx: %d, hidx: %d, tidx: %d", low_idx, heigh_idx, target_idx)
+            logger.info(
+                "cnt %d, key is %s, target_key is %s, result is %d",
+                cnt,
+                const.parse_mysql_int(key),
+                const.parse_mysql_int(target_key),
+                key < target_key,
+            )
             if key == target_key:
                 return target_loc, True
             if key < target_key:
@@ -134,7 +136,8 @@ class MSDIPage(CC):
 
     def _get_first_record(self, stream):
         stream.seek(
-            -const.PAGE_SIZE + self.fil.sizeof()
+            -const.PAGE_SIZE
+            + self.fil.sizeof()
             + self.index_header.sizeof()
             + self.fseg_header.sizeof()
             + 3
@@ -151,6 +154,5 @@ class MSDIPage(CC):
         zipdata = stream.read(ddl_field.zip_len)
         json_data = json.loads(zlib.decompress(zipdata))
         for col in json_data["dd_object"]["columns"]:
-            logger.debug(
-                f"{col['name']}:{col['type']},{col['column_type_utf8']},")
+            logger.debug(f"{col['name']}:{col['type']},{col['column_type_utf8']},")
         return json_data

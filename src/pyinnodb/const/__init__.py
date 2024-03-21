@@ -40,9 +40,7 @@ FIL_PAGE_TYPE_ZLOB_DATA = 26  # Data pages of compressed LOB */
 # Index pages of compressed LOB. This page contains an array of z_index_entry_t objects.*/
 FIL_PAGE_TYPE_ZLOB_INDEX = 27
 FIL_PAGE_TYPE_ZLOB_FRAG = 28  # Fragment pages of compressed LOB. */
-FIL_PAGE_TYPE_ZLOB_FRAG_ENTRY = (
-    29  # Index pages of fragment pages (compressed LOB). */
-)
+FIL_PAGE_TYPE_ZLOB_FRAG_ENTRY = 29  # Index pages of fragment pages (compressed LOB). */
 FIL_PAGE_TYPE_LAST = FIL_PAGE_TYPE_ZLOB_FRAG_ENTRY
 
 PAGE_TYPE_MAP = {
@@ -73,14 +71,15 @@ def get_page_type_name(typ):
 
 
 class XDESState(Enum):
-    '''
+    """
     XDES_NOT_INITED = 0 ## extent descriptor is not initialized */
     XDES_FREE = 1 ## extent is in free list of space */
     XDES_FREE_FRAG = 2 ## extent is in free fragment list of space */
     XDES_FULL_FRAG = 3 ## extent is in full fragment list of space */
     XDES_FSEG = 4 ## extent belongs to a segment */
     XDES_FSEG_FRAG = 5 ## fragment extent leased to segment */
-    '''
+    """
+
     XDES_NOT_INITED = 0  # extent descriptor is not initialized */
     XDES_FREE = 1  # extent is in free list of space */
     XDES_FREE_FRAG = 2  # extent is in free fragment list of space */
@@ -138,7 +137,7 @@ class RecordType(Enum):
 
 
 class PageState:
-    Free = 0x01   # not be used
+    Free = 0x01  # not be used
     Clean = 0x02  # for page that has no un-flushed data, currently always 1
 
     @classmethod
@@ -167,12 +166,11 @@ def encode_mysql_int(value, length, signed=True):
     return data
 
 
-crc32c = crcmod.Crc(poly=0x11EDC6F41, rev=True,
-                    initCrc=0, xorOut=0xFFFFFFFF)
+crc32c = crcmod.Crc(poly=0x11EDC6F41, rev=True, initCrc=0, xorOut=0xFFFFFFFF)
 
 
 def page_checksum_crc32c(page_data):
-    body = page_data[38:PAGE_SIZE-8]
+    body = page_data[38 : PAGE_SIZE - 8]
     header = page_data[4:26]
     return crc32c.new(header).crcValue ^ crc32c.new(body).crcValue
 
@@ -190,7 +188,7 @@ def show_seq_page_list(page_list):
     lines = []
 
     for page_no in page_list[1:]:
-        if page_no == end+1:
+        if page_no == end + 1:
             end = page_no
         else:
             lines.append(show_start_end_format(start, end))

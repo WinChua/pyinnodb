@@ -9,15 +9,17 @@ def swapbytesevery(every=2, unit=8):
     def swap(data):
         if len(data) % unit:
             raise ValueError(
-                f"data length {len(data)} must be a multiple of unit({unit})")
+                f"data length {len(data)} must be a multiple of unit({unit})"
+            )
         if unit % every:
-            raise ValueError(
-                f"unit({unit}) must be a multiple of every({every})")
+            raise ValueError(f"unit({unit}) must be a multiple of every({every})")
         result = b""
         for seg in zip(*[data[i::unit] for i in range(unit)]):
             result += b"".join(
-                list(map(bytes, zip(*[seg[i::every] for i in range(every)])))[::-1])
+                list(map(bytes, zip(*[seg[i::every] for i in range(every)])))[::-1]
+            )
         return result
+
     return swap
 
 
@@ -33,8 +35,9 @@ class MXdesEntry(CC):
     state: int = cfield(cs.Int32ub)
     # page_state: t.List[int] = cfield(cs.Bitwise(
     #     (carray(64, cs.BitsInteger(2)))))
-    page_state: t.List[int] = cfield(cs.Bitwise(
-        ((ByteSwapEvery(carray(64, cs.BitsInteger(2)))))))
+    page_state: t.List[int] = cfield(
+        cs.Bitwise((ByteSwapEvery(carray(64, cs.BitsInteger(2)))))
+    )
     # innodb use big-endaniss when writing data, and every 4 page's state is
     # in a write unit, which means that we should reverse every two bits in
     # one byte, here is an example:
@@ -47,5 +50,5 @@ class MXdesEntry(CC):
         used_idx = []
         for i, ps in enumerate(self.page_state):
             if not const.PageState.is_page_free(ps):
-                used_idx.append(i+(0 if idx is None else 64 * idx))
+                used_idx.append(i + (0 if idx is None else 64 * idx))
         return used_idx

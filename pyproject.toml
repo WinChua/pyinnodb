@@ -10,7 +10,6 @@ dependencies = [
     "construct==2.10.68",
     "construct-typing>=0.6.2",
     "click>=8.1.7",
-    "testcontainers>=4.0.1",
     "sqlalchemy>=2.0.28",
     "pymysql>=1.1.0",
     "cryptography>=42.0.5",
@@ -26,18 +25,21 @@ build-backend = "hatchling.build"
 managed = true
 dev-dependencies = [
     "pytest>=8.1.1",
+    "testcontainers>=4.1.1",
+    "docker>=7.0.0",
 ]
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["pyinnodb"]
+packages = ["src/pyinnodb"]
+
+[tool.hatch.build]
+exclude = [".venv", "data"]
 
 [tool.rye.scripts]
 gencols = { chain = ["gencols:cols", "gencols:fmt"] }
 "gencols:cols" = "python devtools/gen-collations.py"
-"gencols:fmt" = "rye fmt pyinnodb/const/collations.py"
+"gencols:fmt" = "rye fmt src/pyinnodb/const/collations.py"
 cli = { call = "pyinnodb.cli" }
-
-[project.scripts]

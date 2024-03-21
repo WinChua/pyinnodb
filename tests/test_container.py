@@ -35,11 +35,6 @@ class User(Base):
     name = Column(String(50))
     age = Column(Integer)
 
-# 创建数据库引擎
-# engine = create_engine('sqlite:///database.db')
-# 
-# # 创建表
-
 def open_from_container(container: Container, path: str) -> tarfile.TarFile:
     fileobj = BytesIO()
     bits, stat = container.get_archive(path)

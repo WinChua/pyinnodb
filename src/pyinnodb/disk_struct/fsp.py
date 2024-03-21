@@ -11,7 +11,8 @@ class MFspHeader(CC):
     unused: int = cfield(cs.Int32ub)
     highest_page_number: int = cfield(cs.Int32ub)  # size, 已经在磁盘上分配的页数
     highest_page_number_init: int = cfield(
-        cs.Int32ub)  # 已经初始化, 但不一定在磁盘上分配, 大于该值的page是free
+        cs.Int32ub
+    )  # 已经初始化, 但不一定在磁盘上分配, 大于该值的page是free
     flags: int = cfield(cs.Int32ub)
     free_frag_page_number: int = cfield(cs.Int32ub)
     list_base_free: MListBaseNode = cfield(MListBaseNode)
