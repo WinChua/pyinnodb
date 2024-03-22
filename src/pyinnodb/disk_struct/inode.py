@@ -63,4 +63,6 @@ class MInodePage(CC):  # fseg_create
                 continue
             if func is not None:
                 iter_value.append(func(inode))
+            else:
+                iter_value.append(inode)
         return iter_value
