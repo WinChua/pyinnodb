@@ -28,11 +28,13 @@ def tosql(ctx, sdionly):
         table_name = f"{table_object.schema_ref}/{table_object.name}"
         columns_dec = []
         for c in table_object.columns:
-            if c.name in not_focus_col_name:
+            if const.column_hidden_type.ColumnHiddenType(c.hidden) == const.column_hidden_type.ColumnHiddenType.HT_HIDDEN_SE:
                 continue
             columns_dec.append(c.gen_sql())
         idx_dec = []
         for i in table_object.indexes:
+            if i.hidden:
+                continue
             idx_dec.append(table_object.gen_sql_for_index(i))
         columns_dec.extend(idx_dec)
         columns_dec = "\n    " + ",\n    ".join(columns_dec) + "\n"

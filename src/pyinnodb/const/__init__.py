@@ -4,6 +4,7 @@ from .collations import get_collation_by_id
 from .define import *
 from .tool import *
 from . import index_type
+from . import column_hidden_type
 
 class XDESState(Enum):
     """
