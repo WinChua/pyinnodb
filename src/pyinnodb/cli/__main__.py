@@ -18,7 +18,6 @@ def main(ctx, fn, log_level):
     ctx.obj["fn"] = fn
     fsp_page = MFspPage.parse_stream(fn)
     ctx.obj["fsp_page"] = fsp_page
-    print(f"MySQL version {fsp_page.fil.pre_page}")
 
 
 main.command()(static_usage.static_page_usage)
