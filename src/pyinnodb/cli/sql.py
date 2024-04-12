@@ -25,7 +25,7 @@ def tosql(ctx, sdionly):
             return
         table_object = Table(**sdi_page.ddl["dd_object"])
 
-        table_name = f"{table_object.schema_ref}/{table_object.name}"
+        table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
         columns_dec = []
         for c in table_object.columns:
             if const.column_hidden_type.ColumnHiddenType(c.hidden) == const.column_hidden_type.ColumnHiddenType.HT_HIDDEN_SE:
@@ -39,7 +39,9 @@ def tosql(ctx, sdionly):
         columns_dec.extend(idx_dec)
         columns_dec = "\n    " + ",\n    ".join(columns_dec) + "\n"
         table_collation = const.get_collation_by_id(table_object.collation_id)
-        print(f"CREATE TABLE `{table_object.schema_ref}`.`{table_object.name}` ({columns_dec}) ENGINE={table_object.engine} DEFAULT CHARSET={table_collation.CHARACTER_SET_NAME} COLLATE={table_collation.COLLATION_NAME}")
+        parts = table_object.gen_sql_for_partition()
+        desc = f"ENGINE={table_object.engine} DEFAULT CHARSET={table_collation.CHARACTER_SET_NAME} COLLATE={table_collation.COLLATION_NAME}"
+        print(f"CREATE TABLE {table_name} ({columns_dec}) {desc} {'\n'+parts if parts else ''}")
         return
 
 # 'type': sql/dd/types/column.h::enum_column_type

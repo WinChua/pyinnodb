@@ -5,6 +5,7 @@ from .define import *
 from .tool import *
 from . import index_type
 from . import column_hidden_type
+from . import partition
 
 class XDESState(Enum):
     """
