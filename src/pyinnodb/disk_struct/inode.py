@@ -47,6 +47,12 @@ class MInodeEntry(CC):
             full_extents[xdes_idx] = page_usage
         return full_extents
 
+    def first_page(self):
+        ps = [pn for pn in self.fragment_array if pn != -1]
+        if len(ps) == 0:
+            return None
+        return ps[0]
+
     def page_used(self, f):
         page_in_frag = [page_no for page_no in self.fragment_array if page_no != -1]
         not_full_extents = self._get_list_base_usage_page(f, self.list_base_not_full)

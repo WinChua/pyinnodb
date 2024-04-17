@@ -1,9 +1,11 @@
 import click
 
-from pyinnodb.disk_struct.inode import MInodePage
+from pyinnodb.disk_struct.inode import MInodePage, MInodeEntry
 from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb import const
+
+from typing import Callable
 
 @click.pass_context
 def list_page(ctx):
@@ -25,12 +27,20 @@ def static_page_usage(ctx):
     print(f"page has been init: {fsp_page.fsp_header.highest_page_number_init}")
     f.seek(2 * const.PAGE_SIZE)
     inode_page = MInodePage.parse_stream(f)
+    def iter_func(inode: MInodeEntry):
+        return inode.fseg_id, inode.page_used(f), inode.first_page()
     page_usage = inode_page.iter_inode(
-        func=lambda inode: (inode.fseg_id, inode.page_used(f))
+        func=iter_func,
     )
     print(f"segment count: {len(page_usage)}")
     page_cnt = 0
-    for fsegid, pu in page_usage:
+    for fsegid, pu, fp in page_usage:
+        pt = None
+        if fp is not None:
+            f.seek(fp * const.PAGE_SIZE)
+            fp_fil = MFil.parse_stream(f)
+            pt = fp_fil.page_type
+            print(f"\tseg_id:[{fsegid}], {const.get_page_type_name(pt)}")
         for k, v in pu.items():
             if isinstance(v, list):
                 page_cnt += len(v)
@@ -41,7 +51,7 @@ def static_page_usage(ctx):
                 for xdes_id, vv in v.items():
                     page_cnt += len(vv)
                     print(
-                        f"\tseg_id:[{fsegid}], {k} xdes_idx:{xdes_id} page number in use: {const.show_seq_page_list(vv)}"
+                        f"\tseg_id:[{fsegid}], {k} xdes_idx:{xdes_id} page number in use: {const.show_seq_page_list(vv)}{const.get_page_type_name(pt) if pt else ''}"
                     )
 
     print(f"{page_cnt} page in use.")

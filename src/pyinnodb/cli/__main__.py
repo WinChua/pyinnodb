@@ -2,6 +2,7 @@ import click
 from . import static_usage
 from . import sql
 from . import validate
+from . import iter_record
 from pyinnodb.disk_struct.fsp import MFspPage
 import logging
 
@@ -24,6 +25,7 @@ main.command()(static_usage.static_page_usage)
 main.command()(static_usage.list_page)
 main.command()(sql.tosql)
 main.command()(validate.validate)
+main.command()(iter_record.iter_record)
 
 
 if __name__ == "__main__":
