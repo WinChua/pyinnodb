@@ -1,13 +1,16 @@
 import io
 import typing
 import struct
-from dataclasses import dataclass
+import decimal
 import dataclasses
+
 from functools import cache
+from dataclasses import dataclass
 from collections import namedtuple
+
 from .. import const
 from ..const.dd_column_type import DDColumnType, DDColConf
-import decimal
+from ..disk_struct.varsize import VarSize
 
 NewDecimalSize = namedtuple("NewDecimalSize", "intg frac intg0 intg0x frac0 frac0x total")
 
@@ -130,7 +133,7 @@ class Column:
         total = intg0*4 + intg0x + frac0*4 + frac0x
         return NewDecimalSize(intg, frac, intg0, intg0x, frac0, frac0x, total)
 
-    def _read_new_decimal(self, stream):
+    def _read_new_decimal(self, stream): # from mysys/decimal.cc:bin2decimal && decimal2string
         byte_data = stream.read(self.new_decimal_size.total)
         mask = 0 if byte_data[0] & 0x80 else -1
         negative = mask != 0
@@ -159,7 +162,7 @@ class Column:
         return decimal.Decimal(integer)
 
 
-    def _read_decimal(self, stream):
+    def _read_decimal(self, stream): # deprecate for old decimal
         integer_part = self.numeric_precision - self.numeric_scale
         fractional_part = self.numeric_scale
         integer_part_size = int(integer_part / 9) # + decimal_leftover_part[integer_part % 9]
@@ -197,9 +200,15 @@ class Column:
             return f"{integer}"
 
 
-    def read_data(self, stream):
+    def _read_varchar(self, stream, size):
+        return stream.read(size).decode()
+
+    def read_data(self, stream, size=None):
         dtype = DDColumnType(self.type)
-        dsize = self.size()
+        if size is not None:
+            dsize = size
+        else:
+            dsize = self.size()
         if dtype.is_int_number():
             return self._read_int(stream, dsize)
         elif dtype == DDColumnType.FLOAT:
@@ -214,6 +223,8 @@ class Column:
         ## https://dev.mysql.com/doc/refman/8.0/en/precision-math-decimal-characteristics.html
         elif dtype == DDColumnType.DECIMAL or dtype == DDColumnType.NEWDECIMAL:
             return self._read_new_decimal(stream)
+        elif dtype == DDColumnType.VARCHAR:
+            return self._read_varchar(stream, dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)
         # if dtype.is_var():
@@ -388,6 +399,22 @@ class Table:
     partitions: typing.List[Partition] = dataclasses.field(default_factory=list)
     collation_id: int = 0
     # tablespace_ref: ?
+
+    @property
+    @cache
+    def null_col_count(self):
+        return sum(1 if c.is_nullable else 0 for c in self.columns)
+
+    @property
+    @cache
+    def var_col(self):
+        return [c for c in self.columns if DDColumnType.is_big(c.type) or DDColumnType.is_var(c.type)]
+
+    @property
+    @cache
+    def nullcol_bitmask_size(self):
+        null_col = [c for c in self.columns if c.is_nullable]
+        return int((len(null_col)+ 7) / 8), null_col
 
     def get_column(self, cond: typing.Callable[[Column], bool]) -> typing.List[Column]:
         return [c for c in self.columns if cond(c)]
