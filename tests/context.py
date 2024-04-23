@@ -110,22 +110,26 @@ class User(Base):
 def containerOp():
     logger.debug("setup mysql database container ....")
 
-    mysql = MySqlContainer("mysql:8.0.35").__enter__()
-    # with MySqlContainer("mysql:8.0.35") as mysql:
-    engine = sqlalchemy.create_engine(mysql.get_connection_url())
-    logger.debug("mysql is %s", mysql.get_connection_url())
-    Base.metadata.create_all(engine)
-    with engine.connect() as connection:
-        result = connection.execute(text("show variables like '%datadir%'"))
-        result = result.fetchall()
-        result = result[0]
-        logger.debug("result is %s", result)
-        yield ContainerOp(mysql, engine,connection, str(result[1]))
+    try:
+        mysql = MySqlContainer("mysql:8.0.35").__enter__()
+        # with MySqlContainer("mysql:8.0.35") as mysql:
+        engine = sqlalchemy.create_engine(mysql.get_connection_url())
+        logger.debug("mysql is %s", mysql.get_connection_url())
+        Base.metadata.create_all(engine)
+        with engine.connect() as connection:
+            result = connection.execute(text("show variables like '%datadir%'"))
+            result = result.fetchall()
+            result = result[0]
+            logger.debug("result is %s", result)
+            yield ContainerOp(mysql, engine,connection, str(result[1]))
 
-    if not os.getenv("NO_STOP", None) == "1":
+        if not os.getenv("NO_STOP", None) == "1":
+            mysql.stop()
+
+        logger.debug("end test mysql database container ....")
+    except Exception as e:
         mysql.stop()
-
-    logger.debug("end test mysql database container ....")
+        raise e
 
 
 class ContainerOp(object):
