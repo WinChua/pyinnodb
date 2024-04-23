@@ -1,10 +1,10 @@
-import click
-from pyinnodb import const
+from . import *
 from pyinnodb.disk_struct.index import MIndexPage, MSDIPage
 from pyinnodb.disk_struct.record import MRecordHeader
 from pyinnodb.sdi.table import Column, Table
 from pyinnodb.const.dd_column_type import DDColumnType
 
+@main.command()
 @click.pass_context
 @click.option("--pageno", type=click.INT, default=4)
 def iter_record(ctx, pageno):

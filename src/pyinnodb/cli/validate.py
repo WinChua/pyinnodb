@@ -1,11 +1,9 @@
-import click
-from pyinnodb import const
-
+from . import *
 from pyinnodb.const import page_checksum_crc32c
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.fsp import MFspHeader
-from io import BytesIO
 
+@main.command()
 @click.pass_context
 def validate(ctx):
     f = ctx.obj["fn"]

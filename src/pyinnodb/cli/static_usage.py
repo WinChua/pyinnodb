@@ -1,4 +1,4 @@
-import click
+from . import *
 
 from pyinnodb.disk_struct.inode import MInodePage, MInodeEntry
 from pyinnodb.disk_struct.fsp import MFspPage
@@ -7,6 +7,7 @@ from pyinnodb import const
 
 from typing import Callable
 
+@main.command()
 @click.pass_context
 def list_page(ctx):
     f = ctx.obj["fn"]
@@ -18,6 +19,7 @@ def list_page(ctx):
         print(f"{pn} {page_name}")
 
 
+@main.command()
 @click.pass_context
 def static_page_usage(ctx):
     f = ctx.obj["fn"]
