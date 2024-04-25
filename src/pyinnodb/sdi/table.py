@@ -12,7 +12,7 @@ from .. import const
 from ..const.dd_column_type import DDColumnType, DDColConf
 from ..disk_struct.varsize import VarSize, OffPagePointer
 
-from ..disk_struct.data import MTime2
+from ..disk_struct.data import MTime2, MDatetime
 
 class Lob:
     def __init__(self, data, off_page):
@@ -110,8 +110,10 @@ class Column:
     def size(self):
         if self.name in column_spec_size:
             return column_spec_size[self.name]
-        elif DDColumnType.TIME2 == DDColumnType(self.type):
+        elif DDColumnType(self.type) in [DDColumnType.TIME2]:
             return 3 + int(self.datetime_precision/2)
+        elif DDColumnType(self.type) == DDColumnType.DATETIME2:
+            return 5 + int(self.datetime_precision/2)
 
         else:
             dtype = DDColumnType(self.type)
@@ -256,6 +258,12 @@ class Column:
             time_data = MTime2.parse_stream(stream)
             time_data.parse_fsp(stream, dsize - 3) # 3 = MTime2.sizeof()
             return time_data.to_timedelta()
+        elif dtype == DDColumnType.DATETIME2:
+            datetime_data = MDatetime.parse_stream(stream)
+            print("datetime dsize is", dsize)
+            datetime_data.parse_fsp(stream, dsize - 5) # 5 is MDatetime.sizeof()
+            return datetime_data.to_datetime()
+            pass
             #return stream.read(dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)
