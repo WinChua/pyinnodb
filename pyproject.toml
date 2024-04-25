@@ -43,3 +43,5 @@ gencols = { chain = ["gencols:cols", "gencols:fmt"] }
 "gencols:cols" = "python devtools/gen-collations.py"
 "gencols:fmt" = "rye fmt src/pyinnodb/const/collations.py"
 cli = { call = "pyinnodb.cli" }
+
+

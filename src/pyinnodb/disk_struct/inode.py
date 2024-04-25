@@ -4,6 +4,8 @@ from .fil import MFil, MFilTrailer
 from .xdes import MXdesEntry
 from ..mconstruct import *
 
+from .. import const
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,6 +19,17 @@ class MInodeEntry(CC):
     list_base_full: MListBaseNode = cfield(MListBaseNode)
     magic_number: int = cfield(cs.Int32ub)
     fragment_array: t.List[int] = cfield(carray(32, cs.Int32sb))
+
+    def iter_pages(self, f, parser):
+        pages = []
+        for page_number in self.fragment_array:
+            if page_number == -1:
+                return pages
+            f.seek(page_number * const.PAGE_SIZE)
+            pages.append(parser.parse_stream(f))
+
+        # TODO: iter list_base
+        return pages
 
     def is_empty(self):
         return self.fseg_id == 0 or self.magic_number != 97937874
@@ -33,6 +46,12 @@ class MInodeEntry(CC):
             next_pointer = extent_desc.xdes_list.next
             full_extents[xdes_idx] = page_usage
         return full_extents
+
+    def first_page(self):
+        ps = [pn for pn in self.fragment_array if pn != -1]
+        if len(ps) == 0:
+            return None
+        return ps[0]
 
     def page_used(self, f):
         page_in_frag = [page_no for page_no in self.fragment_array if page_no != -1]
@@ -63,4 +82,6 @@ class MInodePage(CC):  # fseg_create
                 continue
             if func is not None:
                 iter_value.append(func(inode))
+            else:
+                iter_value.append(inode)
         return iter_value

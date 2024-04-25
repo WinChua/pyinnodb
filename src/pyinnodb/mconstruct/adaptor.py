@@ -162,7 +162,6 @@ class CC(cs.Construct, metaclass=CMeta):
 def cstring(size):
     return cs.PaddedString(size, "utf8")
 
-
 def carray(count, subcon):
     if isinstance(subcon, CMeta):
         subcon = subcon._get_subcon()
