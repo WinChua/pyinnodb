@@ -116,6 +116,8 @@ class Column:
             return 5 + int(self.datetime_precision/2+0.5)
         elif DDColumnType(self.type) == DDColumnType.TIMESTAMP2:
             return 4 + int(self.datetime_precision/2+0.5)
+        elif DDColumnType(self.type) == DDColumnType.BIT:
+            return int((self.numeric_precision + 7)/8)
 
         else:
             dtype = DDColumnType(self.type)
@@ -273,6 +275,8 @@ class Column:
             return ts_data.to_time()
         elif dtype == DDColumnType.YEAR:
             return int.from_bytes(stream.read(dsize)) + 1900
+        elif dtype == DDColumnType.BIT:
+            return self._read_int(stream, dsize, False)
             #return stream.read(dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)
