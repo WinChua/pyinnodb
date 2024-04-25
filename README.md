@@ -11,7 +11,7 @@ Jeremycole also write a parser in ruby[<sup>[2]</sup>](#r2), which is not avalia
 
 # Install
 
-This project use rye[<sup>[4]</sup>], a comprehensive project and package management tool written in Rust by [Armin](https://github.com/mitsuhiko), to manage
+This project use rye[<sup>[4]</sup>](#r4), a comprehensive project and package management tool written in Rust by [Armin Ronacher](https://github.com/mitsuhiko), to manage
 the dependencies, so you need to setup rye first by:
 
 ```bash
