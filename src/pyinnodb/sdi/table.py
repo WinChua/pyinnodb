@@ -14,6 +14,7 @@ from ..const.dd_column_type import DDColumnType, DDColConf
 from ..disk_struct.varsize import VarSize, OffPagePointer
 
 from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp
+from ..disk_struct.json import MJson
 
 
 class Lob:
@@ -328,7 +329,10 @@ class Column:
                     r.append(b64decode(v))
             return r
         elif dtype == DDColumnType.JSON:
-            return stream.read(dsize)
+            data = stream.read(dsize)
+            print(data)
+            v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data)))
+            return v.get_json()
             # return stream.read(dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)
@@ -547,6 +551,8 @@ class Table:
 
                 return primary_col
 
+        return self.get_column(lambda col: col.name == "DB_ROW_ID") # for table with no primary
+
     def get_default_DB_col(self) -> typing.List[Column]:
         return [c for c in self.columns if c.name in ["DB_TRX_ID", "DB_ROLL_PTR"]]
 
@@ -703,7 +709,7 @@ table_opts = [
     "gipk",
 ]
 
-column_spec_size = {"DB_TRX_ID": 6, "DB_ROLL_PTR": 7}
+column_spec_size = {"DB_ROW_ID": 6, "DB_TRX_ID": 6, "DB_ROLL_PTR": 7}
 
 if __name__ == "__main__":
     import json
