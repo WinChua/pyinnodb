@@ -2,6 +2,7 @@ from ..mconstruct import *
 from datetime import timedelta, datetime, date
 import time
 
+
 class MTime2(CC):
     signed: int = cfield(cs.BitsInteger(1))
     hour: int = cfield(cs.BitsInteger(11))
@@ -12,8 +13,14 @@ class MTime2(CC):
         self.fsp = stream.read(fsp)
 
     def to_timedelta(self) -> timedelta:
-        v = timedelta(hours=self.hour, minutes=self.minute, seconds=self.second, microseconds=int.from_bytes(self.fsp))
+        v = timedelta(
+            hours=self.hour,
+            minutes=self.minute,
+            seconds=self.second,
+            microseconds=int.from_bytes(self.fsp),
+        )
         return v if self.signed == 1 else -v
+
 
 class MDatetime(CC):
     signed: int = cfield(cs.BitsInteger(1))
@@ -27,9 +34,17 @@ class MDatetime(CC):
         self.fsp = stream.read(fsp)
 
     def to_datetime(self) -> datetime:
-        v = datetime(year=int(self.year_month/13), month=self.year_month % 13, day=self.day, hour=self.hour,
-                minute = self.minute, second=self.second, microsecond=int.from_bytes(self.fsp))
+        v = datetime(
+            year=int(self.year_month / 13),
+            month=self.year_month % 13,
+            day=self.day,
+            hour=self.hour,
+            minute=self.minute,
+            second=self.second,
+            microsecond=int.from_bytes(self.fsp),
+        )
         return v if self.signed == 1 else -v
+
 
 class MDate(CC):
     signed: int = cfield(cs.BitsInteger(1))
@@ -41,6 +56,7 @@ class MDate(CC):
         v = date(self.year, self.month, self.day)
         return v if self.signed == 1 else -v
 
+
 class MTimestamp(CC):
     timestamp: int = cfield(cs.Int32ub)
 
@@ -48,6 +64,6 @@ class MTimestamp(CC):
         self.fsp = stream.read(fsp)
 
     def to_time(self) -> datetime:
-        return datetime.utcfromtimestamp(self.timestamp+int.from_bytes(self.fsp)/1000000)
-    
-    
+        return datetime.utcfromtimestamp(
+            self.timestamp + int.from_bytes(self.fsp) / 1000000
+        )

@@ -7,6 +7,7 @@ from pyinnodb import const
 
 from typing import Callable
 
+
 @main.command()
 @click.pass_context
 def list_page(ctx):
@@ -29,8 +30,10 @@ def static_page_usage(ctx):
     print(f"page has been init: {fsp_page.fsp_header.highest_page_number_init}")
     f.seek(2 * const.PAGE_SIZE)
     inode_page = MInodePage.parse_stream(f)
+
     def iter_func(inode: MInodeEntry):
         return inode.fseg_id, inode.page_used(f), inode.first_page()
+
     page_usage = inode_page.iter_inode(
         func=iter_func,
     )

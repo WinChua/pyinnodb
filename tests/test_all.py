@@ -2,7 +2,13 @@ from context import *
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.fsp import MFspHeader
 from pyinnodb.disk_struct.ibuf import MIBufEntry2, MIBufPage
-from pyinnodb.disk_struct.index import MIndexHeader, MIndexPage, MFsegHeader, MSystemRecord, MIndexSystemRecord
+from pyinnodb.disk_struct.index import (
+    MIndexHeader,
+    MIndexPage,
+    MFsegHeader,
+    MSystemRecord,
+    MIndexSystemRecord,
+)
 from pyinnodb.disk_struct.inode import MInodeEntry
 from pyinnodb.disk_struct.list import MListBaseNode, MListNode, MPointer
 from pyinnodb.disk_struct.xdes import MXdesEntry

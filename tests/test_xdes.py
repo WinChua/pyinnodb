@@ -15,9 +15,9 @@ def test_mxdes():
             next=MPointer(
                 page_number=3,
                 page_offset=4,
-            )
+            ),
         ),
         state=5,
-        page_state=[0, 1, 0, 1] * 16
+        page_state=[0, 1, 0, 1] * 16,
     )
     assert len(xe.build()) == 40

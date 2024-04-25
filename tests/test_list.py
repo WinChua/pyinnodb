@@ -12,6 +12,6 @@ def test_mlist():
         next=MPointer(
             page_number=3,
             page_offset=4,
-        )
+        ),
     )
     assert len(t.build()) == 12

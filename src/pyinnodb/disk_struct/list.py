@@ -31,10 +31,12 @@ class MListBaseNode(CC):
     first: MPointer = cfield(MPointer)
     last: MPointer = cfield(MPointer)
 
-    def idx(self, idx, stream) -> MPointer :
+    def idx(self, idx, stream) -> MPointer:
         cur = stream.tell()
-        if self.length == 0: return None
-        if idx >= self.length: return None
+        if self.length == 0:
+            return None
+        if idx >= self.length:
+            return None
         pointer = self.first
         i = 0
         while i < idx:
