@@ -4,6 +4,8 @@ from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb import const
 from io import BytesIO
 
+import dataclasses
+
 
 @click.group()
 @click.argument("fn", type=click.File("rb"))

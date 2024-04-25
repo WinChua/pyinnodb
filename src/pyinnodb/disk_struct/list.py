@@ -2,6 +2,8 @@ from ..mconstruct import *
 
 from .. import const
 
+from functools import cache
+
 
 class MPointer(CC):
     page_number: int = cfield(cs.Int32ub)
@@ -28,6 +30,19 @@ class MListBaseNode(CC):
     length: int = cfield(cs.Int32ub)
     first: MPointer = cfield(MPointer)
     last: MPointer = cfield(MPointer)
+
+    def idx(self, idx, stream) -> MPointer :
+        cur = stream.tell()
+        if self.length == 0: return None
+        if idx >= self.length: return None
+        pointer = self.first
+        i = 0
+        while i < idx:
+            i += 1
+            stream.seek(pointer.seek_loc())
+            pointer = MListNode.parse_stream(stream).next
+        stream.seek(cur)
+        return pointer
 
 
 class MListNode(CC):

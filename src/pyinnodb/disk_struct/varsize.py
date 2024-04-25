@@ -1,5 +1,6 @@
 from ..mconstruct import *
 from .. import const
+from .first_page import MFirstPage
 
 class OffPagePointer(CC):
     space_id : int = cfield(cs.Int32ub)
@@ -14,6 +15,10 @@ class OffPagePointer(CC):
 
         stream.seek(cur)
         return data
+
+    def get_first_page(self, stream) -> MFirstPage:
+        stream.seek(self.page_num * const.PAGE_SIZE)
+        return MFirstPage.parse_stream(stream)
 
 class VarSize(CC):
     size : int = cfield(cs.Int8ub)
