@@ -271,6 +271,8 @@ class Column:
             ts_data = MTimestamp.parse_stream(stream)
             ts_data.parse_fsp(stream, dsize - 4)
             return ts_data.to_time()
+        elif dtype == DDColumnType.YEAR:
+            return int.from_bytes(stream.read(dsize)) + 1900
             #return stream.read(dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)
