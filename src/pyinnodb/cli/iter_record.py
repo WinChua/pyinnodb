@@ -62,6 +62,7 @@ def with_dd_object(dd_object: Table):
 
     def value_parser(rh: MRecordHeader, f):
         cur = f.tell()
+        logger.debug("record header is %s, offset in page %d", rh, cur % const.PAGE_SIZE)
         #print(rh, cur % const.PAGE_SIZE)
 
         if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
