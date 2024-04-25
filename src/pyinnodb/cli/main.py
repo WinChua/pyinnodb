@@ -6,6 +6,7 @@ from io import BytesIO
 
 import dataclasses
 
+logger = logging.getLogger(__name__)
 
 @click.group()
 @click.argument("fn", type=click.File("rb"))

@@ -100,14 +100,14 @@ class MIndexPage(CC):
             target_loc = cur_post + self.page_directory[target_idx]
             stream.seek(target_loc)
             target_key = stream.read(key_len)
-            logger.info("lidx: %d, hidx: %d, tidx: %d", low_idx, heigh_idx, target_idx)
-            logger.info(
-                "cnt %d, key is %s, target_key is %s, result is %d",
-                cnt,
-                const.parse_mysql_int(key),
-                const.parse_mysql_int(target_key),
-                key < target_key,
-            )
+            # logger.info("lidx: %d, hidx: %d, tidx: %d", low_idx, heigh_idx, target_idx)
+            # logger.info(
+            #     "cnt %d, key is %s, target_key is %s, result is %d",
+            #     cnt,
+            #     const.parse_mysql_int(key),
+            #     const.parse_mysql_int(target_key),
+            #     key < target_key,
+            # )
             if key == target_key:
                 return target_loc, True
             if key < target_key:
@@ -149,14 +149,14 @@ class MSDIPage(CC):
             + self.system_records.infimum.next_record_offset,
             1,
         )
-        logger.debug(
-            "stream infimum offset: %d, relative: %d",
-            stream.seek(0, 1),
-            stream.seek(0, 1) % (const.PAGE_SIZE),
-        )
+        # logger.debug(
+        #     "stream infimum offset: %d, relative: %d",
+        #     stream.seek(0, 1),
+        #     stream.seek(0, 1) % (const.PAGE_SIZE),
+        # )
         ddl_field = MDDL.parse_stream(stream)
         zipdata = stream.read(ddl_field.zip_len)
         json_data = json.loads(zlib.decompress(zipdata))
-        for col in json_data["dd_object"]["columns"]:
-            logger.debug(f"{col['name']}:{col['type']},{col['column_type_utf8']},")
+        # for col in json_data["dd_object"]["columns"]:
+        #     logger.debug(f"{col['name']}:{col['type']},{col['column_type_utf8']},")
         return json_data
