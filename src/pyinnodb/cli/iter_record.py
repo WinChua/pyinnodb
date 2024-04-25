@@ -13,7 +13,6 @@ from pyinnodb.disk_struct.first_page import MFirstPage, MIndexEntryNode
 @click.pass_context
 @click.option("--pageno", type=click.INT, default=5)
 def list_first_page(ctx, pageno):
-    from pprint import pprint
 
     f = ctx.obj["fn"]
     fsp_page = ctx.obj["fsp_page"]
@@ -63,12 +62,12 @@ def with_dd_object(dd_object: Table):
 
     def value_parser(rh: MRecordHeader, f):
         cur = f.tell()
-        print(rh, cur % const.PAGE_SIZE)
+        #print(rh, cur % const.PAGE_SIZE)
 
         if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
             next_page_no = const.parse_mysql_int(f.read(4))
             # next_page_no = int.from_bytes(f.read(4), "big")
-            print("it's a node pointer, next page is", next_page_no)
+            #print("it's a node pointer, next page is", next_page_no)
             return
 
         ## read null
@@ -88,23 +87,28 @@ def with_dd_object(dd_object: Table):
                 continue
             var_size[c.ordinal_position] = const.parse_var_size(f)
 
+        kv = {}
         f.seek(cur)
         for col in primary_col:
-            print(col.name, col.size, col.read_data(f))
+            kv[col.name] = col.read_data(f)
 
         for col in db_hidden_col:
             data = col.read_data(f)
             continue
-            print(col.name, col.is_unsigned, data)
+            #print(col.name, col.is_unsigned, data)
 
         for col in secondary_col:
             if col.ordinal_position in null_col_data:
-                print(col.name, col.type, "NULL")
+                kv[col.name] = None
+                #print(col.name, col.type, "NULL")
                 continue
-            print(
-                col.name,
-                col.type,
-                col.read_data(f, var_size.get(col.ordinal_position, None)),
-            )
+            kv[col.name] = col.read_data(f, var_size.get(col.ordinal_position, None))
+            # print(
+            #     col.name,
+            #     col.type,
+            #     col.read_data(f, var_size.get(col.ordinal_position, None)),
+            # )
+
+        print(dd_object.DataClass(**kv))
 
     return value_parser
