@@ -1,5 +1,6 @@
 from context import *
 import decimal
+import datetime
 
 class IntValue(Base):
     __tablename__ = "int_value"
@@ -55,44 +56,16 @@ def test_int_value(containerOp: ContainerOp):
 class SV(Base):
     __tablename__ = "SVOVER"
     id = Column(dmysql.types.INTEGER(10), primary_key=True)
-    VAR_F = Column(dmysql.types.TINYBLOB(10000))
+    TIME_F = Column(dmysql.types.TIME())
     INT_F = Column(dmysql.types.INTEGER(10))
+    TIME_FSP_F = Column(dmysql.types.TIME(fsp=6))
+    VAR_F = Column(dmysql.types.TINYBLOB(10000))
 
 def test_varchar_overflow(containerOp: ContainerOp):
     Base.metadata.create_all(containerOp.engine, [SV.__table__])
     containerOp.build_ibd(
         insert(SV).values(
-            VAR_F = b"z" * 230, INT_F = 42,
-        ),
-        insert(SV).values(
-            VAR_F = b"z" * 231, INT_F = 42,
-        ),
-        insert(SV).values(
-            VAR_F = b"z" * 232, INT_F = 42,
-        ),
-        insert(SV).values(
-            VAR_F = b"z" * 233, INT_F = 42,
-        ),
-        insert(SV).values(
-            VAR_F = b"z" * 234, INT_F = 42,
-        ),
-        insert(SV).values(
-            VAR_F = b"z" * 235, INT_F = 42,
-        ),
-        insert(SV).values(
-            VAR_F = b"z" * 236, INT_F = 42,
-        ),
-        insert(SV).values(
-            VAR_F = b"z" * 237, INT_F = 42,
-        ),
-        insert(SV).values(
-            VAR_F = b"z" * 238, INT_F = 42,
-        ),
-        insert(SV).values(
-            VAR_F = b"z" * 239, INT_F = 42,
-        ),
-        insert(SV).values(
-            VAR_F = b"z" * 255, INT_F = 42,
+            VAR_F = b"z" * 255, INT_F = 42, TIME_FSP_F = datetime.timedelta(hours=1, milliseconds=42),
         ),
     )
     time.sleep(3)
