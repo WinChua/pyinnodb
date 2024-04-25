@@ -33,7 +33,7 @@ class MFspPage(CC):
     has_sdi_page: int = cfield(cs.Int32ub)
     sdi_page_no: int = cfield(cs.Int32ub)
 
-    def iter_page(self, f, iter_func = None):
+    def iter_page(self, f, iter_func=None):
         for pn in range(self.fsp_header.highest_page_number):
             f.seek(pn * const.PAGE_SIZE)
             if iter_func is not None:

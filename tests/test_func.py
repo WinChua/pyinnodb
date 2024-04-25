@@ -27,12 +27,16 @@ def test_msdi_page():
         sdi_page = MSDIPage.parse_stream(f)
         logger.info("sdi_page ddl is %s", sdi_page.ddl)
         logger.info("sdi_page.ddl type is %s", type(sdi_page.ddl))
-        logger.info("schema_ref: %s", sdi_page.ddl['dd_object']['schema_ref'])
-        logger.info("key is %s", sdi_page.ddl['dd_object'].keys())
-        logger.info("table name is %s", sdi_page.ddl['dd_object']['name'])
-        for col in sdi_page.ddl['dd_object']['columns']:
-            logger.info("column name is %s, collation id is %d, type is %s",
-                        col['name'], col['collation_id'], col['type'])
+        logger.info("schema_ref: %s", sdi_page.ddl["dd_object"]["schema_ref"])
+        logger.info("key is %s", sdi_page.ddl["dd_object"].keys())
+        logger.info("table name is %s", sdi_page.ddl["dd_object"]["name"])
+        for col in sdi_page.ddl["dd_object"]["columns"]:
+            logger.info(
+                "column name is %s, collation id is %d, type is %s",
+                col["name"],
+                col["collation_id"],
+                col["type"],
+            )
             logger.info("element is %s", col["elements"])
             # DB_ROLL_PTR, DB_TRX_ID, DB_ROW_ID
             logger.info("ct is %s", col["column_type_utf8"])
@@ -59,8 +63,7 @@ def test_mindex_page():
         logger.info(index_page.index_header.dir_slot_number)
         logger.info(index_page.index_header.record_number)
         logger.info(index_page.index_header.page_dir_insert_number)
-        logger.info("index page level is %d",
-                    index_page.index_header.page_level)
+        logger.info("index page level is %d", index_page.index_header.page_level)
 
 
 def test_page_directory():
@@ -69,11 +72,15 @@ def test_page_directory():
         page4 = f.read(const.PAGE_SIZE)
         index_page = MIndexPage.parse(page4)
         logger.info("the page_directory is %s", index_page.page_directory)
-        logger.info("sizeof is %d", index_page.fil.sizeof() + index_page.index_header.sizeof() +
-                    index_page.fseg_header.sizeof())
+        logger.info(
+            "sizeof is %d",
+            index_page.fil.sizeof()
+            + index_page.index_header.sizeof()
+            + index_page.fseg_header.sizeof(),
+        )
         logger.info("infimum is %s", index_page.system_records.infimum)
         for pd in index_page.page_directory:
-            f.seek(4*const.PAGE_SIZE + pd - 5)
+            f.seek(4 * const.PAGE_SIZE + pd - 5)
             rh = MRecordHeader.parse_stream(f)
             logger.info("the pd is %d, rh is %s, key is %s", pd, rh, f.read(4))
 
@@ -83,22 +90,24 @@ def test_iter_mindex_page():
         f.seek(4 * const.PAGE_SIZE)
         page4 = f.read(const.PAGE_SIZE)
         index_page = MIndexPage.parse(page4)
-        logger.info("the record number this page contains: %d",
-                    index_page.index_header.record_number)
+        logger.info(
+            "the record number this page contains: %d",
+            index_page.index_header.record_number,
+        )
         logger.info(index_page.index_header)
         next_offset = index_page.system_records.infimum.next_record_offset
-        f.seek(4 * const.PAGE_SIZE +
-               index_page.fil.sizeof() +
-               index_page.index_header.sizeof() +
-               index_page.fseg_header.sizeof() +
-               index_page.system_records.infimum.sizeof() -
-               8  # the size of the last field of infimum => marker
-               )
+        f.seek(
+            4 * const.PAGE_SIZE
+            + index_page.fil.sizeof()
+            + index_page.index_header.sizeof()
+            + index_page.fseg_header.sizeof()
+            + index_page.system_records.infimum.sizeof()
+            - 8  # the size of the last field of infimum => marker
+        )
         while next_offset != 0:
-            f.seek(next_offset-MRecordHeader.sizeof(), 1)
+            f.seek(next_offset - MRecordHeader.sizeof(), 1)
             rh = MRecordHeader.parse_stream(f)
-            logger.info("next_offset is %d, rh is %s",
-                        next_offset, rh)
+            logger.info("next_offset is %d, rh is %s", next_offset, rh)
             next_offset = rh.next_record_offset
 
 

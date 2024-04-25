@@ -41,59 +41,71 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 Base = declarative_base()
-all_type = ['BIGINT',
- 'BINARY',
- 'BLOB',
- 'BOOLEAN',
- # 'CLOB',
- 'DATE',
- 'DATETIME',
- 'DECIMAL',
- 'DOUBLE',
- 'DOUBLE_PRECISION',
- 'FLOAT',
- 'INT',
- 'INTEGER',
- 'JSON',
- # 'NULLTYPE',
- 'NUMERIC',
- 'REAL',
- 'SMALLINT',
- # 'STRINGTYPE',
- 'TEXT',
- 'TIME',
- 'TIMESTAMP',
- "ENUM",
- ## 'UUID',
+all_type = [
+    "BIGINT",
+    "BINARY",
+    "BLOB",
+    "BOOLEAN",
+    # 'CLOB',
+    "DATE",
+    "DATETIME",
+    "DECIMAL",
+    "DOUBLE",
+    "DOUBLE_PRECISION",
+    "FLOAT",
+    "INT",
+    "INTEGER",
+    "JSON",
+    # 'NULLTYPE',
+    "NUMERIC",
+    "REAL",
+    "SMALLINT",
+    # 'STRINGTYPE',
+    "TEXT",
+    "TIME",
+    "TIMESTAMP",
+    "ENUM",
+    ## 'UUID',
 ]
-all_type_with_length = [
- 'VARBINARY',
- 'CHAR',
- 'NCHAR',
- 'NVARCHAR',
- 'VARCHAR'
-]
+all_type_with_length = ["VARBINARY", "CHAR", "NCHAR", "NVARCHAR", "VARCHAR"]
 
 all_clob_type = [
- 'TINYTEXT', # L + 1 bytes, where L < 2**8  (255)
- 'TEXT', # L + 2 bytes, where L < 2**16 (64 K)
- 'MEDIUMTEXT', # L + 3 bytes, where L < 2**24 (16 MB)
- 'LONGTEXT', # L + 4 bytes, where L < 2**32 (4 GB)
+    "TINYTEXT",  # L + 1 bytes, where L < 2**8  (255)
+    "TEXT",  # L + 2 bytes, where L < 2**16 (64 K)
+    "MEDIUMTEXT",  # L + 3 bytes, where L < 2**24 (16 MB)
+    "LONGTEXT",  # L + 4 bytes, where L < 2**32 (4 GB)
 ]
 
 
-all_type = [t for t in dir(dmysql.types) if t.isupper() and t not in ["ARRAY", "NULLTYPE", "STRINGTYPE"] and "CHAR" not in t]
-all_type_column = ["class AllType(Base):", "    __tablename__ = 'all_type'", "    id = Column(dmysql.INTEGER, primary_key=True)"]
-all_type_column.extend([f"    {t} = Column(dmysql.types.{t}, comment='COMMENT FOR {t}')" for t in all_type])
+all_type = [
+    t
+    for t in dir(dmysql.types)
+    if t.isupper() and t not in ["ARRAY", "NULLTYPE", "STRINGTYPE"] and "CHAR" not in t
+]
+all_type_column = [
+    "class AllType(Base):",
+    "    __tablename__ = 'all_type'",
+    "    id = Column(dmysql.INTEGER, primary_key=True)",
+]
+all_type_column.extend(
+    [f"    {t} = Column(dmysql.types.{t}, comment='COMMENT FOR {t}')" for t in all_type]
+)
 all_type_column.append("    ENUM = Column(dmysql.ENUM('hello', 'world', 'a'))")
-all_type_column.append("    int_def_col = Column(dmysql.types.BIGINT, server_default=text('42'))")
-all_type_column.append("    str_def_col = Column(dmysql.types.VARCHAR(255), server_default='world')")
+all_type_column.append(
+    "    int_def_col = Column(dmysql.types.BIGINT, server_default=text('42'))"
+)
+all_type_column.append(
+    "    str_def_col = Column(dmysql.types.VARCHAR(255), server_default='world')"
+)
 # all_type_column.extend([f"    {t} = Column(sqlalchemy.types.{t}(10))" for t in all_type_with_length])
 logger.info("class define is %s", "\n".join(all_type_column))
 exec("\n".join(all_type_column))
 AllType = locals().get("AllType")
 
-logger.info("create all_type table is %s", CreateTable(AllType.__table__).compile(dialect=dmysql.dialect()))
+logger.info(
+    "create all_type table is %s",
+    CreateTable(AllType.__table__).compile(dialect=dmysql.dialect()),
+)
 
 sqlalchemy.types.LargeBinary
 
@@ -105,6 +117,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
     age = Column(Integer)
+
 
 @pytest.fixture
 def containerOp():
@@ -121,7 +134,7 @@ def containerOp():
             result = result.fetchall()
             result = result[0]
             logger.debug("result is %s", result)
-            yield ContainerOp(mysql, engine,connection, str(result[1]))
+            yield ContainerOp(mysql, engine, connection, str(result[1]))
 
         if not os.getenv("NO_STOP", None) == "1":
             mysql.stop()
@@ -133,7 +146,13 @@ def containerOp():
 
 
 class ContainerOp(object):
-    def __init__(self, mysql: MySqlContainer, engine: sqlalchemy.Engine, connection: sqlalchemy.Connection, datadir: str):
+    def __init__(
+        self,
+        mysql: MySqlContainer,
+        engine: sqlalchemy.Engine,
+        connection: sqlalchemy.Connection,
+        datadir: str,
+    ):
         self.mysql = mysql
         self.engine = engine
         self.connection = connection

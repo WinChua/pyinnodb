@@ -12,7 +12,7 @@ class MRecordHeader(CC):
     """
 
     # info_flags: int = cfield(cs.BitsInteger(4))
-    instant : int = cfield(cs.BitsInteger(1))
+    instant: int = cfield(cs.BitsInteger(1))
     no_use_1: int = cfield(cs.BitsInteger(1))
     deleted: int = cfield(cs.BitsInteger(1))
     min_record: int = cfield(cs.BitsInteger(1))

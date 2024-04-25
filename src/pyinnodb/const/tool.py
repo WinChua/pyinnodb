@@ -1,7 +1,6 @@
 import construct
 
 
-
 def line_to_dict(data, linesep, keysep):
     return {
         k.strip(): v.strip()
@@ -19,5 +18,5 @@ def parse_var_size(stream):
         stream.seek(-1, 1)
         parts = construct.Int8ub.parse_stream(stream)
         stream.seek(-1, 1)
-        return (size-0x80)*256 + parts
+        return (size - 0x80) * 256 + parts
     return size

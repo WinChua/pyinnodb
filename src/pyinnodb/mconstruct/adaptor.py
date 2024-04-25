@@ -114,7 +114,9 @@ class CC(cs.Construct, metaclass=CMeta):
     def _parse(cls: pt, stream, context, path) -> pt:
         obj = cls._get_subcon()._parse(stream, context, path)
         if getattr(obj, "_post_parsed", None) is not None:
-            obj._post_parsed(stream, context, path)
+            v = obj._post_parsed(stream, context, path)
+            if v is not None:
+                obj._post_value = v
         return obj
 
     def _post_parsed(self, stream, context, path):
@@ -161,6 +163,7 @@ class CC(cs.Construct, metaclass=CMeta):
 
 def cstring(size):
     return cs.PaddedString(size, "utf8")
+
 
 def carray(count, subcon):
     if isinstance(subcon, CMeta):
