@@ -1,12 +1,12 @@
 from ..mconstruct import *
+from collections import namedtuple
 
-class MSmallKeyEntry(CC):
-    offset: int = cfield(cs.Int16ul)
-    length: int = cfield(cs.Int16ul)
+KeyEntry = namedtuple("KeyEntry", "offset length")
 
-class MKeyEntry(CC):
-    offset: int = cfield(cs.Int32ul)
-    length: int = cfield(cs.Int16ul)
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class MJson(CC):
     type: int = cfield(cs.Int8ul)
@@ -16,6 +16,7 @@ class MJson(CC):
         
 
     def _post_parsed(self, stream, context, path):
+        cur = stream.tell() # seek loc after type, offset in the key entry or value entry is relative to cur
         if self.type == 0x04:
             data = int.from_bytes(stream.read(1))
             return {1: True, 2: False, 0:None}.get(data, None)
@@ -51,7 +52,7 @@ class MJson(CC):
             for i in range(element_count):
                 offset = parser.parse_stream(stream)
                 length = cs.Int16ul.parse_stream(stream)
-                key_entry.append((offset, length))
+                key_entry.append(KeyEntry(offset=offset, length=length))
 
         value_entry = []
         for i in range(element_count):
@@ -66,35 +67,19 @@ class MJson(CC):
         if self.type in [0x00, 0x01]: # json object
             key = []
             for ke in key_entry:
-                key.append(stream.read(ke[1]).decode())
+                stream.seek(cur + ke.offset)
+                key_str = stream.read(ke.length).decode()
+                key.append(key_str)
                 
         value = []
         for ve in value_entry:
             if ve[0] in [0x05, 0x06, 0x07, 0x08, 0x09, 0x0a]:
                 value.append(ve[1])
             else:
+                stream.seek(cur + ve[1])
                 value.append(MJson(type=ve[0])._post_parsed(stream, None, None))
 
 
         if self.type in [0x00, 0x01]:
             return {k:v for k, v in zip(key, value)}
         return value
-
-
-        self.spec_size = 2 if self.type in [0x00, 0x02] else 4
-
-        if self.spec_size == 2:
-            self.element_count = cs.Int16ul.parse_stream(stream)
-            self.data_size = cs.Int16ul.parse_stream(stream)
-        else:
-            self.element_count = cs.Int32ul.parse_stream(stream)
-            self.data_size = cs.Int32ul.parse_stream(stream)
-
-        if self.type in [0x00, 0x01]: # json object
-            self.key_entry = []
-            for i in range(self.element_count):
-                if self.spec_size == 2:
-                    self.key_entry.append(MSmallKeyEntry.parse_stream(stream))
-                else:
-                    self.key_entry.append(MKeyEntry.parse_stream(stream))
-
