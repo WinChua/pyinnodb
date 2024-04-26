@@ -110,6 +110,6 @@ def with_dd_object(dd_object: Table):
             #     col.read_data(f, var_size.get(col.ordinal_position, None)),
             # )
 
-        print(dd_object.DataClass(**kv))
+        print(dd_object.DataClass(**{k:v for k, v in kv.items() if k not in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]}))
 
     return value_parser
