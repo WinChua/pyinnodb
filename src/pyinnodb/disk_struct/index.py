@@ -75,9 +75,11 @@ class MIndexPage(CC):
         infimum_offset = self.system_records.infimum.get_current_offset()
         f.seek(page_no * const.PAGE_SIZE + infimum_offset)
         next_offset = self.system_records.infimum.next_record_offset
-        while next_offset > 0:
+        while True:
             f.seek(next_offset - MRecordHeader.sizeof(), 1)
             rh = MRecordHeader.parse_stream(f)
+            if const.RecordType(rh.record_type) == const.RecordType.Supremum:
+                break
             if value_parser is not None:
                 cur = f.tell()
                 value_parser(rh, f)

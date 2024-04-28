@@ -8,6 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# sql-common/json-binary.h
 class MJson(CC):
     type: int = cfield(cs.Int8ul)
 

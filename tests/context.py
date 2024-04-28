@@ -171,11 +171,12 @@ class ContainerOp(object):
         tar = tarfile.open(fileobj=fileobj)
         return tar.extractfile(os.path.basename(path))
 
-    def build_ibd(self, *sql):
+    def build_ibd(self, *sql, nosleep=None):
         for s in sql:
             self.connection.execute(s)
             self.connection.commit()
-        time.sleep(3)
+        if nosleep is None:
+            time.sleep(3)
 
     def build_data_path(self, path: str) -> str:
         return self.datadir + path
