@@ -98,6 +98,23 @@ class Column:
     collation_id: int = 0
     is_explicit_collation: bool = False
 
+    @property
+    @cache
+    def is_instant_col(self):
+        return "default_null" in self.private_data or "default" in self.private_data
+
+    def get_instant_default(self):
+        data = self.private_data.get("default", None)
+        if data is None:
+            return None
+        return self.read_data(io.BytesIO(bytes.fromhex(data)))
+
+    @property
+    @cache
+    def private_data(self):
+        data = const.line_to_dict(self.se_private_data, ";", "=")
+        return data
+
     def __post_init__(self):
         ce: typing.List[ColumnElement] = [ColumnElement(**e) for e in self.elements]
         self.elements = ce
@@ -330,8 +347,11 @@ class Column:
         elif dtype == DDColumnType.JSON:
             #data = stream.read(dsize)
             data = self._read_varchar(stream, dsize)
-            v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data.data)))
-            return v.get_json()
+            try:
+                v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data.data)))
+                return v.get_json()
+            except:
+                return data.data
             # return stream.read(dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)
@@ -543,7 +563,14 @@ class Table:
     @cache
     def nullcol_bitmask_size(self):
         null_col = [c for c in self.columns if c.is_nullable]
+        #null_col = [c for c in null_col if "default_null" not in c.private_data and "default" not in c.private_data]
         return int((len(null_col) + 7) / 8), null_col
+
+    @property
+    @cache
+    def instant_col(self):
+        instant_col = [c for c in self.columns if c.is_instant_col]
+        return instant_col
 
     def get_column(self, cond: typing.Callable[[Column], bool]) -> typing.List[Column]:
         return [c for c in self.columns if cond(c)]
