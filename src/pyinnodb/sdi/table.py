@@ -104,7 +104,10 @@ class Column:
         return "default_null" in self.private_data or "default" in self.private_data
 
     def get_instant_default(self):
-        return self.private_data.get("default", None)
+        data = self.private_data.get("default", None)
+        if data is None:
+            return None
+        return self.read_data(io.BytesIO(bytes.fromhex(data)))
 
     @property
     @cache
@@ -344,9 +347,11 @@ class Column:
         elif dtype == DDColumnType.JSON:
             #data = stream.read(dsize)
             data = self._read_varchar(stream, dsize)
-            return data.data
-            v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data.data)))
-            return v.get_json()
+            try:
+                v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data.data)))
+                return v.get_json()
+            except:
+                return data.data
             # return stream.read(dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)
