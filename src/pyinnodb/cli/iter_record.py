@@ -5,7 +5,6 @@ from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.record import MRecordHeader
 from pyinnodb.sdi.table import Column, Table
 from pyinnodb.const.dd_column_type import DDColumnType
-
 from pyinnodb.disk_struct.first_page import MFirstPage, MIndexEntryNode
 
 
@@ -53,6 +52,10 @@ def iter_record(
 
 
 def with_dd_object(dd_object: Table, delete):
+    primary_col = dd_object.get_primary_key_col()
+    db_default_col = dd_object.get_default_DB_col()
+    pre_col_name = [c.name for c in primary_col]
+    pre_col_name.extend(c.name for c in db_default_col)
     def value_parser(rh: MRecordHeader, f):
         cur = f.tell()
         logger.debug("record header is %s, offset in page %d", rh, cur % const.PAGE_SIZE)
@@ -68,12 +71,14 @@ def with_dd_object(dd_object: Table, delete):
         # data scheme version
         data_schema_version = 0
         f.seek(-MRecordHeader.sizeof(), 1)
-        if rh.no_use_1 == 1:
+        if rh.instant == 1:
             f.seek(-1, 1)
             data_schema_version = int.from_bytes(f.read(1))
 
 
         cols_to_parse = dd_object.get_column_schema_version(data_schema_version)
+        cols_to_parse.sort(key=lambda c: c.private_data.get("physical_pos", c.ordinal_position))
+        cols_to_parse.sort(key=lambda c: pre_col_name.index(c.name) if c.name in pre_col_name else len(pre_col_name))
         logger.debug("data_schema_version:%d", data_schema_version)
         logger.debug("col to parse: %s", ",".join(c.name for c in cols_to_parse))
 
@@ -85,7 +90,7 @@ def with_dd_object(dd_object: Table, delete):
             if DDColumnType.is_big(c.type) or DDColumnType.is_var(c.type)
         ]
 
-        f.seek(-nullcol_bitmask_size - rh.no_use_1, 1)
+        f.seek(-nullcol_bitmask_size - rh.instant, 1)
         null_bitmask = f.read(nullcol_bitmask_size)
         null_col_data = {}
         null_mask = int.from_bytes(null_bitmask, signed=False)
@@ -103,7 +108,6 @@ def with_dd_object(dd_object: Table, delete):
                 continue
             var_size[c.ordinal_position] = const.parse_var_size(f)
 
-        cols_to_parse.sort(key=lambda c: c.private_data.get("physical_pos", None))
 
         disk_data_parsed = {}
         f.seek(cur)
@@ -114,7 +118,7 @@ def with_dd_object(dd_object: Table, delete):
                 logger.debug("c.name[%s], c.ordinal_position[%d] is null", col.name, c.ordinal_position)
                 col_value = None
             else:
-                logger.debug("c.name[%s], c.ordinal_position[%d] parse", col.name, col.ordinal_position)
+                logger.debug("c.name[%s], c.ordinal_position[%d] parse at %d", col.name, col.ordinal_position, f.tell()%const.PAGE_SIZE)
                 col_value = col.read_data(f, var_size.get(col.ordinal_position, None))
             disk_data_parsed[col.name] = col_value
 
