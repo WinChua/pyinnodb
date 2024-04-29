@@ -5,7 +5,6 @@ from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.record import MRecordHeader
 from pyinnodb.sdi.table import Column, Table
 from pyinnodb.const.dd_column_type import DDColumnType
-
 from pyinnodb.disk_struct.first_page import MFirstPage, MIndexEntryNode
 
 
@@ -53,6 +52,10 @@ def iter_record(
 
 
 def with_dd_object(dd_object: Table, delete):
+    primary_col = dd_object.get_primary_key_col()
+    db_default_col = dd_object.get_default_DB_col()
+    pre_col_name = [c.name for c in primary_col]
+    pre_col_name.extend(c.name for c in db_default_col)
     def value_parser(rh: MRecordHeader, f):
         cur = f.tell()
         logger.debug("record header is %s, offset in page %d", rh, cur % const.PAGE_SIZE)
@@ -74,6 +77,7 @@ def with_dd_object(dd_object: Table, delete):
 
 
         cols_to_parse = dd_object.get_column_schema_version(data_schema_version)
+        cols_to_parse.sort(key=lambda c: pre_col_name.index(c.name) if c.name in pre_col_name else len(pre_col_name))
         logger.debug("data_schema_version:%d", data_schema_version)
         logger.debug("col to parse: %s", ",".join(c.name for c in cols_to_parse))
 
@@ -103,7 +107,7 @@ def with_dd_object(dd_object: Table, delete):
                 continue
             var_size[c.ordinal_position] = const.parse_var_size(f)
 
-        cols_to_parse.sort(key=lambda c: c.private_data.get("physical_pos", None))
+        cols_to_parse.sort(key=lambda c: c.private_data.get("physical_pos", c.ordinal_position))
 
         disk_data_parsed = {}
         f.seek(cur)
