@@ -25,46 +25,44 @@ def list_first_page(ctx, pageno):
     # print(MIndexEntryNode.parse_stream(f))
 
 
-def ip_context(with_dd_object):
+def ip_context(with_dd_object, garbage):
     def ip(f):
         fil = MFil.parse_stream(f)
         if const.PageType(fil.page_type) != const.PageType.INDEX:
             return
         f.seek(-MFil.sizeof(), 1)
         index_page = MIndexPage.parse_stream(f)
-        index_page.iterate_record_header(f, value_parser=with_dd_object)
+        logger.debug("fil is %s, index_header is %s", fil, index_page.index_header)
+        index_page.iterate_record_header(f, value_parser=with_dd_object, garbage=garbage)
 
     return ip
 
 
 @main.command()
 @click.pass_context
-@click.option("--delete/--no-delete", default=False, help="include delete mark data")
+@click.option("--garbage/--no-garbage", default=False, help="include garbage mark data")
 def iter_record(
-    ctx, delete
+    ctx, garbage
 ):
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl["dd_object"])
-    fsp_page.iter_page(f, ip_context(with_dd_object(dd_object, delete)))
+    fsp_page.iter_page(f, ip_context(with_dd_object(dd_object), garbage))
 
 
-def with_dd_object(dd_object: Table, delete):
+def with_dd_object(dd_object: Table):
     primary_col = dd_object.get_primary_key_col()
     db_default_col = dd_object.get_default_DB_col()
     pre_col_name = [c.name for c in primary_col]
     pre_col_name.extend(c.name for c in db_default_col)
     def value_parser(rh: MRecordHeader, f):
         cur = f.tell()
-        logger.debug("record header is %s, offset in page %d", rh, cur % const.PAGE_SIZE)
+        logger.debug("record header is %s, offset in page %d, page no is %d", rh, cur % const.PAGE_SIZE, int(cur / const.PAGE_SIZE))
 
         if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
             next_page_no = const.parse_mysql_int(f.read(4))
-            return
-
-        if not delete and rh.deleted:
             return
 
         

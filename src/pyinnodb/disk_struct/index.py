@@ -70,12 +70,20 @@ class MIndexPage(CC):
         stream.seek(-size + const.PAGE_SIZE - 8 - (2 * n), 1)
         self.page_directory = carray(n, cs.Int16sb).parse_stream(stream, **context)
 
-    def iterate_record_header(self, f, value_parser=None):
+    def iterate_record_header(self, f, value_parser=None, garbage=False):
         page_no = self.fil.offset
         infimum_offset = self.system_records.infimum.get_current_offset()
-        f.seek(page_no * const.PAGE_SIZE + infimum_offset)
-        next_offset = self.system_records.infimum.next_record_offset
+        if not garbage:
+            f.seek(page_no * const.PAGE_SIZE + infimum_offset)
+            next_offset = self.system_records.infimum.next_record_offset
+        else:
+            if self.index_header.first_garbage == 0:
+                return
+            f.seek(page_no * const.PAGE_SIZE) 
+            next_offset = self.index_header.first_garbage
         while True:
+            if next_offset == 0:
+                break
             f.seek(next_offset - MRecordHeader.sizeof(), 1)
             rh = MRecordHeader.parse_stream(f)
             if const.RecordType(rh.record_type) == const.RecordType.Supremum:

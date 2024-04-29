@@ -293,9 +293,16 @@ class Column:
             first_page = pointer.get_first_page(stream)
             real_data = first_page.get_data(stream)
             stream.seek(cur)
-            return Lob(real_data, True)
+            if len(real_data) > 200:
+                return Lob(real_data, True)
+            else:
+                return real_data
         else:
-            return Lob(stream.read(size), False)
+            data = stream.read(size)
+            if len(data) > 200:
+                return Lob(stream.read(size), False)
+            else:
+                return data
 
     def read_data(self, stream, size=None):
         dtype = DDColumnType(self.type)
