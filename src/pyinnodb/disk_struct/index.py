@@ -79,7 +79,7 @@ class MIndexPage(CC):
         else:
             if self.index_header.first_garbage == 0:
                 return
-            f.seek(page_no * const.PAGE_SIZE) 
+            f.seek(page_no * const.PAGE_SIZE)
             next_offset = self.index_header.first_garbage
         while True:
             if next_offset == 0:
