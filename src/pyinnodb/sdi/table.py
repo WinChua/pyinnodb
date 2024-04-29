@@ -100,6 +100,11 @@ class Column:
 
     @property
     @cache
+    def is_hidden_from_user(self):
+        return const.column_hidden_type.ColumnHiddenType(self.hidden) != const.column_hidden_type.ColumnHiddenType.HT_VISIBLE
+
+    @property
+    @cache
     def is_instant_col(self):
         return "default_null" in self.private_data or "default" in self.private_data
 
@@ -540,8 +545,13 @@ class Table:
     def DataClass(self):
         cols = []
         for c in self.columns:
-            if c.name not in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]:
-                cols.append(c.name)
+            if c.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]:
+                continue
+            if c.is_hidden_from_user:
+                continue
+            if c.private_data.get("version_dropped", None) is not None:
+                continue
+            cols.append(c.name)
 
         return namedtuple(self.name, " ".join(cols))
 
@@ -574,6 +584,19 @@ class Table:
 
     def get_column(self, cond: typing.Callable[[Column], bool]) -> typing.List[Column]:
         return [c for c in self.columns if cond(c)]
+
+    @cache
+    def get_column_schema_version(self, version) -> typing.List[Column]:
+        cols = []
+        for col in self.columns:
+            va = int(col.private_data.get("version_added", 0))
+            vd = int(col.private_data.get("version_dropped", 0))
+            if version < va: # data was inserted before this col add to table
+                continue
+            if vd != 0 and va > vd: # data was inserted after this col add to table
+                continue
+            cols.append(col)
+        return cols
 
     def get_primary_key_col(self) -> typing.List[Column]:
         primary_col = []
