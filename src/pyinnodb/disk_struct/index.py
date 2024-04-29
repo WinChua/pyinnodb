@@ -70,6 +70,24 @@ class MIndexPage(CC):
         stream.seek(-size + const.PAGE_SIZE - 8 - (2 * n), 1)
         self.page_directory = carray(n, cs.Int16sb).parse_stream(stream, **context)
 
+    def get_first_leaf_page(self, stream, primary_cols):
+        infimum_offset = self.system_records.infimum.get_current_offset()
+        next_page = self.fil.offset
+        stream.seek(next_page * const.PAGE_SIZE + infimum_offset + self.system_records.infimum.next_record_offset)
+        stream.seek(-MRecordHeader.sizeof(), 1)
+        rh = MRecordHeader.parse_stream(stream)
+        rht = const.RecordType(rh.record_type)
+        if rht == const.RecordType.Conventional:
+            return next_page
+        elif rht == const.RecordType.NodePointer:
+            for c in primary_cols:
+                c.read_data(stream)
+            
+            next_page = int.from_bytes(stream.read(4))
+            stream.seek(next_page * const.PAGE_SIZE)
+            next_index_page = MIndexPage.parse_stream(stream)
+            return next_index_page.get_first_leaf_page(stream, primary_cols)
+
     def iterate_record_header(self, f, value_parser=None, garbage=False):
         page_no = self.fil.offset
         infimum_offset = self.system_records.infimum.get_current_offset()

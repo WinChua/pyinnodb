@@ -3,6 +3,7 @@ from pyinnodb.disk_struct.index import MIndexPage, MSDIPage
 from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.record import MRecordHeader
+from pyinnodb.disk_struct.inode import MInodePage
 from pyinnodb.sdi.table import Column, Table
 from pyinnodb.const.dd_column_type import DDColumnType
 from pyinnodb.disk_struct.first_page import MFirstPage, MIndexEntryNode
@@ -48,7 +49,23 @@ def iter_record(ctx, garbage):
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl["dd_object"])
-    fsp_page.iter_page(f, ip_context(with_dd_object(dd_object), garbage))
+    # fsp_page.iter_page(f, ip_context(with_dd_object(dd_object), garbage))
+    f.seek(2 * const.PAGE_SIZE)
+    index_node_page = MInodePage.parse_stream(f)
+    first_root_page_no = index_node_page.inodes[2].first_page()
+    # search way to find first leaf page no
+    # f.seek(first_root_page_no * const.PAGE_SIZE)
+    # index_page = MIndexPage.parse_stream(f)
+    # first_leaf_page = index_page.get_first_leaf_page(f, dd_object.get_primary_key_col())
+    first_leaf_page = index_node_page.inodes[3].first_page()
+    if first_leaf_page is None:
+        first_leaf_page = first_root_page_no
+    while first_leaf_page != 4294967295:
+        f.seek(first_leaf_page * const.PAGE_SIZE)
+        index_page = MIndexPage.parse_stream(f)
+        index_page.iterate_record_header(f, value_parser = with_dd_object(dd_object), garbage=garbage)
+        first_leaf_page = index_page.fil.next_page
+    
 
 
 def with_dd_object(dd_object: Table):
