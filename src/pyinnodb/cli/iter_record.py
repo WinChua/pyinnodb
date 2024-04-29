@@ -71,7 +71,7 @@ def with_dd_object(dd_object: Table, delete):
         # data scheme version
         data_schema_version = 0
         f.seek(-MRecordHeader.sizeof(), 1)
-        if rh.no_use_1 == 1:
+        if rh.instant == 1:
             f.seek(-1, 1)
             data_schema_version = int.from_bytes(f.read(1))
 
@@ -90,7 +90,7 @@ def with_dd_object(dd_object: Table, delete):
             if DDColumnType.is_big(c.type) or DDColumnType.is_var(c.type)
         ]
 
-        f.seek(-nullcol_bitmask_size - rh.no_use_1, 1)
+        f.seek(-nullcol_bitmask_size - rh.instant, 1)
         null_bitmask = f.read(nullcol_bitmask_size)
         null_col_data = {}
         null_mask = int.from_bytes(null_bitmask, signed=False)
