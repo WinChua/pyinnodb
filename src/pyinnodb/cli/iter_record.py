@@ -132,6 +132,8 @@ def with_dd_object(dd_object: Table):
                 continue
             var_size[c.ordinal_position] = const.parse_var_size(f)
 
+        logger.debug("varsize is %s", var_size)
+
         disk_data_parsed = {}
         f.seek(cur)
         for col in cols_to_parse:
