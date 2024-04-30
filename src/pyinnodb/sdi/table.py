@@ -101,7 +101,10 @@ class Column:
     @property
     @cache
     def is_hidden_from_user(self):
-        return const.column_hidden_type.ColumnHiddenType(self.hidden) != const.column_hidden_type.ColumnHiddenType.HT_VISIBLE
+        return (
+            const.column_hidden_type.ColumnHiddenType(self.hidden)
+            != const.column_hidden_type.ColumnHiddenType.HT_VISIBLE
+        )
 
     @property
     @cache
@@ -293,9 +296,16 @@ class Column:
             first_page = pointer.get_first_page(stream)
             real_data = first_page.get_data(stream)
             stream.seek(cur)
-            return Lob(real_data, True)
+            if len(real_data) > 200:
+                return Lob(real_data, True)
+            else:
+                return real_data
         else:
-            return Lob(stream.read(size), False)
+            data = stream.read(size)
+            if len(data) > 200:
+                return Lob(stream.read(size), False)
+            else:
+                return data
 
     def read_data(self, stream, size=None):
         dtype = DDColumnType(self.type)
@@ -352,7 +362,7 @@ class Column:
                     r.append(b64decode(v))
             return r
         elif dtype == DDColumnType.JSON:
-            #data = stream.read(dsize)
+            # data = stream.read(dsize)
             data = self._read_varchar(stream, dsize)
             try:
                 v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data.data)))
@@ -575,7 +585,7 @@ class Table:
     @cache
     def nullcol_bitmask_size(self):
         null_col = [c for c in self.columns if c.is_nullable]
-        #null_col = [c for c in null_col if "default_null" not in c.private_data and "default" not in c.private_data]
+        # null_col = [c for c in null_col if "default_null" not in c.private_data and "default" not in c.private_data]
         return int((len(null_col) + 7) / 8), null_col
 
     @property
@@ -593,9 +603,11 @@ class Table:
         for col in self.columns:
             va = int(col.private_data.get("version_added", 0))
             vd = int(col.private_data.get("version_dropped", 0))
-            if version < va: # data was inserted before this col add to table
+            if version < va:  # data was inserted before this col add to table
                 continue
-            if vd != 0 and version >= vd: # data was inserted after this col add to table
+            if (
+                vd != 0 and version >= vd
+            ):  # data was inserted after this col add to table
                 continue
             cols.append(col)
         return cols
@@ -612,7 +624,9 @@ class Table:
 
                 return primary_col
 
-        return self.get_column(lambda col: col.name == "DB_ROW_ID") # for table with no primary
+        return self.get_column(
+            lambda col: col.name == "DB_ROW_ID"
+        )  # for table with no primary
 
     def get_default_DB_col(self) -> typing.List[Column]:
         return [c for c in self.columns if c.name in ["DB_TRX_ID", "DB_ROLL_PTR"]]

@@ -17,24 +17,32 @@ def test_json_t(containerOp: ContainerOp):
             V_F=42,
         ),
         insert(JT).values(
-            V_F = 43,
-            JSON_F = [1,2,3,4],
+            V_F=43,
+            JSON_F=[1, 2, 3, 4],
         ),
         insert(JT).values(
-            V_F = 44,
-            JSON_F = "HELLO",
+            V_F=44,
+            JSON_F="HELLO",
         ),
         insert(JT).values(
-            V_F = 44,
-            JSON_F = 42,
+            V_F=44,
+            JSON_F=42,
         ),
         insert(JT).values(
-            V_F = 90,
-            JSON_F = 3.14,
+            V_F=90,
+            JSON_F=3.14,
         ),
         insert(JT).values(
-            JSON_F = [{"K"*8096: [3.14, {"HELLO":[{"array":["Hello", 3.15, {"A": "B"}]}, "data", 53]}]}, 90],
-            V_F = 89,
+            JSON_F=[
+                {
+                    "K" * 8096: [
+                        3.14,
+                        {"HELLO": [{"array": ["Hello", 3.15, {"A": "B"}]}, "data", 53]},
+                    ]
+                },
+                90,
+            ],
+            V_F=89,
         ),
     )
     time.sleep(3)
