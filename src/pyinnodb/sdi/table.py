@@ -53,6 +53,16 @@ def modify_init(cls):
 
 @modify_init
 @dataclass(eq=False)
+class IndexElement:
+    ordinal_position: int = 0
+    length: int = 0
+    order: int = 0
+    hidden: bool = False
+    column_opx: int = 0
+
+
+@modify_init
+@dataclass(eq=False)
 class ColumnElement:
     name: str = ""  ## BINARY VARBINARY
     index: int = 0
@@ -97,6 +107,39 @@ class Column:
     elements: typing.List[ColumnElement] = dataclasses.field(default_factory=list)
     collation_id: int = 0
     is_explicit_collation: bool = False
+
+    def index_prefix(self, ie: IndexElement):
+        if ie.length == 4294967295:
+            return 0, False
+        varlen, prekey_len = 1, 0
+        if const.dd_column_type.DDColumnType.is_var(
+            self.type
+        ):  ## TODO: judge prefix key
+            if self.collation_id == 255:
+                varlen = 4
+            elif DDColumnType(self.type) in [
+                DDColumnType.VARCHAR,
+                DDColumnType.STRING,
+            ] and not self.column_type_utf8.startswith("varb"):
+                varlen = 3
+            if (
+                self.char_length > ie.length
+            ):  # the index field data length must small than the original field
+                prekey_len = int(ie.length / varlen)
+                return prekey_len, True
+        else:
+            return 0, False
+
+    @cache
+    def version_valid(self, data_schema_version) -> bool :
+        va = int(self.private_data.get("version_added", 0))
+        vd = int(self.private_data.get("version_dropped", 0))
+        if data_schema_version < va:
+            return False
+        if vd != 0 and data_schema_version >= vd:
+            return False
+        return True
+
 
     @property
     @cache
@@ -364,11 +407,13 @@ class Column:
         elif dtype == DDColumnType.JSON:
             # data = stream.read(dsize)
             data = self._read_varchar(stream, dsize)
+            if isinstance(data, Lob):
+                data = data.data
             try:
-                v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data.data)))
+                v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data)))
                 return v.get_json()
             except:
-                return data.data
+                return data
             # return stream.read(dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)
@@ -398,16 +443,6 @@ class CheckCons:
     state: int = None
     check_clause: str = ""  # write binary
     check_clause_utf8: str = ""
-
-
-@modify_init
-@dataclass(eq=False)
-class IndexElement:
-    ordinal_position: int = 0
-    length: int = 0
-    order: int = 0
-    hidden: bool = False
-    column_opx: int = 0
 
 
 @modify_init
@@ -611,6 +646,23 @@ class Table:
                 continue
             cols.append(col)
         return cols
+
+    def get_disk_data_layout(self):
+        data_layout_col = []
+        for idx in self.indexes:
+            if (
+                const.index_type.IndexType(idx.type)
+                == const.index_type.IndexType.IT_PRIMARY
+            ):
+                for ie in idx.elements:
+                    col = self.columns[ie.column_opx]
+                    prekey_len, ok = col.index_prefix(ie)
+                    if ok: # prefix
+                        data_layout_col.append((col, prekey_len))
+                    else:
+                        data_layout_col.append((col, ie.length))
+
+        return data_layout_col
 
     def get_primary_key_col(self) -> typing.List[Column]:
         primary_col = []
