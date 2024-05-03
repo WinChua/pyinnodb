@@ -53,8 +53,29 @@ def tosql(ctx, mode):
             root_page_no = int(table_object.indexes[0].private_data.get("root", 4))
             f.seek(root_page_no * const.PAGE_SIZE)
             root_index_page = MIndexPage.parse_stream(f)
-            print(root_index_page.fseg_header.get_first_leaf_page(f))
-            pass
+            first_leaf_page_no = root_index_page.fseg_header.get_first_leaf_page(f)
+            values = []
+            def transfter(nd):
+                vs = []
+                for field in nd:
+                    if isinstance(field, dict) or isinstance(field, list):
+                        vs.append(repr(json.dumps(field)))
+                    elif field is None:
+                        vs.append("NULL")
+                    else:
+                        vs.append(repr(field))
+                values.append(f"({','.join(vs)})")
+
+            default_value_parser = MIndexPage.default_value_parser(table_object, transfter)
+            while first_leaf_page_no != 4294967295:
+                f.seek(first_leaf_page_no * const.PAGE_SIZE)
+                index_page = MIndexPage.parse_stream(f)
+                index_page.iterate_record_header(f, value_parser=default_value_parser)
+                first_leaf_page_no = index_page.fil.next_page
+
+            table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
+            print(f"INSERT INTO {table_name}({','.join(table_object.DataClass._fields)}) values {', '.join(values)}")
+
         return
 
 
