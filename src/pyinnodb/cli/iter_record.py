@@ -98,6 +98,9 @@ def with_dd_object(dd_object: Table):
 
         cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
 
+        logger.debug("colname in primary: %s", ", ".join(c[0].name for c in primary_data_layout_col))
+        logger.debug("colname in index: %s", ", ".join(c[0].name for c in cols_disk_layout))
+
         nullable_cols = [d[0] for d in cols_disk_layout if d[1] == 4294967295 and d[0].is_nullable]
         nullcol_bitmask_size = int((len(nullable_cols) + 7) / 8)
         f.seek(-nullcol_bitmask_size - rh.instant, 1)
@@ -171,10 +174,6 @@ def with_dd_object(dd_object: Table):
 
         print(dd_object.DataClass(**disk_data_parsed))
         return
-
-
-
-
 
 
         # old

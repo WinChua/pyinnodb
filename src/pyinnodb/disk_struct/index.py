@@ -2,8 +2,12 @@ from .list import MPointer
 from .fil import MFil, MFilTrailer
 from .record import MRecordHeader
 from ..mconstruct import *
+from .inode import MInodeEntry
+
 
 from .. import const
+from ..const.dd_column_type import DDColumnType
+from ..sdi.table import Table
 
 import logging
 import json
@@ -37,6 +41,17 @@ class MFsegHeader(CC):
     # pointer INODE entry in INODE page
     internal_pointer: MPointer = cfield(MPointer)
 
+    def get_first_leaf_page(self, f):
+        if self.leaf_pointer.page_number != 4294967295:
+            f.seek(self.leaf_pointer.seek_loc())
+            inode_entry = MInodeEntry.parse_stream(f)
+            fp = inode_entry.first_page()
+            if fp is not None:
+                return fp
+
+        f.seek(self.internal_pointer.seek_loc())
+        inode_entry = MInodeEntry.parse_stream(f)
+        return inode_entry.first_page()
 
 class MSystemRecord(CC):
     info_flags: int = cfield(cs.BitsInteger(4))
@@ -63,6 +78,77 @@ class MIndexPage(CC):
     index_header: MIndexHeader = cfield(MIndexHeader)
     fseg_header: MFsegHeader = cfield(MFsegHeader)
     system_records: MIndexSystemRecord = cfield(MIndexSystemRecord)
+
+    @classmethod
+    def default_value_parser(cls, dd_object: Table, transfter = None):
+        primary_data_layout_col = dd_object.get_disk_data_layout()
+        def value_parser(rh: MRecordHeader, f):
+            cur = f.tell()
+            if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
+                next_page_no = const.parse_mysql_int(f.read(4))
+                return
+
+            # data scheme version
+            data_schema_version = 0
+            f.seek(-MRecordHeader.sizeof(), 1)
+            if rh.instant == 1:
+                f.seek(-1, 1)
+                data_schema_version = int.from_bytes(f.read(1))
+
+            cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
+
+            nullable_cols = [d[0] for d in cols_disk_layout if d[1] == 4294967295 and d[0].is_nullable]
+            nullcol_bitmask_size = int((len(nullable_cols) + 7) / 8)
+            f.seek(-nullcol_bitmask_size - rh.instant, 1)
+            null_bitmask = f.read(nullcol_bitmask_size)
+            null_col_data = {}
+            null_mask = int.from_bytes(null_bitmask, signed=False)
+            for i, c in enumerate(nullable_cols):
+                if null_mask & (1 << i):
+                    null_col_data[c.ordinal_position] = 1
+            may_var_col = [
+                (i, c[0])
+                for i, c in enumerate(cols_disk_layout)
+                if DDColumnType.is_big(c[0].type) or DDColumnType.is_var(c[0].type)
+            ]
+
+            ## read var
+            f.seek(-nullcol_bitmask_size, 1)
+            var_size = {}
+            for i, c in may_var_col:
+                if c.ordinal_position in null_col_data:
+                    continue
+                var_size[i] = const.parse_var_size(f)
+
+            disk_data_parsed = {}
+            f.seek(cur)
+
+            for i, (col, size_spec) in enumerate(cols_disk_layout):
+                col_value = None
+                if col.ordinal_position in null_col_data:
+                    col_value = None
+                else:
+                    vs = var_size.get(i, None)
+                    col_value = col.read_data(f, vs)
+                disk_data_parsed[col.name] = col_value
+
+            for col in dd_object.columns:
+                if (
+                    col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]
+                    or col.private_data.get("version_dropped", 0) != 0
+                ):
+                    if col.name in disk_data_parsed:
+                        disk_data_parsed.pop(col.name)
+                    continue
+                if col.name not in disk_data_parsed:
+                    disk_data_parsed[col.name] = col.get_instant_default()
+
+            if transfter is None:
+                print(dd_object.DataClass(**disk_data_parsed))
+            else:
+                transfter(dd_object.DataClass(**disk_data_parsed))
+            return
+        return value_parser
 
     def _post_parsed(self, stream, context, path):
         n = self.index_header.dir_slot_number
