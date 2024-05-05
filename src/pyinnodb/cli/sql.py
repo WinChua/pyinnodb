@@ -5,6 +5,8 @@ from pyinnodb.sdi.table import Table
 
 import json
 
+from datetime import timedelta, datetime, date
+
 logger = logging.getLogger(__name__)
 
 
@@ -62,8 +64,10 @@ def tosql(ctx, mode):
                         vs.append(repr(json.dumps(field)))
                     elif field is None:
                         vs.append("NULL")
-                    else:
+                    elif isinstance(field, date) or isinstance(field, timedelta) or isinstance(field, datetime):
                         vs.append(f"'{str(field)}'")
+                    else:
+                        vs.append(repr(field))
                 values.append(f"({','.join(vs)})")
 
             default_value_parser = MIndexPage.default_value_parser(table_object, transfter)
