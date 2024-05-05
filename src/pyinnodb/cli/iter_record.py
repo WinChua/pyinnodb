@@ -43,7 +43,8 @@ def ip_context(with_dd_object, garbage):
 @main.command()
 @click.pass_context
 @click.option("--garbage/--no-garbage", default=False, help="include garbage mark data")
-def iter_record(ctx, garbage):
+@click.option("--hidden-col/--no-hidden-col", type=click.BOOL, default=False)
+def iter_record(ctx, garbage, hidden_col):
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
@@ -63,12 +64,12 @@ def iter_record(ctx, garbage):
     while first_leaf_page != 4294967295:
         f.seek(first_leaf_page * const.PAGE_SIZE)
         index_page = MIndexPage.parse_stream(f)
-        index_page.iterate_record_header(f, value_parser = with_dd_object(dd_object), garbage=garbage)
+        index_page.iterate_record_header(f, value_parser = with_dd_object(dd_object, hidden_col), garbage=garbage)
         first_leaf_page = index_page.fil.next_page
     
 
 
-def with_dd_object(dd_object: Table):
+def with_dd_object(dd_object: Table, hidden_col):
     primary_col = dd_object.get_primary_key_col()
     db_default_col = dd_object.get_default_DB_col()
     pre_col_name = [c.name for c in primary_col]
@@ -163,7 +164,7 @@ def with_dd_object(dd_object: Table):
 
         for col in dd_object.columns:
             if (
-                col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]
+                (col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"] and not hidden_col)
                 or col.private_data.get("version_dropped", 0) != 0
             ):
                 if col.name in disk_data_parsed:
@@ -172,7 +173,10 @@ def with_dd_object(dd_object: Table):
             if col.name not in disk_data_parsed:
                 disk_data_parsed[col.name] = col.get_instant_default()
 
-        print(dd_object.DataClass(**disk_data_parsed))
+        if hidden_col:
+            print(dd_object.DataClassHiddenCol(**disk_data_parsed))
+        else:
+            print(dd_object.DataClass(**disk_data_parsed))
         return
 
 
