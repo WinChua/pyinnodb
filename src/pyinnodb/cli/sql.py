@@ -63,7 +63,7 @@ def tosql(ctx, mode):
                     elif field is None:
                         vs.append("NULL")
                     else:
-                        vs.append(repr(field))
+                        vs.append(f"'{str(field)}'")
                 values.append(f"({','.join(vs)})")
 
             default_value_parser = MIndexPage.default_value_parser(table_object, transfter)
