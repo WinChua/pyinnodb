@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 def tosql(ctx, mode):
     f = ctx.obj["fn"]
     fsp_page = ctx.obj["fsp_page"]
+    logger.debug("fsp header is %s", fsp_page.fsp_header)
     logger.debug("fsp page is %s", fsp_page.fil)
     if fsp_page.has_sdi_page == 1:
         f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
