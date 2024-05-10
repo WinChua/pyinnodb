@@ -1,7 +1,6 @@
 from ..mconstruct import *
 from .list import MListNode, MListBaseNode, MPointer
 from .fil import MFil
-from .rollback import MRollbackPointer
 import typing
 from .. import const
 
@@ -45,12 +44,7 @@ class MUndoPage(CC):
     fil: MFil = cfield(MFil)
     page_header: MUndoHeader = cfield(MUndoHeader)
     seg_header: MUndoSegmentHeader = cfield(MUndoSegmentHeader)
-    test_log_header: MUndoLogHeader = cfield(MUndoLogHeader)
-    test_undo_log: MUndoLogForInsert = cfield(MUndoLogForInsert)
-    undo_no: int = cfield(IntFromBytes(6))
-    ptr: MRollbackPointer = cfield(MRollbackPointer)
-    padding: bytes = cfield(cs.Bytes(49))
-    data: bytes = cfield(cs.Bytes(100))
+    #test_undo_log: MUndoLogForInsert = cfield(MUndoLogForInsert)
 
 class MRSEGHeader(CC):
     max_size: int = cfield(cs.Int32ub)
@@ -82,7 +76,7 @@ TRX_UNDO_UPD_DEL_REC = 13
 TRX_UNDO_DEL_MARK_REC = 14
 
 class MUndoRecordInsert(CC):
-    prev_record_offset: int = cfield(cs.Int16ub)
+    # prev_record_offset: int = cfield(cs.Int16ub)
     next_record_offset: int = cfield(cs.Int16ub)
     flag: int = cfield(cs.Int8ub)
     undo_number: int = cfield(cs.Bytes(0))
@@ -91,7 +85,7 @@ class MUndoRecordInsert(CC):
     def _post_parsed(self, stream, context, path):
         # trx_undo_rec_get_undo_no
         if self.flag & TRX_UNDO_MODIFY_BLOB > 0:
-            stream.read(1)
+            assert stream.read(1) == b'\x00'
 
         self.undo_number = const.read_compressed_mysql_int(stream)
         self.table_id = const.read_compressed_mysql_int(stream)

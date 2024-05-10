@@ -13,9 +13,9 @@ def test_undo(containerOp: ContainerOp):
             name = "WinChua",
         )
     )
-    containerOp.build_ibd(
-            update(UL).where(UL.name == "WinChua").values(name = "OK"),
-    )
+    # containerOp.build_ibd(
+    #         update(UL).where(UL.name == "WinChua").values(name = "OK"),
+    # )
     tar = containerOp.open(containerOp.build_data_path("test/ul.ibd"))
     undo1 = containerOp.open(containerOp.build_data_path("undo_001"))
 

@@ -150,6 +150,7 @@ COLUMN_IDX_TYPE_PRIM = 2
 COLUMN_IDX_TYPE_UNIQ = 3
 COLUMN_IDX_TYPE_MULT = 4
 
+# mach_read_next_compressed
 def read_compressed_mysql_int(stream):
     b0 = stream.read(1)
     val = int.from_bytes(b0)
@@ -169,3 +170,7 @@ def read_compressed_mysql_int(stream):
         return (int.from_bytes(b0 + stream.read(2)) & 0x1FFFF) | 0xFFFE0000
     else:
         return int.from_bytes(stream.read(3)) | 0xFF000000
+
+def mach_u64_read_next_compressed(stream):
+    data = read_compressed_mysql_int(stream)
+    return (data << 32) | int.from_bytes(stream.read(4))
