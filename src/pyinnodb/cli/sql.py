@@ -56,7 +56,7 @@ def tosql(ctx, mode):
             root_page_no = int(table_object.indexes[0].private_data.get("root", 4))
             f.seek(root_page_no * const.PAGE_SIZE)
             root_index_page = MIndexPage.parse_stream(f)
-            first_leaf_page_no = root_index_page.fseg_header.get_first_leaf_page(f)
+            first_leaf_page_no = root_index_page.get_first_leaf_page(f, table_object.get_primary_key_col())
             values = []
             def transfter(nd):
                 vs = []
