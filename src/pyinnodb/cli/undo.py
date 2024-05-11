@@ -4,6 +4,9 @@ from pyinnodb.disk_struct.undo_log import *
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.trx import *
 from pyinnodb.disk_struct.rollback import MRollbackPointer
+from pyinnodb.disk_struct.index import MSDIPage
+from pyinnodb.sdi.table import Column, Table
+
 
 @main.command()
 @click.pass_context
@@ -16,6 +19,7 @@ def undo_list(ctx, pageno):
     print(undo_page)
     print(undo_page.sizeof())
 
+
 @main.command()
 @click.pass_context
 @click.option("--pageno", type=click.INT)
@@ -23,17 +27,25 @@ def undo_list(ctx, pageno):
 @click.option("--insert", type=click.INT)
 @click.option("--rsegid", type=click.INT)
 def undo_record(ctx, pageno, offset, insert, rsegid):
-    f = ctx.obj['fn']
+    f = ctx.obj["fn"]
+    fsp_page: MFspPage = ctx.obj["fsp_page"]
+    f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
+    sdi_page = MSDIPage.parse_stream(f)
+    dd_object = Table(**sdi_page.ddl["dd_object"])
     undo_001 = open("datadir/undo_001", "rb")
     undo_002 = open("datadir/undo_002", "rb")
     undo_map = {1: undo_001, 2: undo_002}
-    rptr = MRollbackPointer(insert_flag=insert,
-            rollback_seg_id=rsegid,
-            page_number=pageno,
-            page_offset=offset)
+    rptr = MRollbackPointer(
+        insert_flag=insert,
+        rollback_seg_id=rsegid,
+        page_number=pageno,
+        page_offset=offset,
+    )
     while rptr is not None:
         tmp = rptr
-        undo_record_header, rptr = rptr.last_version(undo_map)
+        undo_record_header, rptr = rptr.last_version(
+            undo_map, dd_object.get_primary_key_col(), dd_object.get_disk_data_layout()
+        )
         print(tmp, undo_record_header)
     # f.seek(pageno * const.PAGE_SIZE + offset)
     # rollptr = MUndoRecordInsert.parse_stream(f)
@@ -47,11 +59,12 @@ def undo_record(ctx, pageno, offset, insert, rsegid):
     # else: # insert
     #     pass
 
+
 @main.command()
 @click.pass_context
-@click.option('--pageno', type=click.INT)
+@click.option("--pageno", type=click.INT)
 def rseg_array(ctx, pageno):
-    f = ctx.obj['fn']
+    f = ctx.obj["fn"]
     f.seek(pageno * const.PAGE_SIZE)
     page = MRSEGArrayPage.parse_stream(f)
     print(page)
