@@ -269,14 +269,7 @@ class MSDIPage(CC):
             + self.system_records.infimum.next_record_offset,
             1,
         )
-        # logger.debug(
-        #     "stream infimum offset: %d, relative: %d",
-        #     stream.seek(0, 1),
-        #     stream.seek(0, 1) % (const.PAGE_SIZE),
-        # )
         ddl_field = MDDL.parse_stream(stream)
         zipdata = stream.read(ddl_field.zip_len)
         json_data = json.loads(zlib.decompress(zipdata))
-        # for col in json_data["dd_object"]["columns"]:
-        #     logger.debug(f"{col['name']}:{col['type']},{col['column_type_utf8']},")
         return json_data

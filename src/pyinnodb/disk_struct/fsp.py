@@ -29,7 +29,7 @@ class MFspPage(CC):
     fil: MFil = cfield(MFil)
     fsp_header: MFspHeader = cfield(MFspHeader)
     xdess: t.List[MXdesEntry] = cfield(carray(256, MXdesEntry))
-    info_max: t.List[int] = cfield(carray(115, cs.Int8ub))
+    info_max: t.List[int] = cfield(cs.Bytes(115))
     has_sdi_page: int = cfield(cs.Int32ub)
     sdi_page_no: int = cfield(cs.Int32ub)
 

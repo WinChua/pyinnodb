@@ -41,12 +41,14 @@ def undo_record(ctx, pageno, offset, insert, rsegid):
         page_number=pageno,
         page_offset=offset,
     )
+    history = []
     while rptr is not None:
-        tmp = rptr
-        undo_record_header, rptr = rptr.last_version(
+        hist, rptr = rptr.last_version(
             undo_map, dd_object.get_primary_key_col(), dd_object.get_disk_data_layout()
         )
-        print(tmp, undo_record_header)
+        history.append(hist)
+    for h in history:
+        print(h)
     # f.seek(pageno * const.PAGE_SIZE + offset)
     # rollptr = MUndoRecordInsert.parse_stream(f)
     # print(rollptr)
