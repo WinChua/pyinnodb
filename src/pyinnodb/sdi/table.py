@@ -15,6 +15,7 @@ from ..disk_struct.varsize import VarSize, OffPagePointer
 
 from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp
 from ..disk_struct.json import MJson
+from ..disk_struct.rollback import MRollbackPointer
 
 
 class Lob:
@@ -127,6 +128,8 @@ class Column:
             ):  # the index field data length must small than the original field
                 prekey_len = int(ie.length / varlen)
                 return prekey_len, True
+            else:
+                return 0, False
         else:
             return 0, False
 
@@ -181,12 +184,14 @@ class Column:
         return coll
 
     def gen_sql(self):
-        sql = f"`{self.name}` {self.column_type_utf8}{'' if self.is_nullable else ' NOT NULL'}"
+        sql = f"`{self.name}` {self.column_type_utf8}{'' if self.is_nullable or self.is_virtual else ' NOT NULL'}"
         sql += f"{' AUTO_INCREMENT' if self.is_auto_increment else ''}"
         if self.default_option != "":
             sql += f" DEFAULT ({self.default_option})"
         elif not self.default_value_utf8_null:
             sql += f" DEFAULT '{self.default_value_utf8}'"
+        elif len(self.generation_expression_utf8) != 0:
+            sql += f" GENERATED ALWAYS AS ({self.generation_expression_utf8}) {'VIRTUAL' if self.is_virtual else 'STORED'}"
         elif self.default_value_utf8_null and self.is_nullable:
             sql += f" DEFAULT NULL"
         if self.update_option != "":
@@ -357,6 +362,8 @@ class Column:
                 return data
 
     def read_data(self, stream, size=None):
+        if self.name == "DB_ROLL_PTR":
+            return MRollbackPointer.parse_stream(stream)
         dtype = DDColumnType(self.type)
         if size is not None:
             dsize = size
@@ -621,6 +628,8 @@ class Table:
             if c.is_hidden_from_user:
                 continue
             if c.private_data.get("version_dropped", None) is not None:
+                continue
+            if c.is_virtual or c.generation_expression_utf8 != "":
                 continue
             cols.append(c.name)
 

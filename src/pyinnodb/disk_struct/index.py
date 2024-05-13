@@ -41,17 +41,19 @@ class MFsegHeader(CC):
     # pointer INODE entry in INODE page
     internal_pointer: MPointer = cfield(MPointer)
 
-    def get_first_leaf_page(self, f):
-        if self.leaf_pointer.page_number != 4294967295:
-            f.seek(self.leaf_pointer.seek_loc())
-            inode_entry = MInodeEntry.parse_stream(f)
-            fp = inode_entry.first_page()
-            if fp is not None:
-                return fp
+    # should not use this way to determine the first leaf page number
+    # as off-page may allocate first
+    # def get_first_leaf_page(self, f):
+    #     if self.leaf_pointer.page_number != 4294967295:
+    #         f.seek(self.leaf_pointer.seek_loc())
+    #         inode_entry = MInodeEntry.parse_stream(f)
+    #         fp = inode_entry.first_page()
+    #         if fp is not None:
+    #             return fp
 
-        f.seek(self.internal_pointer.seek_loc())
-        inode_entry = MInodeEntry.parse_stream(f)
-        return inode_entry.first_page()
+    #     f.seek(self.internal_pointer.seek_loc())
+    #     inode_entry = MInodeEntry.parse_stream(f)
+    #     return inode_entry.first_page()
 
 class MSystemRecord(CC):
     info_flags: int = cfield(cs.BitsInteger(4))
@@ -130,6 +132,8 @@ class MIndexPage(CC):
                 else:
                     vs = var_size.get(i, None)
                     col_value = col.read_data(f, vs)
+                if col.generation_expression_utf8 != "":
+                    continue
                 disk_data_parsed[col.name] = col_value
 
             for col in dd_object.columns:
@@ -139,6 +143,8 @@ class MIndexPage(CC):
                 ):
                     if col.name in disk_data_parsed:
                         disk_data_parsed.pop(col.name)
+                    continue
+                if col.is_virtual or col.generation_expression_utf8 != "":
                     continue
                 if col.name not in disk_data_parsed:
                     disk_data_parsed[col.name] = col.get_instant_default()
@@ -263,14 +269,7 @@ class MSDIPage(CC):
             + self.system_records.infimum.next_record_offset,
             1,
         )
-        # logger.debug(
-        #     "stream infimum offset: %d, relative: %d",
-        #     stream.seek(0, 1),
-        #     stream.seek(0, 1) % (const.PAGE_SIZE),
-        # )
         ddl_field = MDDL.parse_stream(stream)
         zipdata = stream.read(ddl_field.zip_len)
         json_data = json.loads(zlib.decompress(zipdata))
-        # for col in json_data["dd_object"]["columns"]:
-        #     logger.debug(f"{col['name']}:{col['type']},{col['column_type_utf8']},")
         return json_data

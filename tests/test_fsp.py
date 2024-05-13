@@ -53,5 +53,5 @@ def test_minode():
 def test_mfsp_page():
     with open(test_filename, "rb") as f:
         fsp_page = MFspPage.parse_stream(f)
-        logger.info(fsp_page.has_sdi_page)
+        logger.info(fsp_page.sdi_version)
         logger.info(fsp_page.sdi_page_no)

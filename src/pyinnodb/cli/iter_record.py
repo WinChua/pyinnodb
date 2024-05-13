@@ -44,23 +44,22 @@ def ip_context(with_dd_object, garbage):
 @click.pass_context
 @click.option("--garbage/--no-garbage", default=False, help="include garbage mark data")
 @click.option("--hidden-col/--no-hidden-col", type=click.BOOL, default=False)
-def iter_record(ctx, garbage, hidden_col):
+@click.option("--pageno", default=None, type=click.INT)
+def iter_record(ctx, garbage, hidden_col, pageno):
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl["dd_object"])
-    # fsp_page.iter_page(f, ip_context(with_dd_object(dd_object), garbage))
-    f.seek(2 * const.PAGE_SIZE)
-    index_node_page = MInodePage.parse_stream(f)
-    first_root_page_no = index_node_page.inodes[2].first_page()
-    # search way to find first leaf page no
-    # f.seek(first_root_page_no * const.PAGE_SIZE)
-    # index_page = MIndexPage.parse_stream(f)
-    # first_leaf_page = index_page.get_first_leaf_page(f, dd_object.get_primary_key_col())
-    first_leaf_page = index_node_page.inodes[3].first_page()
-    if first_leaf_page is None:
-        first_leaf_page = first_root_page_no
+    root_page_no = int(dd_object.indexes[0].private_data.get("root", 4))
+    f.seek(root_page_no * const.PAGE_SIZE)
+    root_index_page = MIndexPage.parse_stream(f)
+    first_leaf_page = root_index_page.get_first_leaf_page(f, dd_object.get_primary_key_col())
+    # as the first page of leaf inode may be the off-page of large column, we should not use this way
+    #first_leaf_page = root_index_page.fseg_header.get_first_leaf_page(f)
+    logger.debug("first_leaf_page is %s", first_leaf_page)
+    if pageno is not None:
+        first_leaf_page = pageno
     while first_leaf_page != 4294967295:
         f.seek(first_leaf_page * const.PAGE_SIZE)
         index_page = MIndexPage.parse_stream(f)
@@ -160,6 +159,8 @@ def with_dd_object(dd_object: Table, hidden_col):
                 ##     else:
                 ##         vs = min(vs, size_spec)
                 col_value = col.read_data(f, vs)
+            if col.generation_expression_utf8 != "":
+                continue
             disk_data_parsed[col.name] = col_value
 
         for col in dd_object.columns:
@@ -169,6 +170,8 @@ def with_dd_object(dd_object: Table, hidden_col):
             ):
                 if col.name in disk_data_parsed:
                     disk_data_parsed.pop(col.name)
+                continue
+            if col.is_virtual or col.generation_expression_utf8 != "":
                 continue
             if col.name not in disk_data_parsed:
                 disk_data_parsed[col.name] = col.get_instant_default()

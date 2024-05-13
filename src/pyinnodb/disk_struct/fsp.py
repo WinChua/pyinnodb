@@ -7,6 +7,9 @@ from .. import const
 
 import typing as t
 
+FSP_FLAGS_WIDTH_SDI = 1
+FSP_FLAGS_POS_SDI = 8
+FSP_FLAGS_MASK_SDI = 0x4000
 
 class MFspHeader(CC):
     space_id: int = cfield(cs.Int32ub)
@@ -24,13 +27,17 @@ class MFspHeader(CC):
     list_base_full_inode: MListBaseNode = cfield(MListBaseNode)
     list_base_free_inode: MListBaseNode = cfield(MListBaseNode)
 
+    def has_sdi_page(self):
+        return ((self.flags & FSP_FLAGS_MASK_SDI) >> FSP_FLAGS_POS_SDI) > 0
+
+
 
 class MFspPage(CC):
     fil: MFil = cfield(MFil)
     fsp_header: MFspHeader = cfield(MFspHeader)
     xdess: t.List[MXdesEntry] = cfield(carray(256, MXdesEntry))
-    info_max: t.List[int] = cfield(carray(115, cs.Int8ub))
-    has_sdi_page: int = cfield(cs.Int32ub)
+    info_max: t.List[int] = cfield(cs.Bytes(115))
+    sdi_version: int = cfield(cs.Int32ub)
     sdi_page_no: int = cfield(cs.Int32ub)
 
     def iter_page(self, f, iter_func=None):
