@@ -5,5 +5,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo hello
-        echo world
+        curl -sSf https://rye-up.com/get | RYE_INSTALL_OPTION=-y bash
+        source ~/.rye/env
