@@ -4,8 +4,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - run: |
+    - name: checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+
+    - name: run build
+      run: |
         curl -sSf https://rye-up.com/get | RYE_INSTALL_OPTION=-y bash
         source ~/.rye/env
         ls
-        rye list
