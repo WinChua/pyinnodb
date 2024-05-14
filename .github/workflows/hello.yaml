@@ -16,6 +16,8 @@ jobs:
         rye sync
         rye tools install uv
         rye run of
+        ls
+        pwd
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -36,3 +38,6 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: pyinnodb.sh
         asset_name: pyinnodb.sh
+      run: |
+        pwd
+        ls
