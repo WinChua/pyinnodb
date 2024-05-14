@@ -17,7 +17,7 @@ class MTime2(CC):
             hours=self.hour,
             minutes=self.minute,
             seconds=self.second,
-            microseconds=int.from_bytes(self.fsp),
+            microseconds=int.from_bytes(self.fsp, "big"),
         )
         return v if self.signed == 1 else -v
 
@@ -41,7 +41,7 @@ class MDatetime(CC):
             hour=self.hour,
             minute=self.minute,
             second=self.second,
-            microsecond=int.from_bytes(self.fsp),
+            microsecond=int.from_bytes(self.fsp, "big"),
         )
         return v if self.signed == 1 else -v
 
@@ -65,5 +65,5 @@ class MTimestamp(CC):
 
     def to_time(self) -> datetime:
         return datetime.utcfromtimestamp(
-            self.timestamp + int.from_bytes(self.fsp) / 1000000
+            self.timestamp + int.from_bytes(self.fsp, "big") / 1000000
         )

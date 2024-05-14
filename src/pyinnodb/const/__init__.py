@@ -98,7 +98,7 @@ def parse_mysql_unsigned(data):
 
 def parse_mysql_int(data, signed=True):
     if signed:
-        data = int.to_bytes(data[0] ^ 0x80) + data[1:]
+        data = int.to_bytes(data[0] ^ 0x80, "big") + data[1:]
     return int.from_bytes(data, "big", signed=signed)
 
 
@@ -109,7 +109,7 @@ def encode_mysql_unsigned(data, length):
 def encode_mysql_int(value, length, signed=True):
     data = int.to_bytes(value, length, "big", signed=signed)
     if signed:
-        data = int.to_bytes(data[0] ^ 0x80) + data[1:]
+        data = int.to_bytes(data[0] ^ 0x80, "big") + data[1:]
     return data
 
 
@@ -153,24 +153,24 @@ COLUMN_IDX_TYPE_MULT = 4
 # mach_read_next_compressed
 def read_compressed_mysql_int(stream):
     b0 = stream.read(1)
-    val = int.from_bytes(b0)
+    val = int.from_bytes(b0, "big")
     if val < 0x80:
         return val
     elif val < 0xC0:
-        return int.from_bytes(b0 + stream.read(1)) & 0x3FFF
+        return int.from_bytes(b0 + stream.read(1), "big") & 0x3FFF
     elif val < 0xE0:
-        return int.from_bytes(b0 + stream.read(2)) & 0x1FFFFF
+        return int.from_bytes(b0 + stream.read(2), "big") & 0x1FFFFF
     elif val < 0xF0:
-        return int.from_bytes(b0 + stream.read(3)) & 0xFFFFFFF
+        return int.from_bytes(b0 + stream.read(3), "big") & 0xFFFFFFF
     elif val < 0xF8:
-        return int.from_bytes(stream.read(4))
+        return int.from_bytes(stream.read(4), "big")
     elif val < 0xFC:
-        return (int.from_bytes(b0 + stream.read(1)) & 0x3FFF) | 0xFFFFFC00
+        return (int.from_bytes(b0 + stream.read(1), "big") & 0x3FFF) | 0xFFFFFC00
     elif val < 0xFE:
-        return (int.from_bytes(b0 + stream.read(2)) & 0x1FFFF) | 0xFFFE0000
+        return (int.from_bytes(b0 + stream.read(2), "big") & 0x1FFFF) | 0xFFFE0000
     else:
-        return int.from_bytes(stream.read(3)) | 0xFF000000
+        return int.from_bytes(stream.read(3), "big") | 0xFF000000
 
 def mach_u64_read_next_compressed(stream):
     data = read_compressed_mysql_int(stream)
-    return (data << 32) | int.from_bytes(stream.read(4))
+    return (data << 32) | int.from_bytes(stream.read(4), "big")

@@ -2,7 +2,11 @@ from ..mconstruct import *
 
 from .. import const
 
-from functools import cache
+import sys
+if sys.version_info.minor >= 9:
+    from functools import cache
+else:
+    cache = lambda x: x
 
 
 class MPointer(CC):
