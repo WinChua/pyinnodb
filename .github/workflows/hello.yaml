@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-      curl -sSf https://rye-up.com/get | RYE_INSTALL_OPTION=-y bash
+      curl -sSf https://rye-up.com/get > install.sh
+      RYE_INSTALL_OPTION=-y bash install.sh
       source ~/.rye/env
       ls
