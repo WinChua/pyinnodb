@@ -4,7 +4,11 @@ import struct
 import decimal
 import dataclasses
 
-from functools import cache
+import sys
+if sys.version_info.minor >= 9:
+    from functools import cache
+else:
+    cache = lambda x: x
 from dataclasses import dataclass
 from collections import namedtuple
 from base64 import b64decode
