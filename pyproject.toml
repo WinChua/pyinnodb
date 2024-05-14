@@ -41,7 +41,7 @@ gencols = { chain = ["gencols:cols", "gencols:fmt"] }
 "gencols:fmt" = "rye fmt src/pyinnodb/const/collations.py"
 cli = { call = "pyinnodb.cli" }
 of = { chain = ["of:req", "of:cp", "of:clean", "of:zip", "of:patch", "of:ex"] }
-"of:req" = "uv pip install -r requirements.lock --target target"
+"of:req" = "mkdir target; uv pip install -r requirements.lock --target target"
 "of:cp" = "cp -r src/pyinnodb target"
 "of:clean" = "find target  -type d -name '__pycache__' -exec rm -rf {} +"
 "of:zip" = "python -m zipapp target/ -m pyinnodb.cli:main -o pyinnodb.sh"
