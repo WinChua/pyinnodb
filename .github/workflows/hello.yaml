@@ -13,6 +13,6 @@ jobs:
       run: |
         curl -sSf https://rye-up.com/get | RYE_INSTALL_OPTION=-y bash
         source ~/.rye/env
-        rr of
+        rye run of
         git status
         ls
