@@ -77,6 +77,7 @@ def with_dd_object(dd_object: Table, delete):
 
 
         cols_to_parse = dd_object.get_column_schema_version(data_schema_version)
+        cols_to_parse.sort(key=lambda c: c.private_data.get("physical_pos", c.ordinal_position))
         cols_to_parse.sort(key=lambda c: pre_col_name.index(c.name) if c.name in pre_col_name else len(pre_col_name))
         logger.debug("data_schema_version:%d", data_schema_version)
         logger.debug("col to parse: %s", ",".join(c.name for c in cols_to_parse))
@@ -107,7 +108,6 @@ def with_dd_object(dd_object: Table, delete):
                 continue
             var_size[c.ordinal_position] = const.parse_var_size(f)
 
-        cols_to_parse.sort(key=lambda c: c.private_data.get("physical_pos", c.ordinal_position))
 
         disk_data_parsed = {}
         f.seek(cur)
@@ -118,7 +118,7 @@ def with_dd_object(dd_object: Table, delete):
                 logger.debug("c.name[%s], c.ordinal_position[%d] is null", col.name, c.ordinal_position)
                 col_value = None
             else:
-                logger.debug("c.name[%s], c.ordinal_position[%d] parse", col.name, col.ordinal_position)
+                logger.debug("c.name[%s], c.ordinal_position[%d] parse at %d", col.name, col.ordinal_position, f.tell()%const.PAGE_SIZE)
                 col_value = col.read_data(f, var_size.get(col.ordinal_position, None))
             disk_data_parsed[col.name] = col_value
 
