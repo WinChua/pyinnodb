@@ -184,12 +184,14 @@ class Column:
         return coll
 
     def gen_sql(self):
-        sql = f"`{self.name}` {self.column_type_utf8}{'' if self.is_nullable else ' NOT NULL'}"
+        sql = f"`{self.name}` {self.column_type_utf8}{'' if self.is_nullable or self.is_virtual else ' NOT NULL'}"
         sql += f"{' AUTO_INCREMENT' if self.is_auto_increment else ''}"
         if self.default_option != "":
             sql += f" DEFAULT ({self.default_option})"
         elif not self.default_value_utf8_null:
             sql += f" DEFAULT '{self.default_value_utf8}'"
+        elif self.is_virtual:
+            sql += f" GENERATED ALWAYS AS ({self.generation_expression_utf8}) VIRTUAL"
         elif self.default_value_utf8_null and self.is_nullable:
             sql += f" DEFAULT NULL"
         if self.update_option != "":
