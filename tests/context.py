@@ -13,7 +13,7 @@ from testcontainers.mysql import MySqlContainer
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
-from sqlalchemy import insert
+from sqlalchemy import insert, update
 from pyinnodb import const
 import sqlalchemy
 from sqlalchemy.dialects import mysql as dmysql
@@ -124,7 +124,9 @@ def containerOp():
     logger.debug("setup mysql database container ....")
 
     try:
-        mysql = MySqlContainer("mysql:8.0.35").__enter__()
+        mContainer = MySqlContainer("mysql:8.0.35")
+        mContainer.with_volume_mapping(os.getcwd() + "/" + "datadir", "/var/lib/mysql", "rw")
+        mysql = mContainer.__enter__()
         # with MySqlContainer("mysql:8.0.35") as mysql:
         engine = sqlalchemy.create_engine(mysql.get_connection_url())
         logger.debug("mysql is %s", mysql.get_connection_url())
@@ -176,7 +178,7 @@ class ContainerOp(object):
             self.connection.execute(s)
             self.connection.commit()
         if nosleep is None:
-            time.sleep(3)
+            time.sleep(5)
 
     def build_data_path(self, path: str) -> str:
         return self.datadir + path

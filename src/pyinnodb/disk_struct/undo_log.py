@@ -1,6 +1,9 @@
 from ..mconstruct import *
-from .list import MListNode, MListBaseNode
+from .list import MListNode, MListBaseNode, MPointer
 from .fil import MFil
+from .rollback import MRollbackPointer
+import typing
+from .. import const
 
 # trx0undo.h
 
@@ -10,11 +13,11 @@ class MUndoHeader(CC):
     free_space_offset: int = cfield(cs.Int16ub)
     undo_page_list_node: MListNode = cfield(MListNode)
 
-
 class MUndoSegmentHeader(CC):
     state: int = cfield(cs.Int16ub)
     last_log_offset: int = cfield(cs.Int16ub)
-    fseg_entry: str = cfield(cs.Bytes(10))
+    spaceid: int = cfield(cs.Int32ub)
+    pointer: MPointer = cfield(MPointer)
     undo_page_list_node_base: MListBaseNode = cfield(MListBaseNode)
 
 class MUndoLogHeader(CC):
@@ -44,5 +47,51 @@ class MUndoPage(CC):
     seg_header: MUndoSegmentHeader = cfield(MUndoSegmentHeader)
     test_log_header: MUndoLogHeader = cfield(MUndoLogHeader)
     test_undo_log: MUndoLogForInsert = cfield(MUndoLogForInsert)
+    undo_no: int = cfield(IntFromBytes(6))
+    ptr: MRollbackPointer = cfield(MRollbackPointer)
+    padding: bytes = cfield(cs.Bytes(49))
+    data: bytes = cfield(cs.Bytes(100))
 
+class MRSEGHeader(CC):
+    max_size: int = cfield(cs.Int32ub)
+    history_size: int = cfield(cs.Int32ub)
+    history_list_node_base: MListBaseNode = cfield(MListBaseNode)
+    spaceid: int = cfield(cs.Int32ub)
+    pointer: MPointer = cfield(MPointer)
 
+class MRSEGArrayHeader(CC):
+    marker: bytes = cfield(cs.Bytes(4)) #'RSEH'
+    array_size: int = cfield(cs.Int32ub)
+    spaceid: int = cfield(cs.Int32ub)
+    pointer: MPointer = cfield(MPointer)
+    pagenos: typing.List[int] = cfield(carray(128, cs.Int32ub))
+    # reserve_space: bytes = cfield(cs.Bytes(200)) ## at the end
+
+class MRSEGArrayPage(CC):
+    fil: MFil = cfield(MFil)
+    header: MRSEGArrayHeader = cfield(MRSEGArrayHeader)
+
+class MRSEGPage(CC):
+    fil: MFil = cfield(MFil)
+    header: MRSEGHeader = cfield(MRSEGHeader)
+    slots: typing.List[int] = cfield(carray(1024, cs.Int32ub))
+
+TRX_UNDO_MODIFY_BLOB = 64
+TRX_UNDO_UPD_EXIST_REC = 12
+TRX_UNDO_UPD_DEL_REC = 13
+TRX_UNDO_DEL_MARK_REC = 14
+
+class MUndoRecordInsert(CC):
+    prev_record_offset: int = cfield(cs.Int16ub)
+    next_record_offset: int = cfield(cs.Int16ub)
+    flag: int = cfield(cs.Int8ub)
+    undo_number: int = cfield(cs.Bytes(0))
+    table_id: int = cfield(cs.Bytes(0))
+
+    def _post_parsed(self, stream, context, path):
+        # trx_undo_rec_get_undo_no
+        if self.flag & TRX_UNDO_MODIFY_BLOB > 0:
+            stream.read(1)
+
+        self.undo_number = const.read_compressed_mysql_int(stream)
+        self.table_id = const.read_compressed_mysql_int(stream)

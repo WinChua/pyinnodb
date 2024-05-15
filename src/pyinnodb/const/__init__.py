@@ -149,3 +149,23 @@ COLUMN_IDX_TYPE_NONE = 1
 COLUMN_IDX_TYPE_PRIM = 2
 COLUMN_IDX_TYPE_UNIQ = 3
 COLUMN_IDX_TYPE_MULT = 4
+
+def read_compressed_mysql_int(stream):
+    b0 = stream.read(1)
+    val = int.from_bytes(b0)
+    if val < 0x80:
+        return val
+    elif val < 0xC0:
+        return int.from_bytes(b0 + stream.read(1)) & 0x3FFF
+    elif val < 0xE0:
+        return int.from_bytes(b0 + stream.read(2)) & 0x1FFFFF
+    elif val < 0xF0:
+        return int.from_bytes(b0 + stream.read(3)) & 0xFFFFFFF
+    elif val < 0xF8:
+        return int.from_bytes(stream.read(4))
+    elif val < 0xFC:
+        return (int.from_bytes(b0 + stream.read(1)) & 0x3FFF) | 0xFFFFFC00
+    elif val < 0xFE:
+        return (int.from_bytes(b0 + stream.read(2)) & 0x1FFFF) | 0xFFFE0000
+    else:
+        return int.from_bytes(stream.read(3)) | 0xFF000000
