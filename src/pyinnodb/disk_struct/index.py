@@ -78,6 +78,10 @@ class MIndexPage(CC):
         while next_offset > 0:
             f.seek(next_offset - MRecordHeader.sizeof(), 1)
             rh = MRecordHeader.parse_stream(f)
+            if value_parser is not None:
+                cur = f.tell()
+                value_parser(rh, f)
+                f.seek(cur)
             next_offset = rh.next_record_offset
 
     def binary_search_with_page_directory(self, key, stream):

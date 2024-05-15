@@ -122,6 +122,9 @@ def containerOp():
         logger.debug("result is %s", result)
         yield ContainerOp(mysql, engine,connection, str(result[1]))
 
+    if not os.getenv("NO_STOP", None) == "1":
+        mysql.stop()
+
     logger.debug("end test mysql database container ....")
 
 

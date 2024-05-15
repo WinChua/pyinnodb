@@ -1,8 +1,15 @@
+import io
 import typing
+import struct
 from dataclasses import dataclass
 import dataclasses
+from functools import cache
+from collections import namedtuple
 from .. import const
-from ..const.dd_column_type import DDColumnType
+from ..const.dd_column_type import DDColumnType, DDColConf
+import decimal
+
+NewDecimalSize = namedtuple("NewDecimalSize", "intg frac intg0 intg0x frac0 frac0x total")
 
 def modify_init(cls):
     old_init = cls.__init__
@@ -22,13 +29,13 @@ def modify_init(cls):
     return cls
 
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class ColumnElement:
     name: str = "" ## BINARY VARBINARY
     index: str = ""
 
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class Column:
     name: str = ""
     type: int = 0
@@ -67,6 +74,10 @@ class Column:
     collation_id: int = 0
     is_explicit_collation: bool = False
 
+    def __post_init__(self):
+        ce: typing.List[ColumnElement] = [ColumnElement(**e) for e in self.elements]
+        self.elements = ce
+
     def get_collation(self):
         coll = const.get_collation_by_id(self.collation_id)
         return coll
@@ -83,8 +94,147 @@ class Column:
         sql += ' COMMENT \'' + self.comment + '\'' if self.comment else ''
         return sql
 
+    def size(self):
+        if self.name in column_spec_size:
+            return column_spec_size[self.name]
+        else:
+            dtype = DDColumnType(self.type)
+            return DDColConf.get_col_type_conf(self.type).size
+            ## if dtype == DDColumnType.FLOAT:
+            ##     ## https://dev.mysql.com/doc/refman/8.0/en/fixed-point-types.html
+            ##     ## https://dev.mysql.com/doc/refman/8.0/en/floating-point-types.html
+            ##     ## https://stackoverflow.com/questions/10993501/mysql-float-storage-size
+            ##     return 4
+            ##     return 4 if self.numeric_precision <= 24 else 8
+            ## else:
+            ##     return DDColConf.get_col_type_conf(self.type).size
+        
+    def _read_int(self, stream, size, signed=None):
+        byte_data = stream.read(size)
+        if signed is None:
+            should_signed = self.name not in column_spec_size and not self.is_unsigned
+        else:
+            should_signed = signed
+
+        if should_signed:
+            byte_data = (byte_data[0] ^ 0x80).to_bytes(1) + byte_data[1:]
+        return int.from_bytes(byte_data, "big", signed=should_signed)
+
+    @property
+    @cache
+    def new_decimal_size(self) -> NewDecimalSize :
+        intg = self.numeric_precision - self.numeric_scale
+        frac = self.numeric_scale
+        intg0, intg0x = int(intg / 9), decimal_leftover_part[intg % 9]
+        frac0, frac0x = int(self.numeric_scale/9), decimal_leftover_part[self.numeric_scale % 9]
+        total = intg0*4 + intg0x + frac0*4 + frac0x
+        return NewDecimalSize(intg, frac, intg0, intg0x, frac0, frac0x, total)
+
+    def _read_new_decimal(self, stream):
+        byte_data = stream.read(self.new_decimal_size.total)
+        mask = 0 if byte_data[0] & 0x80 else -1
+        negative = mask != 0
+        byte_data = (byte_data[0] ^ 0x80).to_bytes(1) + byte_data[1:]
+        byte_stream = io.BytesIO(byte_data)
+
+        integer = '' if not negative else '-'
+        if self.new_decimal_size.intg0x > 0:
+            d = byte_stream.read(self.new_decimal_size.intg0x)
+            integer += str(int.from_bytes(d, signed=True) ^ mask)
+        for i in range(self.new_decimal_size.intg0):
+            d = byte_stream.read(4)
+            integer += str(int.from_bytes(d, signed=True) ^ mask)
+
+        if self.new_decimal_size.frac > 0:
+            integer += "."
+        
+        for i in range(self.new_decimal_size.frac0):
+            d = byte_stream.read(4)
+            integer += str(int.from_bytes(d, signed=True) ^ mask)
+
+        if self.new_decimal_size.frac0x > 0:
+            d = byte_stream.read(self.new_decimal_size.frac0x)
+            integer += str(int.from_bytes(d, signed=True) ^ mask)
+
+        return decimal.Decimal(integer)
+
+
+    def _read_decimal(self, stream):
+        integer_part = self.numeric_precision - self.numeric_scale
+        fractional_part = self.numeric_scale
+        integer_part_size = int(integer_part / 9) # + decimal_leftover_part[integer_part % 9]
+        fractional_part_size = int(fractional_part/9) # + decimal_leftover_part[fractional_part_size%9]
+
+        total_size = integer_part_size * 4 + fractional_part_size * 4 + decimal_leftover_part[integer_part % 9] + decimal_leftover_part[fractional_part % 9]
+        byte_data = stream.read(total_size)
+        positive = byte_data[0] & 0x80 > 0
+        if not positive:
+            byte_data = bytes(~b & 0xff for b in byte_data)
+        byte_data = (byte_data[0] ^ 0x80).to_bytes(1) + byte_data[1:]
+
+        integer = ''
+        consume = decimal_leftover_part[integer_part%9]
+        if consume > 0:
+            integer = str(int.from_bytes(byte_data[:consume], "big"))
+    
+        for i in range(integer_part_size):
+            # integer *= 1000
+            integer += str(int.from_bytes(byte_data[consume:consume+4], "big"))
+            consume += 4
+
+        fractional = ''
+        for i in range(fractional_part_size):
+            fractional += str(int.from_bytes(byte_data[consume:consume+4], "big"))
+            consume += 4
+
+        fractional_consume = decimal_leftover_part[fractional_part % 9]
+        if fractional_consume > 0:
+            fractional += str(int.from_bytes(byte_data[consume:], "big"))
+
+        if len(fractional) > 0:
+            return f"{integer}.{fractional}"
+        else:
+            return f"{integer}"
+
+
+    def read_data(self, stream):
+        dtype = DDColumnType(self.type)
+        dsize = self.size()
+        if dtype.is_int_number():
+            return self._read_int(stream, dsize)
+        elif dtype == DDColumnType.FLOAT:
+            byte_data = stream.read(dsize)
+            if dsize == 4:
+                return struct.unpack('f', byte_data)[0]
+            if dsize == 8:
+                return struct.unpack('d', byte_data)[0]
+        elif dtype == DDColumnType.DOUBLE:
+            byte_data = stream.read(dsize)
+            return struct.unpack('d', byte_data)[0]
+        ## https://dev.mysql.com/doc/refman/8.0/en/precision-math-decimal-characteristics.html
+        elif dtype == DDColumnType.DECIMAL or dtype == DDColumnType.NEWDECIMAL:
+            return self._read_new_decimal(stream)
+        # if dtype == DDColumnType.JSON:
+        #     size = const.parse_var_size(stream)
+        # if dtype.is_var():
+        #     size = const.parse_var_size(stream)
+        pass
+
+decimal_leftover_part = {
+    0: 0,
+    1: 1,
+    2: 1,
+    3: 2,
+    4: 2,
+    5: 3,
+    6: 3,
+    7: 4,
+    8: 4,
+    9: 4,
+}
+
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class CheckCons:
     name: str = ""
     state: int = None
@@ -92,7 +242,7 @@ class CheckCons:
     check_clause_utf8: str = ""
 
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class IndexElement:
     ordinal_position: int = 0
     length: int = 0
@@ -101,7 +251,7 @@ class IndexElement:
     column_opx: int = 0
 
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class Index:
     name: str = ""
     hidden: bool = False
@@ -141,7 +291,7 @@ class Index:
 
 
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class ForeignElement:
     #column_opx: Column = None
     ordinal_position: str = ""
@@ -150,7 +300,7 @@ class ForeignElement:
 
 
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class ForeignKeys:
     name: str = ""
     match_option: int = None
@@ -163,7 +313,7 @@ class ForeignKeys:
     elements: typing.List[ForeignElement] = None
 
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class PartitionValue:
     max_value: bool = False
     null_value: bool = False
@@ -172,7 +322,7 @@ class PartitionValue:
     value_utf8: str = ""
 
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class PartitionIndex:
     options: str = "" # properties
     se_private_data: str = "" # properties
@@ -180,7 +330,7 @@ class PartitionIndex:
 
 
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class Partition:
     name: str = ""
     parent_partition_id: int = 0
@@ -204,7 +354,7 @@ class Partition:
         self.subpartitions = sp
 
 @modify_init
-@dataclass
+@dataclass(eq=False)
 class Table:
     # from abstract table
     name: str = ""
@@ -238,6 +388,22 @@ class Table:
     partitions: typing.List[Partition] = dataclasses.field(default_factory=list)
     collation_id: int = 0
     # tablespace_ref: ?
+
+    def get_column(self, cond: typing.Callable[[Column], bool]) -> typing.List[Column]:
+        return [c for c in self.columns if cond(c)]
+
+    def get_primary_key_col(self) -> typing.List[Column]:
+        primary_col = []
+        for idx in self.indexes:
+            if const.index_type.IndexType(idx.type) == const.index_type.IndexType.IT_PRIMARY:
+                for ie in idx.get_effect_element():
+                    primary_col.append(self.columns[ie.column_opx])
+
+                return primary_col
+
+    def get_default_DB_col(self) -> typing.List[Column]:
+        return [c for c in self.columns if c.name in ["DB_TRX_ID", "DB_ROLL_PTR"]]
+
 
     def __post_init__(self):
         cols: typing.List[Column] = [Column(**c) for c in self.columns]
@@ -331,6 +497,10 @@ table_opts=[
 "timestamp",
 "view_valid",
 "gipk"]
+
+column_spec_size = {
+    "DB_TRX_ID":6, "DB_ROLL_PTR":7
+}
 
 if __name__ == "__main__":
     import json
