@@ -5,7 +5,7 @@ from .undo_log import MUndoRecordInsert, TRX_UNDO_DEL_MARK_REC
 UNIV_SQL_NULL  = ~0
 UNIV_PAGE_SIZE_SHIFT_DEF = 14
 UNIV_PAGE_SIZE_DEF = 1 << UNIV_PAGE_SIZE_SHIFT_DEF
-UNIV_EXTERN_STORAGE_FIELD = int.from_bytes((UNIV_SQL_NULL - UNIV_PAGE_SIZE_DEF).to_bytes(4, signed=True))
+UNIV_EXTERN_STORAGE_FIELD = int.from_bytes((UNIV_SQL_NULL - UNIV_PAGE_SIZE_DEF).to_bytes(4, "big", signed=True), "big")
 SPATIAL_STATUS_SHIFT = 12
 SPATIAL_STATUS_MASK = 3 << SPATIAL_STATUS_SHIFT
 
@@ -44,7 +44,7 @@ class MRollbackPointer(CC):
             info_bits = f.read(1)
             trx_id = const.mach_u64_read_next_compressed(f)
             ptr = const.mach_u64_read_next_compressed(f)
-            ptr = MRollbackPointer.parse(ptr.to_bytes(7))
+            ptr = MRollbackPointer.parse(ptr.to_bytes(7, "big"))
             hist = HistoryVersion(trx_id, ptr, 1)
             # trx_undo_rec_skip_row_ref: skip primary key
             for c in primary_col:

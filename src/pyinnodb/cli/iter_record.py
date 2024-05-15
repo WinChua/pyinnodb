@@ -94,7 +94,7 @@ def with_dd_object(dd_object: Table, hidden_col):
         f.seek(-MRecordHeader.sizeof(), 1)
         if rh.instant == 1:
             f.seek(-1, 1)
-            data_schema_version = int.from_bytes(f.read(1))
+            data_schema_version = int.from_bytes(f.read(1), "big")
 
         cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
 
@@ -106,7 +106,7 @@ def with_dd_object(dd_object: Table, hidden_col):
         f.seek(-nullcol_bitmask_size - rh.instant, 1)
         null_bitmask = f.read(nullcol_bitmask_size)
         null_col_data = {}
-        null_mask = int.from_bytes(null_bitmask, signed=False)
+        null_mask = int.from_bytes(null_bitmask, "big", signed=False)
         for i, c in enumerate(nullable_cols):
             if null_mask & (1 << i):
                 null_col_data[c.ordinal_position] = 1
@@ -208,7 +208,7 @@ def with_dd_object(dd_object: Table, hidden_col):
         f.seek(-nullcol_bitmask_size - rh.instant, 1)
         null_bitmask = f.read(nullcol_bitmask_size)
         null_col_data = {}
-        null_mask = int.from_bytes(null_bitmask, signed=False)
+        null_mask = int.from_bytes(null_bitmask, "big", signed=False)
         for i, c in enumerate(nullable_cols):
             if null_mask & (1 << i):
                 null_col_data[c.ordinal_position] = 1

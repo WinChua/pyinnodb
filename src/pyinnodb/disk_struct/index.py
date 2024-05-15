@@ -95,7 +95,7 @@ class MIndexPage(CC):
             f.seek(-MRecordHeader.sizeof(), 1)
             if rh.instant == 1:
                 f.seek(-1, 1)
-                data_schema_version = int.from_bytes(f.read(1))
+                data_schema_version = int.from_bytes(f.read(1), "big")
 
             cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
 
@@ -104,7 +104,7 @@ class MIndexPage(CC):
             f.seek(-nullcol_bitmask_size - rh.instant, 1)
             null_bitmask = f.read(nullcol_bitmask_size)
             null_col_data = {}
-            null_mask = int.from_bytes(null_bitmask, signed=False)
+            null_mask = int.from_bytes(null_bitmask, "big", signed=False)
             for i, c in enumerate(nullable_cols):
                 if null_mask & (1 << i):
                     null_col_data[c.ordinal_position] = 1
@@ -175,7 +175,7 @@ class MIndexPage(CC):
             for c in primary_cols:
                 c.read_data(stream)
             
-            next_page = int.from_bytes(stream.read(4))
+            next_page = int.from_bytes(stream.read(4), "big")
             stream.seek(next_page * const.PAGE_SIZE)
             next_index_page = MIndexPage.parse_stream(stream)
             return next_index_page.get_first_leaf_page(stream, primary_cols)

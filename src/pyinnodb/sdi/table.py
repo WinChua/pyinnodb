@@ -239,7 +239,7 @@ class Column:
             should_signed = signed
 
         if should_signed:
-            byte_data = (byte_data[0] ^ 0x80).to_bytes(1) + byte_data[1:]
+            byte_data = (byte_data[0] ^ 0x80).to_bytes(1, "big") + byte_data[1:]
         return int.from_bytes(byte_data, "big", signed=should_signed)
 
     @property
@@ -269,27 +269,27 @@ class Column:
         byte_data = stream.read(self.new_decimal_size.total)
         mask = 0 if byte_data[0] & 0x80 else -1
         negative = mask != 0
-        byte_data = (byte_data[0] ^ 0x80).to_bytes(1) + byte_data[1:]
+        byte_data = (byte_data[0] ^ 0x80).to_bytes(1, "big") + byte_data[1:]
         byte_stream = io.BytesIO(byte_data)
 
         integer = "" if not negative else "-"
         if self.new_decimal_size.intg0x > 0:
             d = byte_stream.read(self.new_decimal_size.intg0x)
-            integer += str(int.from_bytes(d, signed=True) ^ mask)
+            integer += str(int.from_bytes(d, "big", signed=True) ^ mask)
         for i in range(self.new_decimal_size.intg0):
             d = byte_stream.read(4)
-            integer += str(int.from_bytes(d, signed=True) ^ mask)
+            integer += str(int.from_bytes(d, "big", signed=True) ^ mask)
 
         if self.new_decimal_size.frac > 0:
             integer += "."
 
         for i in range(self.new_decimal_size.frac0):
             d = byte_stream.read(4)
-            integer += str(int.from_bytes(d, signed=True) ^ mask)
+            integer += str(int.from_bytes(d, "big", signed=True) ^ mask)
 
         if self.new_decimal_size.frac0x > 0:
             d = byte_stream.read(self.new_decimal_size.frac0x)
-            integer += str(int.from_bytes(d, signed=True) ^ mask)
+            integer += str(int.from_bytes(d, "big", signed=True) ^ mask)
 
         return decimal.Decimal(integer)
 
@@ -313,7 +313,7 @@ class Column:
         positive = byte_data[0] & 0x80 > 0
         if not positive:
             byte_data = bytes(~b & 0xFF for b in byte_data)
-        byte_data = (byte_data[0] ^ 0x80).to_bytes(1) + byte_data[1:]
+        byte_data = (byte_data[0] ^ 0x80).to_bytes(1, "big") + byte_data[1:]
 
         integer = ""
         consume = decimal_leftover_part[integer_part % 9]
@@ -404,7 +404,7 @@ class Column:
             ts_data.parse_fsp(stream, dsize - 4)
             return ts_data.to_time()
         elif dtype == DDColumnType.YEAR:
-            return int.from_bytes(stream.read(dsize)) + 1900
+            return int.from_bytes(stream.read(dsize), "big") + 1900
         elif dtype == DDColumnType.BIT:
             return self._read_int(stream, dsize, False)
         elif dtype == DDColumnType.ENUM:
@@ -776,7 +776,8 @@ class Table:
                 parts.append(
                     f"PARTITION {par.name} VALUES LESS THAN ({par.description_utf8})"
                 )
-            return f"{p}{',\n    '.join(parts)}\n)*/"
+            parts = ",\n    ".join(parts) + "\n"
+            return f"{p}{parts})*/"
         elif pt == const.partition.PartitionType.PT_HASH:
             return f"/*!50100 PARTITION BY HASH ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
         elif pt == const.partition.PartitionType.PT_KEY_55:
@@ -786,7 +787,8 @@ class Table:
             parts = []
             for par in self.partitions:
                 parts.append(f"PARTITION {par.name} VALUES IN ({par.description_utf8})")
-            return f"{p}{',\n    '.join(parts)}\n)*/"
+            parts = ",\n    ".join(parts) + "\n"
+            return f"{p}{parts})*/"
 
 
 def should_ext():

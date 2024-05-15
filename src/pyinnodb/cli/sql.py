@@ -49,7 +49,7 @@ def tosql(ctx, mode):
                 "\nCOMMENT '" + table_object.comment + "'" if table_object.comment else ""
             )
             print(
-                f"CREATE TABLE {table_name} ({columns_dec}) {desc} {'\n'+parts if parts else ''}{comment}"
+                f"CREATE TABLE {table_name} ({columns_dec}) {desc} {chr(10)+parts if parts else ''}{comment}"
             )
         else:
             table_object = Table(**sdi_page.ddl["dd_object"])

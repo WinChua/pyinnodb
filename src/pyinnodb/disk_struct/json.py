@@ -18,7 +18,7 @@ class MJson(CC):
     def _post_parsed(self, stream, context, path):
         cur = stream.tell()  # seek loc after type, offset in the key entry or value entry is relative to cur
         if self.type == 0x04:
-            data = int.from_bytes(stream.read(1))
+            data = int.from_bytes(stream.read(1), "big")
             return {1: True, 2: False, 0: None}.get(data, None)
         elif self.type == 0x05:
             return cs.Int16sl.parse_stream(stream)
@@ -36,10 +36,10 @@ class MJson(CC):
             return cs.Float64l.parse_stream(stream)
         elif self.type == 0x0C:
             b0 = stream.read(1)
-            size = int.from_bytes(b0)
+            size = int.from_bytes(b0, "big")
             if size > 0x80:
                 b1 = stream.read(1)
-                size = int.from_bytes(stream.read(1)) * 128 + (size ^ 0x80)
+                size = int.from_bytes(stream.read(1), "big") * 128 + (size ^ 0x80)
             return stream.read(size).decode()
 
         parser = cs.Int16ul if self.type in [0x00, 0x02] else cs.Int32ul
