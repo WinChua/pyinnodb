@@ -38,6 +38,6 @@ packages = ["pyinnodb"]
 gencols = { chain = ["gencols:cols", "gencols:fmt"] }
 "gencols:cols" = "python devtools/gen-collations.py"
 "gencols:fmt" = "rye fmt pyinnodb/const/collations.py"
+cli = { call = "pyinnodb.cli" }
 
 [project.scripts]
-cli = "pyinnodb:cli"
