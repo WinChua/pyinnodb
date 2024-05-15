@@ -305,7 +305,6 @@ class Column:
             return time_data.to_timedelta()
         elif dtype == DDColumnType.DATETIME2:
             datetime_data = MDatetime.parse_stream(stream)
-            print("datetime dsize is", dsize)
             datetime_data.parse_fsp(stream, dsize - 5)  # 5 is MDatetime.sizeof()
             return datetime_data.to_datetime()
         elif dtype == DDColumnType.NEWDATE:
@@ -330,7 +329,6 @@ class Column:
             return r
         elif dtype == DDColumnType.JSON:
             data = stream.read(dsize)
-            print(data)
             v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data)))
             return v.get_json()
             # return stream.read(dsize)
@@ -515,6 +513,16 @@ class Table:
     partitions: typing.List[Partition] = dataclasses.field(default_factory=list)
     collation_id: int = 0
     # tablespace_ref: ?
+
+    @property
+    @cache
+    def DataClass(self):
+        cols = []
+        for c in self.columns:
+            if c.name not in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]:
+                cols.append(c.name)
+
+        return namedtuple(self.name, " ".join(cols))
 
     @property
     @cache
