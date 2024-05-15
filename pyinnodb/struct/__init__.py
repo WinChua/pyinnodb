@@ -7,3 +7,4 @@ from .inode import *
 from .xdes import *
 from .index import *
 from .record import *
+from .ibuf import *
