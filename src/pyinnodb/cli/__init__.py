@@ -4,3 +4,4 @@ from . import static_usage
 from . import sql
 from . import validate
 from . import undo
+from . import parse

@@ -2,6 +2,30 @@ from .. import const
 from ..mconstruct import *
 from .undo_log import MUndoRecordInsert, TRX_UNDO_DEL_MARK_REC
 
+UNIV_SQL_NULL  = ~0
+UNIV_PAGE_SIZE_SHIFT_DEF = 14
+UNIV_PAGE_SIZE_DEF = 1 << UNIV_PAGE_SIZE_SHIFT_DEF
+UNIV_EXTERN_STORAGE_FIELD = int.from_bytes((UNIV_SQL_NULL - UNIV_PAGE_SIZE_DEF).to_bytes(4, signed=True))
+SPATIAL_STATUS_SHIFT = 12
+SPATIAL_STATUS_MASK = 3 << SPATIAL_STATUS_SHIFT
+
+class HistoryVersion:
+    def __init__(self, trx_id, rollptr, upd):
+        self.trx_id = trx_id
+        self.field = []
+        self.rollptr = rollptr
+        self.upd = upd
+
+    def add_field(self, col, value):
+        self.field.append((col, value))
+
+    def __str__(self):
+        if self.upd == 1:
+            return f"<Update by trx[{self.trx_id}]: {'; '.join('`' + c.name + '` updated original value: ' + str(v) for c, v in self.field)}>"
+        else:
+            return f"<Insert>"
+
+    __repr__ = __str__
 
 class MRollbackPointer(CC):
     insert_flag: int = cfield(cs.BitsInteger(1))
@@ -21,6 +45,7 @@ class MRollbackPointer(CC):
             trx_id = const.mach_u64_read_next_compressed(f)
             ptr = const.mach_u64_read_next_compressed(f)
             ptr = MRollbackPointer.parse(ptr.to_bytes(7))
+            hist = HistoryVersion(trx_id, ptr, 1)
             # trx_undo_rec_skip_row_ref: skip primary key
             for c in primary_col:
                 col_len = const.read_compressed_mysql_int(f)
@@ -37,11 +62,16 @@ class MRollbackPointer(CC):
             for i in range(n_fields):
                 col_no = const.read_compressed_mysql_int(f)
                 len = const.read_compressed_mysql_int(f)
-                orig_data = f.read(len)
+                #if len > UNIV_EXTERN_STORAGE_FIELD:
+                #    len = ((len - UNIV_EXTERN_STORAGE_FIELD) & (~SPATIAL_STATUS_MASK))
                 col = disk_data_layout[col_no][0]
-                print(col.name, len, orig_data)
+                if len == 4294967295: # UNIV_SQL_NULL & 0xffffffff
+                    orig_data = None
+                else:
+                    orig_data = col.read_data(f, len)
+                hist.add_field(col, orig_data)
                 # trx_undo_rec_get_col_val
-            return undo_record_header, ptr
+            return hist, ptr
         else:
-            return undo_record_header, None
+            return HistoryVersion(None, None, 0), None
         
