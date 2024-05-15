@@ -328,8 +328,9 @@ class Column:
                     r.append(b64decode(v))
             return r
         elif dtype == DDColumnType.JSON:
-            data = stream.read(dsize)
-            v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data)))
+            #data = stream.read(dsize)
+            data = self._read_varchar(stream, dsize)
+            v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data.data)))
             return v.get_json()
             # return stream.read(dsize)
         # if dtype == DDColumnType.JSON:

@@ -33,7 +33,7 @@ def test_json_t(containerOp: ContainerOp):
             JSON_F = 3.14,
         ),
         insert(JT).values(
-            JSON_F = [{"K": [3.14, {"HELLO":[{"array":["Hello", 3.15, {"A": "B"}]}, "data", 53]}]}, 90],
+            JSON_F = [{"K"*8096: [3.14, {"HELLO":[{"array":["Hello", 3.15, {"A": "B"}]}, "data", 53]}]}, 90],
             V_F = 89,
         ),
     )
