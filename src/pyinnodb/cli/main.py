@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 )
 @click.pass_context
 def main(ctx, fn, log_level):
-    logging.basicConfig(level=log_level)
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', level=log_level)
     ctx.ensure_object(dict)
     ctx.obj["fn"] = fn
     fsp_page = MFspPage.parse_stream(fn)
