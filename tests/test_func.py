@@ -1,10 +1,10 @@
 from context import *
-from pyinnodb.struct import *
+from pyinnodb.disk_struct import *
 from pyinnodb.const import get_page_type_name
 from pyinnodb import const
 
-from pyinnodb.struct.index import *
-from pyinnodb.struct.fil import *
+from pyinnodb.disk_struct.index import *
+from pyinnodb.disk_struct.fil import *
 
 
 def test_fsp_mheader():

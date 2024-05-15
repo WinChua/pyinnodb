@@ -1,9 +1,9 @@
 from collections import Counter
 import crcmod
 from context import *
-from pyinnodb.struct.fil import MFil, MFilTrailer
-from pyinnodb.struct.fsp import MFspHeader, MFspPage
-from pyinnodb.struct.inode import MInodePage
+from pyinnodb.disk_struct.fil import MFil, MFilTrailer
+from pyinnodb.disk_struct.fsp import MFspHeader, MFspPage
+from pyinnodb.disk_struct.inode import MInodePage
 
 test_fil_case = [
     (

@@ -1,6 +1,6 @@
 from context import *
 
-from pyinnodb.struct.ibuf import *
+from pyinnodb.disk_struct.ibuf import *
 
 
 def test_mibuf_page():

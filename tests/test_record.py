@@ -1,6 +1,6 @@
 from context import *
-from pyinnodb.struct.record import MRecordHeader
-from pyinnodb.struct.index import MIndexPage
+from pyinnodb.disk_struct.record import MRecordHeader
+from pyinnodb.disk_struct.index import MIndexPage
 
 
 def test_record():
