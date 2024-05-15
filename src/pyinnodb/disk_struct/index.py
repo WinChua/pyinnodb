@@ -2,6 +2,7 @@ from .list import MPointer
 from .fil import MFil, MFilTrailer
 from .record import MRecordHeader
 from ..mconstruct import *
+from .inode import MInodeEntry
 
 from .. import const
 
@@ -37,6 +38,17 @@ class MFsegHeader(CC):
     # pointer INODE entry in INODE page
     internal_pointer: MPointer = cfield(MPointer)
 
+    def get_first_leaf_page(self, f):
+        if self.leaf_pointer.page_number != (-1 & 0xffffffff):
+            f.seek(self.leaf_pointer.seek_loc())
+            inode_entry = MInodeEntry.parse_stream(f)
+            fp = inode_entry.first_page()
+            if fp is not None:
+                return fp
+
+        f.seek(self.internal_pointer.seek_loc())
+        inode_entry = MInodeEntry.parse_stream(f)
+        return inode_entry.first_page()
 
 class MSystemRecord(CC):
     info_flags: int = cfield(cs.BitsInteger(4))

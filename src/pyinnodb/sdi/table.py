@@ -470,6 +470,12 @@ class Index:
     secondary_engine_attribute: str = ""
     elements: typing.List[IndexElement] = dataclasses.field(default_factory=list)
 
+    @property
+    @cache
+    def private_data(self):
+        data = const.line_to_dict(self.se_private_data, ";", "=")
+        return data
+
     def __post_init__(self):
         c: typing.List[IndexElement] = [IndexElement(**e) for e in self.elements]
         self.elements = c
@@ -657,8 +663,9 @@ class Table:
         data_layout_col = []
         for idx in self.indexes:
             if (
-                const.index_type.IndexType(idx.type)
-                == const.index_type.IndexType.IT_PRIMARY
+                idx.name == "PRIMARY"
+                # const.index_type.IndexType(idx.type)
+                # == const.index_type.IndexType.IT_PRIMARY
             ):
                 for ie in idx.elements:
                     col = self.columns[ie.column_opx]
