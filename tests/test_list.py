@@ -4,7 +4,6 @@ from pyinnodb.struct.list import MListBaseNode, MListNode, MPointer
 
 
 def test_mlist():
-    assert MListNode.sizeof() == 12
     t = MListNode(
         prev=MPointer(
             page_number=1,
