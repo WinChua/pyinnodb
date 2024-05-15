@@ -62,12 +62,14 @@ class SDIPage(Struct):
     system_records = Field(IndexSystemRecord)
 
     def _parse(self, stream, context = None):
+        ret = super()._parse(stream, context)
         stream.seek(1024 * 16 - self._consume_num - 8, 1)
         logger.debug("from index page, consume %d, seek %d", self._consume_num, stream.seek(0, 1))
         logger.debug("from index page, system_records _consume_num %d", self.system_records._consume_num)
         self.fil_tailer = FilTrailer()
         self.fil_tailer.parse_stream(stream)
         self._get_first_record(stream)
+        return ret
 
     def _get_first_record(self, stream):
         stream.seek(-16 * 1024 + 
