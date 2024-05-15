@@ -82,7 +82,7 @@ class MIndexPage(CC):
     system_records: MIndexSystemRecord = cfield(MIndexSystemRecord)
 
     @classmethod
-    def default_value_parser(cls, dd_object: Table, transfter = None):
+    def default_value_parser(cls, dd_object: Table, transfter = None, hidden_col=False):
         primary_data_layout_col = dd_object.get_disk_data_layout()
         def value_parser(rh: MRecordHeader, f):
             cur = f.tell()
@@ -138,7 +138,7 @@ class MIndexPage(CC):
 
             for col in dd_object.columns:
                 if (
-                    col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]
+                    (col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"] and not hidden_col)
                     or col.private_data.get("version_dropped", 0) != 0
                 ):
                     if col.name in disk_data_parsed:
@@ -149,10 +149,11 @@ class MIndexPage(CC):
                 if col.name not in disk_data_parsed:
                     disk_data_parsed[col.name] = col.get_instant_default()
 
+            klass = dd_object.DataClassHiddenCol if hidden_col else dd_object.DataClass
             if transfter is None:
-                print(dd_object.DataClass(**disk_data_parsed))
+                print(klass(**disk_data_parsed))
             else:
-                transfter(dd_object.DataClass(**disk_data_parsed))
+                return transfter(klass(**disk_data_parsed))
             return
         return value_parser
 
@@ -210,31 +211,21 @@ class MIndexPage(CC):
         if cur_post % const.PAGE_SIZE != 0:
             return None, False
         key_len = len(key)
-        low_idx, heigh_idx = 0, len(self.page_directory) - 1
+        low, high = 0, len(self.page_directory) - 1
         cnt = 0
-        while low_idx < heigh_idx:
-            cnt += 1
-            if cnt > 100:
-                return None, False
-            target_idx = int((low_idx + heigh_idx) / 2)  # like ceil
-            target_loc = cur_post + self.page_directory[target_idx]
-            stream.seek(target_loc)
-            target_key = stream.read(key_len)
-            # logger.info("lidx: %d, hidx: %d, tidx: %d", low_idx, heigh_idx, target_idx)
-            # logger.info(
-            #     "cnt %d, key is %s, target_key is %s, result is %d",
-            #     cnt,
-            #     const.parse_mysql_int(key),
-            #     const.parse_mysql_int(target_key),
-            #     key < target_key,
-            # )
-            if key == target_key:
-                return target_loc, True
-            if key < target_key:
-                low_idx = target_idx
+        while high > low + 1:
+            target = int((high + low)/2)
+            stream.seek(cur_post + self.page_directory[target])
+            record_key = stream.read(key_len)
+            logger.debug("low: %d, high: %d, target: %d, record_key: %s, key: %s", low, high, target, record_key, key)
+            if record_key == key:
+                return target, True
+            elif key > record_key:
+                high = target
             else:
-                heigh_idx = target_idx
-        return None, False
+                low = target
+            cnt += 1
+        return low, False
 
 
 class MDDL(CC):

@@ -98,7 +98,7 @@ def parse_mysql_unsigned(data):
 
 def parse_mysql_int(data, signed=True):
     if signed:
-        data = int.to_bytes(data[0] ^ 0x80, "big") + data[1:]
+        data = int.to_bytes(data[0] ^ 0x80, 1, "big") + data[1:]
     return int.from_bytes(data, "big", signed=signed)
 
 
@@ -109,7 +109,7 @@ def encode_mysql_unsigned(data, length):
 def encode_mysql_int(value, length, signed=True):
     data = int.to_bytes(value, length, "big", signed=signed)
     if signed:
-        data = int.to_bytes(data[0] ^ 0x80, "big") + data[1:]
+        data = int.to_bytes(data[0] ^ 0x80, 1, "big") + data[1:]
     return data
 
 
