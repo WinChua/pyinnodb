@@ -12,6 +12,14 @@ from .. import const
 from ..const.dd_column_type import DDColumnType, DDColConf
 from ..disk_struct.varsize import VarSize, OffPagePointer
 
+class Lob:
+    def __init__(self, data, off_page):
+        self.data = data
+        self.off_page = off_page
+
+    def __str__(self):
+        return f"<Lob length:{len(self.data)} preview:{self.data[:5] + b'..' + self.data[-5:]} off_page:{self.off_page}>"
+
 NewDecimalSize = namedtuple("NewDecimalSize", "intg frac intg0 intg0x frac0 frac0x total")
 
 def modify_init(cls):
@@ -201,13 +209,17 @@ class Column:
 
 
     def _read_varchar(self, stream, size):
-        if size > 10000:
+        if size > 8096: # with test on 8.0.17 when data size larger than 8096, the col will be store off-page
+                        # will the varsize record in record header is 16404
             data = stream.read(20)
-            print(data)
+            cur = stream.tell()
             pointer = OffPagePointer.parse_stream(io.BytesIO(data))
-            return pointer
+            first_page = pointer.get_first_page(stream)
+            real_data = first_page.get_data(stream)
+            stream.seek(cur)
+            return Lob(real_data, True)
         else:
-            return stream.read(size)
+            return Lob(stream.read(size), False)
 
     def read_data(self, stream, size=None):
         dtype = DDColumnType(self.type)
@@ -230,6 +242,8 @@ class Column:
         elif dtype == DDColumnType.DECIMAL or dtype == DDColumnType.NEWDECIMAL:
             return self._read_new_decimal(stream)
         elif dtype == DDColumnType.VARCHAR:
+            return self._read_varchar(stream, dsize)
+        elif dtype == DDColumnType.LONG_BLOB:
             return self._read_varchar(stream, dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)
@@ -500,7 +514,55 @@ class Table:
                 parts.append(f"PARTITION {par.name} VALUES IN ({par.description_utf8})")
             return f"{p}{',\n    '.join(parts)}\n)*/"
 
+def should_ext():
+    return True
 
+'''
+static inline bool page_zip_rec_needs_ext(ulint rec_size, ulint comp,
+                                          ulint n_fields,
+                                          const page_size_t &page_size) {
+  ut_ad(rec_size > (comp ? REC_N_NEW_EXTRA_BYTES : REC_N_OLD_EXTRA_BYTES));
+  ut_ad(comp || !page_size.is_compressed());
+  if (rec_size >= REC_MAX_DATA_SIZE) {  # REC_MAX_DATA_SIZE 16384
+    return true;
+  }
+  if (page_size.is_compressed()) {
+    ut_ad(comp);
+    /* On a compressed page, there is a two-byte entry in
+    the dense page directory for every record.  But there
+    is no record header.  There should be enough room for
+    one record on an empty leaf page.  Subtract 1 byte for
+    the encoded heap number.  Check also the available space
+    on the uncompressed page. */
+    return (rec_size - (REC_N_NEW_EXTRA_BYTES - 2 - 1) >=
+                page_zip_empty_size(n_fields, page_size.physical()) ||
+            rec_size >= page_get_free_space_of_empty(true) / 2);
+  }
+  return (rec_size >= page_get_free_space_of_empty(comp) / 2);
+}    
+'''
+'''
+static inline ulint page_get_free_space_of_empty(
+    bool comp) /*!< in: nonzero=compact page layout */
+{
+  if (comp) {
+    return ((ulint)(UNIV_PAGE_SIZE - PAGE_NEW_SUPREMUM_END - PAGE_DIR -
+                    2 * PAGE_DIR_SLOT_SIZE));
+  }
+  return ((ulint)(UNIV_PAGE_SIZE - PAGE_OLD_SUPREMUM_END - PAGE_DIR -
+                  2 * PAGE_DIR_SLOT_SIZE));
+}  
+'''
+'''
+UNIV_PAGE_SIZE: 1 << 14 => 16 KB
+PAGE_OLD_SUPREMUM_END = PAGE_DATA + 2 + 2 * REC_N_OLD_EXTRA_BYTES + 8 + 9
+PAGE_DIR = 8
+PAGE_DIR_SLOT_SIZE = 2
+REC_N_OLD_EXTRA_BYTES = 6
+PAGE_DATA = 38 + 36 + 2 * 10
+
+16 * 1024 - 38 - 36 - 20 - 2 - 2 * 6 - 8 - 9  - 8 - 2 * 2
+'''
 
 table_opts=[
 "avg_row_length",
@@ -541,3 +603,4 @@ if __name__ == "__main__":
         data = json.loads(f.read())
         print(data)
         table_sdi = Table(**data['dd_object'])
+

@@ -55,14 +55,44 @@ def test_int_value(containerOp: ContainerOp):
 class SV(Base):
     __tablename__ = "SVOVER"
     id = Column(dmysql.types.INTEGER(10), primary_key=True)
-    VAR_F = Column(dmysql.types.VARCHAR(16300))
+    VAR_F = Column(dmysql.types.LONGBLOB(16300))
     INT_F = Column(dmysql.types.INTEGER(10))
 
 def test_varchar_overflow(containerOp: ContainerOp):
     Base.metadata.create_all(containerOp.engine, [SV.__table__])
     containerOp.build_ibd(
         insert(SV).values(
-            VAR_F = "hello" * 1900, INT_F = 42,
+            VAR_F = b"z" * 8090, INT_F = 42,
+        ),
+        insert(SV).values(
+            VAR_F = b"z" * 8091, INT_F = 42,
+        ),
+        insert(SV).values(
+            VAR_F = b"z" * 8092, INT_F = 42,
+        ),
+        insert(SV).values(
+            VAR_F = b"z" * 8093, INT_F = 42,
+        ),
+        insert(SV).values(
+            VAR_F = b"z" * 8094, INT_F = 42,
+        ),
+        insert(SV).values(
+            VAR_F = b"z" * 8095, INT_F = 42,
+        ),
+        insert(SV).values(
+            VAR_F = b"z" * 8096, INT_F = 42,
+        ),
+        insert(SV).values(
+            VAR_F = b"z" * 8097, INT_F = 42,
+        ),
+        insert(SV).values(
+            VAR_F = b"z" * 8098, INT_F = 42,
+        ),
+        insert(SV).values(
+            VAR_F = b"z" * 8099, INT_F = 42,
+        ),
+        insert(SV).values(
+            VAR_F = b"z" * 8115, INT_F = 42,
         ),
     )
     time.sleep(3)
