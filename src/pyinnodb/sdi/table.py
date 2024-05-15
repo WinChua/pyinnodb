@@ -431,12 +431,6 @@ class Column:
                 return v.get_json()
             except:
                 return data
-            # return stream.read(dsize)
-        # if dtype == DDColumnType.JSON:
-        #     size = const.parse_var_size(stream)
-        # if dtype.is_var():
-        #     size = const.parse_var_size(stream)
-        pass
 
 
 decimal_leftover_part = {
@@ -622,6 +616,7 @@ class Table:
             cols.append(c.name)
 
         return namedtuple(self.name, " ".join(cols))
+
     @property
     @cache
     def DataClass(self):
@@ -701,6 +696,20 @@ class Table:
                         data_layout_col.append((col, ie.length))
 
         return data_layout_col
+
+    def build_primary_key_bytes(self, values) -> bytes:
+        cols = self.get_disk_data_layout()
+        cols = [c for c in cols if c[1] != ~0&0xffffffff]
+        buf = io.BytesIO()
+        for i, c in enumerate(cols):
+            if DDColumnType(c[0].type).is_int_number():
+                if c[0].is_unsigned:
+                    buf.write(const.encode_mysql_unsigned(values[i], c[0].size))
+                else:
+                    buf.write(const.encode_mysql_int(values[i], c[0].size))
+            else:
+                raise "not int primary"
+        return buf.getvalue()
 
     def get_primary_key_col(self) -> typing.List[Column]:
         primary_col = []
