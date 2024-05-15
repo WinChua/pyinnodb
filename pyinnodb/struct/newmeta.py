@@ -88,8 +88,8 @@ class OrderParseMeta(type):
         cls, name, bases, attrs
     ):  # after py3.7 key of dict is iterated in insert order
         klass = super().__new__(cls, name, bases, attrs)
-        keys_order = []
-        parser_fields = []
+        klass._attr_order = []
+        klass._parse_order = []
         bits_fields = []
         for attr_name, parser in attrs.items():
             if isinstance(parser, AttrNameCall):
@@ -97,32 +97,26 @@ class OrderParseMeta(type):
 
             if isinstance(parser, OMBits):
                 bits_fields.append((attr_name, parser))
-                keys_order.append(attr_name)
+                klass._attr_order.append(attr_name)
                 continue
             elif len(bits_fields) > 0:
                 bits_parser = construct.EmbeddedBitStruct(
                     *[f[1]._make_con() for f in bits_fields]
                 )
-                parser_fields.append(("", bits_parser))
+                klass._parse_order.append(("", bits_parser))
                 bits_fields = []
             if isinstance(parser, construct.Construct) or (
                 isinstance(parser, type) and issubclass(parser, ostruct)
             ):  # for class that we define
-                keys_order.append(attr_name)
-                parser_fields.append((attr_name, parser))
+                klass._attr_order.append(attr_name)
+                klass._parse_order.append((attr_name, parser))
 
-        # parser_fields.sort(key = lambda x: x[1])
         if len(bits_fields) > 0:
             bits_parser = construct.EmbeddedBitStruct(
                 *[f[1]._make_con() for f in bits_fields]
             )
-            parser_fields.append(("", bits_parser))
+            klass._parse_order.append(("", bits_parser))
             bits_fields = []
-
-        klass._attr_order = keys_order
-        klass._parse_order = []
-        for f in parser_fields:
-            klass._parse_order.append(f)
 
         def __str__(self):
             data = []
