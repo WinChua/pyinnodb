@@ -7,6 +7,14 @@ from . import index_type
 from . import column_hidden_type
 from . import partition
 
+class RowFormat(Enum):
+    RF_FIXED = 1
+    RF_DYNAMIC = 2
+    RF_COMPRESSED = 3
+    RF_REDUNDANT = 4
+    RF_COMPACT = 5
+    RF_PAGED = 6
+
 class XDESState(Enum):
     """
     XDES_NOT_INITED = 0 ## extent descriptor is not initialized */

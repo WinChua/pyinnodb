@@ -50,3 +50,22 @@ def test_int_value(containerOp: ContainerOp):
     tar = containerOp.open(containerOp.build_data_path("/test/int_value.ibd"))
     with open("int_value.ibd", "wb") as f:
         f.write(tar.read())
+
+
+class SV(Base):
+    __tablename__ = "SVOVER"
+    id = Column(dmysql.types.INTEGER(10), primary_key=True)
+    VAR_F = Column(dmysql.types.VARCHAR(16300))
+    INT_F = Column(dmysql.types.INTEGER(10))
+
+def test_varchar_overflow(containerOp: ContainerOp):
+    Base.metadata.create_all(containerOp.engine, [SV.__table__])
+    containerOp.build_ibd(
+        insert(SV).values(
+            VAR_F = "hello" * 1900, INT_F = 42,
+        ),
+    )
+    time.sleep(3)
+    tar = containerOp.open(containerOp.build_data_path("/test/SVOVER.ibd"))
+    with open("SVOVER.ibd", "wb") as f:
+        f.write(tar.read())

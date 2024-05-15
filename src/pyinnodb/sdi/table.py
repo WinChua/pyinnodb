@@ -10,7 +10,7 @@ from collections import namedtuple
 
 from .. import const
 from ..const.dd_column_type import DDColumnType, DDColConf
-from ..disk_struct.varsize import VarSize
+from ..disk_struct.varsize import VarSize, OffPagePointer
 
 NewDecimalSize = namedtuple("NewDecimalSize", "intg frac intg0 intg0x frac0 frac0x total")
 
@@ -201,7 +201,13 @@ class Column:
 
 
     def _read_varchar(self, stream, size):
-        return stream.read(size).decode()
+        if size > 10000:
+            data = stream.read(20)
+            print(data)
+            pointer = OffPagePointer.parse_stream(io.BytesIO(data))
+            return pointer
+        else:
+            return stream.read(size)
 
     def read_data(self, stream, size=None):
         dtype = DDColumnType(self.type)
