@@ -256,7 +256,7 @@ class Table:
                     varlen = 4
                 elif DDColumnType(col.type) in [DDColumnType.VARCHAR, DDColumnType.STRING] and not col.column_type_utf8.startswith("varb"):
                     varlen = 3
-                if col.char_length > ie.length:
+                if col.char_length > ie.length: # the index field data length must small than the original field
                     prekey_len = int(ie.length / varlen)
             prefix_part = f"({prekey_len})" if prekey_len != 0 else ""
             cols_name.append(f"`{col.name}`{prefix_part}")
