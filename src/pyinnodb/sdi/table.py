@@ -152,13 +152,19 @@ class Column:
     @property
     @cache
     def is_instant_col(self):
-        return "default_null" in self.private_data or "default" in self.private_data
+        return "version_added" in self.private_data or "version_dropped" in self.private_data
+        #return "default_null" in self.private_data or "default" in self.private_data
 
     def get_instant_default(self):
+        # if self.default_value_utf8_null:
+        #     return "NULL"
+        # else:
+        #     return self.default_value_utf8
         data = self.private_data.get("default", None)
         if data is None:
             return None
-        return self.read_data(io.BytesIO(bytes.fromhex(data)))
+        buf = io.BytesIO(bytes.fromhex(data))
+        return self.read_data(buf, len(data))
 
     @property
     @cache
@@ -181,7 +187,7 @@ class Column:
             sql += f" DEFAULT ({self.default_option})"
         elif not self.default_value_utf8_null:
             sql += f" DEFAULT '{self.default_value_utf8}'"
-        elif self.default_value_utf8_null:
+        elif self.default_value_utf8_null and self.is_nullable:
             sql += f" DEFAULT NULL"
         if self.update_option != "":
             sql += f" ON UPDATE {self.update_option}"
@@ -371,7 +377,7 @@ class Column:
         elif dtype == DDColumnType.DECIMAL or dtype == DDColumnType.NEWDECIMAL:
             return self._read_new_decimal(stream)
         elif dtype == DDColumnType.VARCHAR:
-            return self._read_varchar(stream, dsize)
+            return self._read_varchar(stream, dsize).decode()
         elif dtype in [DDColumnType.LONG_BLOB, DDColumnType.MEDIUM_BLOB]:
             return self._read_varchar(stream, dsize)
         elif dtype == DDColumnType.TINY_BLOB:
