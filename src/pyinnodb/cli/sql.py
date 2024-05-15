@@ -41,7 +41,8 @@ def tosql(ctx, sdionly):
         table_collation = const.get_collation_by_id(table_object.collation_id)
         parts = table_object.gen_sql_for_partition()
         desc = f"ENGINE={table_object.engine} DEFAULT CHARSET={table_collation.CHARACTER_SET_NAME} COLLATE={table_collation.COLLATION_NAME}"
-        print(f"CREATE TABLE {table_name} ({columns_dec}) {desc} {'\n'+parts if parts else ''}")
+        comment = "\nCOMMENT '" + table_object.comment + "'" if table_object.comment else ''
+        print(f"CREATE TABLE {table_name} ({columns_dec}) {desc} {'\n'+parts if parts else ''}{comment}")
         return
 
 # 'type': sql/dd/types/column.h::enum_column_type

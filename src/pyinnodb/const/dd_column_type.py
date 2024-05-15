@@ -45,6 +45,11 @@ class DDColumnType(Enum):
     def is_var(cls, t):
         return cls(t) in _var_type
 
+    @classmethod
+    def is_big(cls, t):
+        return cls(t) in _big_type
+
+
 _number_type = [
     DDColumnType.DECIMAL,
     DDColumnType.TINY ,
@@ -60,5 +65,12 @@ _var_type = [
     DDColumnType.LONG_BLOB,
     DDColumnType.BLOB,
     DDColumnType.STRING,
+    DDColumnType.JSON,
+]
+
+_big_type = [
+    DDColumnType.MEDIUM_BLOB,
+    DDColumnType.LONG_BLOB,
+    DDColumnType.BLOB,
     DDColumnType.JSON,
 ]
