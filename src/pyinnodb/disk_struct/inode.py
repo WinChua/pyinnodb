@@ -5,6 +5,7 @@ from .xdes import MXdesEntry
 from ..mconstruct import *
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +26,7 @@ class MInodeEntry(CC):
         next_pointer = base_node.first
         for i in range(base_node.length):
             loc = next_pointer.seek_loc()
-            f.seek(loc-8)
+            f.seek(loc - 8)
             extent_desc = MXdesEntry.parse_stream(f)
             xdes_idx = next_pointer.xdes_idx()
             page_usage = extent_desc.desc_page_usage(xdes_idx)
@@ -34,24 +35,24 @@ class MInodeEntry(CC):
         return full_extents
 
     def page_used(self, f):
-        page_in_frag = [
-            page_no for page_no in self.fragment_array if page_no != -1]
-        not_full_extents = self._get_list_base_usage_page(
-            f, self.list_base_not_full)
+        page_in_frag = [page_no for page_no in self.fragment_array if page_no != -1]
+        not_full_extents = self._get_list_base_usage_page(f, self.list_base_not_full)
         full_extents = self._get_list_base_usage_page(f, self.list_base_full)
         free_extents = self._get_list_base_usage_page(f, self.list_base_free)
         return {
             "full": full_extents,
             "not_full": not_full_extents,
             "free": free_extents,
-            "frag": page_in_frag}
+            "frag": page_in_frag,
+        }
 
 
 class MInodePage(CC):  # fseg_create
     fil_header: MFil = cfield(MFil)
     list_node_inode_page: MListNode = cfield(MListNode)
     inodes: t.List[MInodeEntry] = cfield(
-        carray(85, MInodeEntry))  # search for FSEG_ARR_OFFSET
+        carray(85, MInodeEntry)
+    )  # search for FSEG_ARR_OFFSET
     empty_space: t.List[int] = cfield(carray(6, cs.Int8ub))
     fil_tailer: MFilTrailer = cfield(MFilTrailer)
 

@@ -30,8 +30,7 @@ class CMeta(type):
             if isinstance(f, list):
                 name = "_".join(map(lambda x: x.name, f))
                 klass._bits_names.append(name)
-                subcon = cs.BitStruct(
-                    **{k.name: k.metadata[METAKEY] for k in f})
+                subcon = cs.BitStruct(**{k.name: k.metadata[METAKEY] for k in f})
             else:
                 name = f.name
                 subcon = f.metadata[METAKEY]
@@ -124,7 +123,9 @@ class CC(cs.Construct, metaclass=CMeta):
     def _encode(self, obj=None, context=None, path=None):
         if obj is None:
             obj = self
-        return {f.name: getattr(obj, f.name) for f in dataclasses.fields(self.__class__)}
+        return {
+            f.name: getattr(obj, f.name) for f in dataclasses.fields(self.__class__)
+        }
 
     @classmethod
     def _decode(cls, obj, context, path):
@@ -199,6 +200,7 @@ class IntFromBytes(cs.Construct):
 
 
 if __name__ == "__main__":
+
     class DD(CC):
         f: int = cfield(cs.Int16ub)
 
@@ -219,8 +221,5 @@ if __name__ == "__main__":
         cstr: str = cfield(cstring(10))
 
     print(Array.sizeof())
-    ta = Array(
-        fs=[DD(f=1)] * 10,
-        cstr="a" * 10
-    )
+    ta = Array(fs=[DD(f=1)] * 10, cstr="a" * 10)
     print(ta.build())
