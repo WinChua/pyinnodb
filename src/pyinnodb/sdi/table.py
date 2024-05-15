@@ -593,7 +593,7 @@ class Table:
             vd = int(col.private_data.get("version_dropped", 0))
             if version < va: # data was inserted before this col add to table
                 continue
-            if vd != 0 and va > vd: # data was inserted after this col add to table
+            if vd != 0 and version >= vd: # data was inserted after this col add to table
                 continue
             cols.append(col)
         return cols
