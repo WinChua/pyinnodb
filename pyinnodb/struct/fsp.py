@@ -1,5 +1,9 @@
 from ..mconstruct import *
 from .list import MListBaseNode, MListNode
+from .fil import MFil
+from .xdes import MXdesEntry
+
+import typing as t
 
 
 class MFspHeader(CC):
@@ -16,3 +20,12 @@ class MFspHeader(CC):
     next_seg_id: int = cfield(cs.Int64ub)
     list_base_full_inode: MListBaseNode = cfield(MListBaseNode)
     list_base_free_inode: MListBaseNode = cfield(MListBaseNode)
+
+
+class MFspPage(CC):
+    fil: MFil = cfield(MFil)
+    fsp_header: MFspHeader = cfield(MFspHeader)
+    xdess: t.List[MXdesEntry] = cfield(carray(256, MXdesEntry))
+    info_max: t.List[int] = cfield(carray(115, cs.Int8ub))
+    has_sdi_page: int = cfield(cs.Int32ub)
+    sdi_page_no: int = cfield(cs.Int32ub)
