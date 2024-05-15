@@ -74,7 +74,12 @@ class Column:
     def gen_sql(self):
         sql = f"`{self.name}` {self.column_type_utf8} {'NULL' if self.is_nullable else 'NOT NULL'}"
         sql += f"{' AUTO_INCREMENT' if self.is_auto_increment else ''}"
-        sql += f"{' DEFAULT \'' + self.default_value_utf8 + '\'' if not self.default_value_utf8_null else ''}"
+        if self.default_option != "":
+            sql += f" DEFAULT ({self.default_option})"
+        elif not self.default_value_utf8_null:
+            sql += f" DEFAULT '{self.default_value_utf8}'"
+        if self.update_option != "":
+            sql += f" ON UPDATE {self.update_option}"
         sql += ' COMMENT \'' + self.comment + '\'' if self.comment else ''
         return sql
 
@@ -276,6 +281,25 @@ class Table:
         key_part = ",".join(cols_name)
         comment = f" COMMENT '{idx.comment}'" if idx.comment else ''
         return f"{idx_type_part}{idx_name_part}({key_part}){comment}"
+
+    def gen_sql_for_partition(self) -> str:
+        pt = const.partition.PartitionType(self.partition_type)
+        if pt == const.partition.PartitionType.PT_RANGE:
+            p = f"/*!50100 PARTITION BY RANGE({self.partition_expression_utf8}) (\n    "
+            parts = []
+            for par in self.partitions:
+                parts.append(f"PARTITION {par.name} VALUES LESS THAN ({par.description_utf8})")
+            return f"{p}{',\n    '.join(parts)}\n)*/"
+        elif pt == const.partition.PartitionType.PT_HASH:
+            return f"/*!50100 PARTITION BY HASH ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+        elif pt == const.partition.PartitionType.PT_KEY_55:
+            return f"/*!50100 PARTITION BY KEY ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+        elif pt == const.partition.PartitionType.PT_LIST:
+            p = f"/*!50100 PARTITION BY LIST ({self.partition_expression_utf8}) (\n    "
+            parts = []
+            for par in self.partitions:
+                parts.append(f"PARTITION {par.name} VALUES IN ({par.description_utf8})")
+            return f"{p}{',\n    '.join(parts)}\n)*/"
 
 
 
