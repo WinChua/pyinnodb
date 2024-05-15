@@ -601,6 +601,18 @@ class Table:
 
     @property
     @cache
+    def DataClassHiddenCol(self):
+        cols = []
+        for c in self.columns:
+            # if c.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]:
+            #     continue
+            if c.private_data.get("version_dropped", None) is not None:
+                continue
+            cols.append(c.name)
+
+        return namedtuple(self.name, " ".join(cols))
+    @property
+    @cache
     def DataClass(self):
         cols = []
         for c in self.columns:
