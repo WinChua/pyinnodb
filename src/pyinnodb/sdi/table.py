@@ -15,6 +15,7 @@ from ..disk_struct.varsize import VarSize, OffPagePointer
 
 from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp
 from ..disk_struct.json import MJson
+from ..disk_struct.rollback import MRollbackPointer
 
 
 class Lob:
@@ -127,6 +128,8 @@ class Column:
             ):  # the index field data length must small than the original field
                 prekey_len = int(ie.length / varlen)
                 return prekey_len, True
+            else:
+                return 0, False
         else:
             return 0, False
 
@@ -357,6 +360,8 @@ class Column:
                 return data
 
     def read_data(self, stream, size=None):
+        if self.name == "DB_ROLL_PTR":
+            return MRollbackPointer.parse_stream(stream)
         dtype = DDColumnType(self.type)
         if size is not None:
             dsize = size
