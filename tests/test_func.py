@@ -5,15 +5,14 @@ from pyinnodb import const
 
 test_filename1 = parent_dir + "/data/t1.ibd"
 test_filename = "/home/winchua/github/mysql-server/make/data/test/t1.ibd"
-test_filename2 = "/home/winchua/github/mysql-server/make/data/test/t_btree.ibd"
+test_filename2 = test_filename
 
 
 def test_list_page():
     with open(test_filename, "rb") as f:
-        fil = Fil()
-        fil.parse_stream(f)
+        fil = Fil.parse_stream(f)
         logger.info(fil)
-        fsp_header = struct_parse(FspHeader(), f)
+        fsp_header = struct_parse(FspHeader, f)
         logger.info(fsp_header)
         for i in range(fsp_header.highest_page_number):
             f.seek(i * 16 * 1024)
@@ -27,19 +26,16 @@ def test_list_page():
 
 def test_fsp_header():
     with open(test_filename, "rb") as f:
-        fil = Fil()
-        fil.parse_stream(f)
-        fsp_header = FspHeader()
-        fsp_header.parse_stream(f)
+        fil = Fil.parse_stream(f)
+        fsp_header = FspHeader.parse_stream(f)
         logger.info("fsp_header is %s", fsp_header)
         xdess = []
-        return
         for i in range(256):
-            xdess.append(XdesEntry().parse_stream(f))
+            xdess.append(XdesEntry.parse_stream(f))
             logger.info("idx: %d, segid: %d", i, xdess[-1].fseg_id)
 
 def test_sdi_page():
-    with open(test_filename1, "rb") as f:
+    with open(test_filename, "rb") as f:
         f.seek(3 * 16 * 1024)
         index_page = SDIPage._parse(f)
         # logger.info("index page size %d", len(index_page.build()))
@@ -65,10 +61,9 @@ test_index_page_data = b"2\x17X&\x00\x00\x00\x04\xff\xff\xff\xff\xff\xff\xff\xff
 
 
 def test_index_page():
-    with open(test_filename1, "rb") as f:
+    with open(test_filename, "rb") as f:
         f.seek(4 * 16 * 1024)
-        index_page = IndexPage()
-        index_page.parse_stream(f)
+        index_page = IndexPage.parse_stream(f)
         # logger.info("index page size %d", len(index_page.build()))
         # logger.info("page_type %s", get_page_type_name(index_page.fil.page_type))
         # logger.info("fil size %d, index_header size %d, fseg_header size %d", len(index_page.fil.build()), len(index_page.index_header.build()), len(index_page.fseg_header.build()))
@@ -108,13 +103,8 @@ def test_inode_entry():
     with open(test_filename1, "rb") as f:
         f.seek(2 * 16 * 1024 + 50)
         data = f.read(192)
-        inode_entry = InodeEntry()
-        inode_entry.parse_stream(BytesIO(data))
+        inode_entry = InodeEntry.parse_stream(BytesIO(data))
         logger.debug("inode entry is %s", inode_entry)
-        inodes = construct.Array(1, InodeEntry())
-        a = inodes.parse_stream(BytesIO(data))
-        logger.debug("inodes is %s", a[0])
-        logger.debug("eq is %s", a == inode_entry)
 
 
 def test_index_iter():
@@ -129,3 +119,29 @@ def test_index_iter():
         logger.info("leaf_inode %s", leaf_inode)
         logger.info("leaf_space_id %d", index_page.fseg_header.leaf_space_id)
         logger.info("root page is %d", internal_inode.fragment_array[0])
+
+def test_iter_record():
+    with open(test_filename, "rb") as f:
+        f.seek(4 * 16 * 1024)
+        index_page = IndexPage.parse_stream(f)
+        logger.info("fseg_header is %s", index_page.fseg_header)
+        logger.info("infimum is %s", index_page.system_records.infimum)
+        logger.info("supremum is %s", index_page.system_records.supremum)
+        logger.info("page_dir is %s", index_page.page_directory)
+        logger.info("infimum consume %d", index_page.fil._consume_num + index_page.index_header._consume_num
+                + index_page.fseg_header._consume_num + index_page.system_records.infimum._consume_num-8)
+        f.seek(4 * 16 * 1024 
+               + index_page.fil._consume_num
+               + index_page.index_header._consume_num
+               + index_page.fseg_header._consume_num
+               + index_page.system_records.infimum._consume_num-8)
+        next_record_offset = index_page.system_records.infimum.next_record_offset
+        cnt = 0
+        while next_record_offset != 0:
+            f.seek(next_record_offset - 5, 1)
+            rh = RecordHeader.parse_stream(f)
+            cnt += 1
+            if cnt >= 10:
+                break
+            logger.info("rh is %s", rh)
+            next_record_offset = rh.next_record_offset

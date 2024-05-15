@@ -41,7 +41,7 @@ class SystemRecord(OStruct):
     record_owned_num = OBits(4)
     order = OBits(13)
     record_type = OBits(3)
-    next_record_offset = UBInt16
+    next_record_offset = SBInt16
     marker = String(8)
 
 
@@ -63,6 +63,16 @@ class IndexPage(OStruct):
     ## only root index page contains pointer to the fseg, other page, zero-filled
     system_records = IndexSystemRecord
 
+    @classmethod
+    def _parse(cls, stream, context=None):
+        self = super()._parse(stream, context)
+        n = self.index_header.dir_slot_number
+        stream.seek(-self._consume_num + 1024 * 16 - 8 - (2 * n), 1)
+        parser = Array(n, SBInt16(""))
+        v = parser._parse(stream , context)
+        self.page_directory = v
+        return self
+
 
 class SDIPage(OStruct):
     fil = Fil
@@ -82,9 +92,8 @@ class SDIPage(OStruct):
             "from index page, system_records _consume_num %d",
             self.system_records._consume_num,
         )
-        self.fil_tailer = FilTrailer()
-        self.fil_tailer.parse_stream(stream)
-        self._get_first_record(stream)
+        self.fil_tailer = FilTrailer.parse_stream(stream)
+        self.ddl = self._get_first_record(stream)
         return self
 
     def _get_first_record(self, stream):
@@ -105,11 +114,11 @@ class SDIPage(OStruct):
         )
         ddl_field = ddl.parse_stream(stream)
         logger.debug("ddl is %s", ddl_field)
-        return
         zipdata = stream.read(ddl_field.zip_len)
         json_data = json.loads(zlib.decompress(zipdata))
         for col in json_data["dd_object"]["columns"]:
             logger.debug(f"{col['name']}:{col['type']},{col['column_type_utf8']},")
+        return json_data
 
 
 
