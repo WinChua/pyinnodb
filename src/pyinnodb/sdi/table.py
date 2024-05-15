@@ -108,6 +108,8 @@ class Column:
         sql += ' COMMENT \'' + self.comment + '\'' if self.comment else ''
         return sql
 
+    @property
+    @cache
     def size(self):
         if self.name in column_spec_size:
             return column_spec_size[self.name]
@@ -252,7 +254,7 @@ class Column:
         if size is not None:
             dsize = size
         else:
-            dsize = self.size()
+            dsize = self.size
         if dtype.is_int_number():
             return self._read_int(stream, dsize)
         elif dtype == DDColumnType.FLOAT:
