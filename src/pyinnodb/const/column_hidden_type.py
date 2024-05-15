@@ -2,6 +2,9 @@ from enum import Enum
 
 
 class ColumnHiddenType(Enum):
+    '''
+    use when drop column
+    '''
     HT_VISIBLE = 1  # the column is visible a normal column
     HT_HIDDEN_SE = 2  # not visible to the server
     HT_HIDDEN_SQL = (
