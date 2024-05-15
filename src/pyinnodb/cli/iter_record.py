@@ -53,25 +53,12 @@ def iter_record(
 
 
 def with_dd_object(dd_object: Table, delete):
-    primary_col = dd_object.get_primary_key_col()
-    db_hidden_col = dd_object.get_default_DB_col()
-    exclude_col = [c.name for c in primary_col]
-    exclude_col.extend([c.name for c in db_hidden_col])
-    secondary_col = dd_object.get_column(lambda c: c.name not in exclude_col)
-    nullcol_bitmask_size, nullable_cols = dd_object.nullcol_bitmask_size
-    may_var_col = dd_object.var_col
-    #exclude_col.sort(key = lambda c: c.private_data.get("physical_pos", -1))
-    secondary_col.sort(key = lambda c: c.private_data.get("physical_pos", -1))
-
     def value_parser(rh: MRecordHeader, f):
         cur = f.tell()
         logger.debug("record header is %s, offset in page %d", rh, cur % const.PAGE_SIZE)
-        #print(rh, cur % const.PAGE_SIZE)
 
         if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
             next_page_no = const.parse_mysql_int(f.read(4))
-            # next_page_no = int.from_bytes(f.read(4), "big")
-            #print("it's a node pointer, next page is", next_page_no)
             return
 
         if not delete and rh.deleted:
@@ -114,8 +101,6 @@ def with_dd_object(dd_object: Table, delete):
         for c in may_var_col:
             if c.ordinal_position in null_col_data:
                 continue
-            if rh.no_use_1 == 0 and c.is_instant_col: # for the record no insert before instant col
-                continue
             var_size[c.ordinal_position] = const.parse_var_size(f)
 
         cols_to_parse.sort(key=lambda c: c.private_data.get("physical_pos", None))
@@ -143,78 +128,6 @@ def with_dd_object(dd_object: Table, delete):
                 disk_data_parsed[col.name] = col.get_instant_default()
 
         print(dd_object.DataClass(**disk_data_parsed))
-        return
 
-
-
-
-
-        ## read null
-        # if rh.no_use_1 == 0:
-        #     f.seek(-MRecordHeader.sizeof() - nullcol_bitmask_size, 1)
-        # else:
-        #     f.seek(-MRecordHeader.sizeof() - nullcol_bitmask_size - 1, 1)
-        f.seek(-MRecordHeader.sizeof() - nullcol_bitmask_size - rh.no_use_1, 1)
-        null_bitmask = f.read(nullcol_bitmask_size)
-        rec_col_version = 0
-        if rh.no_use_1 == 1:
-            rec_col_version = int.from_bytes(f.read(1)) # TODO: figure what this byte do
-        null_mask = int.from_bytes(null_bitmask, signed=False)
-        null_col_data = {}
-        for i, c in enumerate(nullable_cols):
-            if null_mask & (1 << i):
-                null_col_data[c.ordinal_position] = 1
-
-        logger.debug("null_bitmask data is %s, instant byte: %s", null_bitmask, rec_col_version)
-        logger.debug("null_col_data is %s, %s", null_col_data, ",".join(c.name for c in nullable_cols))
-
-        ## read var
-        f.seek(-nullcol_bitmask_size - rh.no_use_1, 1)
-        var_size = {}
-        for c in may_var_col:
-            if c.ordinal_position in null_col_data:
-                continue
-            if rh.no_use_1 == 0 and c.is_instant_col: # for the record no insert before instant col
-                continue
-            var_size[c.ordinal_position] = const.parse_var_size(f)
-            logger.debug("read var size %s for col %s", var_size[c.ordinal_position], c.name)
-
-
-        logger.debug("var size is %s", var_size)
-
-        kv = {}
-        f.seek(cur)
-        for col in primary_col:
-            kv[col.name] = col.read_data(f)
-
-        for col in db_hidden_col:
-            data = col.read_data(f)
-            continue
-            #print(col.name, col.is_unsigned, data)
-
-        for col in secondary_col:
-            version_added = col.private_data.get("version_added", 0)
-            version_dropped = col.private_data.get("version_dropped", 0)
-            logger.debug("name: %s, rec col version: %d, add: %d, drop: %d", col.name, rec_col_version, version_added, version_dropped)
-            col_value = None
-            if col.ordinal_position in null_col_data:
-                col_value = None
-            elif rh.no_use_1 == 0 and col.is_instant_col:
-                col_value = col.get_instant_default() # try to get the default value for instant col
-            elif instant_col_deal > rec_col_version:
-                col_value = col.get_instant_default() # try to get the default value for instant col
-            else:
-                col_value = col.read_data(f, var_size.get(col.ordinal_position, None))
-            if col.is_hidden_from_user: # hidden from user, no show
-                continue
-            kv[col.name] = col_value
-            # print(
-            #     col.name,
-            #     col.type,
-            #     col.read_data(f, var_size.get(col.ordinal_position, None)),
-            # )
-
-        print(kv)
-        #print(dd_object.DataClass(**{k:v for k, v in kv.items() if k not in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]}))
 
     return value_parser
