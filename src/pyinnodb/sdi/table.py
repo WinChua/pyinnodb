@@ -1,6 +1,8 @@
 import typing
 from dataclasses import dataclass
 import dataclasses
+from .. import const
+from ..const.dd_column_type import DDColumnType
 
 def modify_init(cls):
     old_init = cls.__init__
@@ -65,6 +67,17 @@ class Column:
     collation_id: int = 0
     is_explicit_collation: bool = False
 
+    def get_collation(self):
+        coll = const.get_collation_by_id(self.collation_id)
+        return coll
+
+    def gen_sql(self):
+        sql = f"`{self.name}` {self.column_type_utf8} {'NULL' if self.is_nullable else 'NOT NULL'}"
+        sql += f"{' AUTO_INCREMENT' if self.is_auto_increment else ''}"
+        sql += f"{' DEFAULT \'' + self.default_value_utf8 + '\'' if not self.default_value_utf8_null else ''}"
+        sql += ' COMMENT \'' + self.comment + '\'' if self.comment else ''
+        return sql
+
 @modify_init
 @dataclass
 class CheckCons:
@@ -92,7 +105,7 @@ class Index:
     comment: str = ""
     options: str = ""
     se_private_data: str = ""
-    type: int = 0 
+    type: int = 0 ## sql/dd/types/index.h:enum_index_type
     algorithm: int = 0
     is_algorithm_explicit: bool = False
     is_visible: bool = False
@@ -100,6 +113,26 @@ class Index:
     engine_attribute: str = ""
     secondary_engine_attribute: str = ""
     elements: typing.List[IndexElement] = dataclasses.field(default_factory=list)
+
+    def __post_init__(self):
+        c: typing.List[IndexElement] = [IndexElement(**e) for e in self.elements]
+        self.elements = c
+
+    def get_effect_element(self) -> typing.List[IndexElement]:
+        return [e for e in self.elements if e.length != 4294967295 and not e.hidden]
+
+    def get_index_type(self):
+        it = const.index_type.IndexType(self.type)
+        if it == const.index_type.IndexType.IT_PRIMARY:
+            return 'PRIMARY '
+        elif it == const.index_type.IndexType.IT_UNIQUE:
+            return 'UNIQUE '
+        elif it == const.index_type.IndexType.IT_FULLTEXT:
+            return 'FULLTEXT '
+        elif it == const.index_type.IndexType.IT_MULTIPLE:
+            return ''
+        elif it == const.index_type.IndexType.IT_SPATIAL:
+            return 'SPATIAL '
 
 
 @modify_init
@@ -161,6 +194,7 @@ class Partition:
 @dataclass
 class Table:
     # from abstract table
+    name: str = ""
     mysql_version_id: int = 0
     created: int = 0
     last_altered: int = 0
@@ -191,6 +225,49 @@ class Table:
     partitions: typing.List[Partition] = dataclasses.field(default_factory=list)
     collation_id: int = 0
     # tablespace_ref: ?
+
+    def __post_init__(self):
+        cols: typing.List[Column] = [Column(**c) for c in self.columns]
+        self.columns = cols
+        idxs: typing.List[Index] = [Index(**i) for i in self.indexes]
+        self.indexes = idxs
+        fors: typing.List[ForeignKeys] = [ForeignKeys(**f) for f in self.foreign_keys]
+        self.foreign_keys = fors
+        cons: typing.List[CheckCons] = [CheckCons(**c) for c in self.check_constraints]
+        self.check_constraints = cons
+        pars: typing.List[Partition] = [Partition(**p) for p in self.partitions]
+        self.partitions = pars
+
+    def tosql_gen_column(self):
+        hidden_column_name = ['DB_TRX_ID', 'DB_ROLL_PTR', 'DB_ROW_ID']
+        for c in self.columns:
+            if c.name in hidden_column_name:
+                continue
+            DDColumnType(c.type) != DDColumnType.LONG
+        pass
+
+    def gen_sql_for_index(self, idx: Index) -> str :
+        cols_name = []
+        for ie in idx.get_effect_element():
+            col = self.columns[ie.column_opx]
+            varlen, prekey_len = 1, 0
+            if const.dd_column_type.DDColumnType.is_var(col.type): ## TODO: judge prefix key
+                if col.collation_id == 255:
+                    varlen = 4
+                elif DDColumnType(col.type) in [DDColumnType.VARCHAR, DDColumnType.STRING] and not col.column_type_utf8.startswith("varb"):
+                    varlen = 3
+                if col.char_length > ie.length:
+                    prekey_len = int(ie.length / varlen)
+            prefix_part = f"({prekey_len})" if prekey_len != 0 else ""
+            cols_name.append(f"`{col.name}`{prefix_part}")
+        if len(cols_name) == 0:
+            return ""
+
+        idx_type_part = f"{idx.get_index_type()}KEY "
+        idx_name_part = f"`{idx.name}` " if idx.name != "PRIMARY" else ''
+        key_part = ",".join(cols_name)
+        comment = f" COMMENT '{idx.comment}'" if idx.comment else ''
+        return f"{idx_type_part}{idx_name_part}({key_part}){comment}"
 
 
 

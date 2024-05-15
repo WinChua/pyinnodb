@@ -28,3 +28,12 @@ def test_instant(containerOp: ContainerOp):
     logger.debug(tar1_inode)
     logger.debug(tar2_inode)
 
+def test_get_all_type(containerOp: ContainerOp):
+    containerOp.build_ibd(
+        text("INSERT INTO `test`.`all_type`(`ENUM`) values ('hello')"),
+        text(f"ALTER TABLE `test`.`all_type` ADD COLUMN instant_col varchar(255) DEFAULT 'HELLO', ALGORITHM=INSTANT")
+    )
+    time.sleep(3)
+    tar = containerOp.open(containerOp.build_data_path("/test/all_type.ibd"))
+    with open("all_type.ibd", "wb") as f:
+        f.write(tar.read())
