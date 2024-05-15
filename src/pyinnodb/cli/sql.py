@@ -26,7 +26,10 @@ def tosql(ctx, sdionly):
         table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
         columns_dec = []
         for c in table_object.columns:
-            if const.column_hidden_type.ColumnHiddenType(c.hidden) == const.column_hidden_type.ColumnHiddenType.HT_HIDDEN_SE:
+            if (
+                const.column_hidden_type.ColumnHiddenType(c.hidden)
+                == const.column_hidden_type.ColumnHiddenType.HT_HIDDEN_SE
+            ):
                 continue
             columns_dec.append(c.gen_sql())
         idx_dec = []
@@ -39,13 +42,18 @@ def tosql(ctx, sdionly):
         table_collation = const.get_collation_by_id(table_object.collation_id)
         parts = table_object.gen_sql_for_partition()
         desc = f"ENGINE={table_object.engine} DEFAULT CHARSET={table_collation.CHARACTER_SET_NAME} COLLATE={table_collation.COLLATION_NAME}"
-        comment = "\nCOMMENT '" + table_object.comment + "'" if table_object.comment else ''
-        print(f"CREATE TABLE {table_name} ({columns_dec}) {desc} {'\n'+parts if parts else ''}{comment}")
+        comment = (
+            "\nCOMMENT '" + table_object.comment + "'" if table_object.comment else ""
+        )
+        print(
+            f"CREATE TABLE {table_name} ({columns_dec}) {desc} {'\n'+parts if parts else ''}{comment}"
+        )
         return
+
 
 # 'type': sql/dd/types/column.h::enum_column_type
 # column_key : ag --cpp \ CK_NONE
 
 # column_type_utf8 -> ag --cpp '::sql_type'
 
-not_focus_col_name = ['DB_TRX_ID', 'DB_ROLL_PTR', 'DB_ROW_ID']
+not_focus_col_name = ["DB_TRX_ID", "DB_ROLL_PTR", "DB_ROW_ID"]

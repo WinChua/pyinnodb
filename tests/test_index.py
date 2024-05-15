@@ -15,8 +15,7 @@ def test_index_page_header():
         f.seek(4 * const.PAGE_SIZE)
         index_page = MIndexPage.parse_stream(f)
         logger.info("record_format: %s", index_page.index_header.record_format)
-        logger.info("record num is %d",
-                    index_page.index_header.heap_records_number)
+        logger.info("record num is %d", index_page.index_header.heap_records_number)
         logger.info("header is %s", index_page.index_header)
 
 
@@ -27,8 +26,9 @@ def test_page_level():
         logger.info("page_level is %s", index_page_4.index_header.page_level)
         all_fil_page = [index_page_4.fil]
         logger.info("index_page info is %s", index_page_4.fil)
-        logger.info("page type is %s",
-                    const.get_page_type_name(index_page_4.fil.page_type))
+        logger.info(
+            "page type is %s", const.get_page_type_name(index_page_4.fil.page_type)
+        )
         next_page = index_page_4.fil.next_page
         while next_page != 4294967295:
             logger.info("next_page is %d", next_page)

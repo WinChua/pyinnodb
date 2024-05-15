@@ -5,6 +5,7 @@ from pyinnodb.sdi.table import Table
 
 import json
 
+
 def test_sdi_parse():
     with open(test_filename, "rb") as f:
         f.seek(3 * const.PAGE_SIZE)

@@ -7,6 +7,7 @@ from . import index_type
 from . import column_hidden_type
 from . import partition
 
+
 class RowFormat(Enum):
     RF_FIXED = 1
     RF_DYNAMIC = 2
@@ -14,6 +15,7 @@ class RowFormat(Enum):
     RF_REDUNDANT = 4
     RF_COMPACT = 5
     RF_PAGED = 6
+
 
 class XDESState(Enum):
     """

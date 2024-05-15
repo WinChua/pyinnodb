@@ -103,8 +103,11 @@ def test_list_mpage():
         for i in range(mfsp_header.highest_page_number):
             f.seek(i * const.PAGE_SIZE)
             mfili = MFil.parse_stream(f)
-            logger.info("offset: %d, page_type: %s", mfili.offset,
-                        const.get_page_type_name(mfili.page_type))
+            logger.info(
+                "offset: %d, page_type: %s",
+                mfili.offset,
+                const.get_page_type_name(mfili.page_type),
+            )
 
 
 def test_validate_page():
@@ -112,15 +115,16 @@ def test_validate_page():
         mfil = MFil.parse_stream(f)
         mfsp_header = MFspHeader.parse_stream(f)
         for i in range(mfsp_header.highest_page_number):
-            f.seek(i*const.PAGE_SIZE)
+            f.seek(i * const.PAGE_SIZE)
             page_data = f.read(const.PAGE_SIZE)
             mfil = MFil.parse(page_data)
             crc32c = const.page_checksum_crc32c(page_data)
             if mfil.page_type == const.FIL_PAGE_TYPE_ALLOCATED:
                 logger.info("allocated page no need to calculate checksum")
                 continue
-            logger.info("fil check sum:%x, caculate check sum: %x",
-                        mfil.checksum, crc32c)
+            logger.info(
+                "fil check sum:%x, caculate check sum: %x", mfil.checksum, crc32c
+            )
 
 
 def test_page_checksum():
@@ -133,24 +137,26 @@ def test_page_checksum():
         logger.info(mfil_tailer)
         logger.info("tailer checksum is %x", mfil_tailer.old_checksum)
         import zlib
+
         crc321 = zlib.crc32(mfil.build()[4:26])
         logger.info("crc321 is %x", crc321)
         logger.info("page crc32 is %x", zlib.crc32(page0[4:26]))
-        crc322 = zlib.crc32(page0[38:const.PAGE_SIZE-8])
+        crc322 = zlib.crc32(page0[38 : const.PAGE_SIZE - 8])
         logger.info("c2 is %x", crc322)
         logger.info("result is %x", crc321 ^ crc322)
         header = mfil.build()[4:26]
-        body = page0[38:const.PAGE_SIZE - 8]
+        body = page0[38 : const.PAGE_SIZE - 8]
         import functools
+
         logger.info("checksum crc32c is %x", checksum(header) ^ checksum(body))
 
     target_mfil = MFil.parse(
-        b'\xed\x18\xb5\xc2\x00\x00\x00\x00\x00\x018\xe4\x00\x00\x00\x01\x00\x00\x00\x00\x00\x017X\x00\x08\x00\x00\x00\x00\x01"m\x8e\x00\x00\x00\x00')
+        b'\xed\x18\xb5\xc2\x00\x00\x00\x00\x00\x018\xe4\x00\x00\x00\x01\x00\x00\x00\x00\x00\x017X\x00\x08\x00\x00\x00\x00\x01"m\x8e\x00\x00\x00\x00'
+    )
     logger.info(target_mfil)
 
 
-crc32c = crcmod.Crc(poly=0x11EDC6F41, rev=True,
-                    initCrc=0, xorOut=0xFFFFFFFF)
+crc32c = crcmod.Crc(poly=0x11EDC6F41, rev=True, initCrc=0, xorOut=0xFFFFFFFF)
 
 
 def checksum(data):
@@ -158,7 +164,6 @@ def checksum(data):
 
 
 def the_checksum():
-
     MAX = 0xFFFFFFFF
     MASK1 = 1463735687
     MASK2 = 1653893711
@@ -185,8 +190,9 @@ def test_desc():
                     page_number = i * 64 + j
                     f.seek(page_number * const.PAGE_SIZE)
                     fil = MFil.parse_stream(f)
-                    logger.info('ps:%d, page number:%d, page in used: %s',
-                                ps, page_number, fil)
+                    logger.info(
+                        "ps:%d, page number:%d, page in used: %s", ps, page_number, fil
+                    )
 
     return
     logger.info("xdes is %s", fsp_page.xdess[0].build())
@@ -202,12 +208,17 @@ def test_desc():
         for i, inode in enumerate(inode_page.inodes):
             if inode.fseg_id == 0:
                 continue
-            logger.info("i: %d, inode.id is %s, magic:%s", i,
-                        inode.fseg_id, inode.magic_number)
-            logger.info("page in used: %s", ",".join(
-                map(str, [f for f in inode.fragment_array if f >= 0])))
-            logger.info("xdes length: %d,%d,%d,%d",
-                        inode.list_base_free.length,
-                        inode.list_base_full.length,
-                        inode.list_base_not_full.length,
-                        inode.not_full_list_used_page)
+            logger.info(
+                "i: %d, inode.id is %s, magic:%s", i, inode.fseg_id, inode.magic_number
+            )
+            logger.info(
+                "page in used: %s",
+                ",".join(map(str, [f for f in inode.fragment_array if f >= 0])),
+            )
+            logger.info(
+                "xdes length: %d,%d,%d,%d",
+                inode.list_base_free.length,
+                inode.list_base_full.length,
+                inode.list_base_not_full.length,
+                inode.not_full_list_used_page,
+            )
