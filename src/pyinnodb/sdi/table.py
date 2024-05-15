@@ -129,12 +129,14 @@ class Column:
         return coll
 
     def gen_sql(self):
-        sql = f"`{self.name}` {self.column_type_utf8} {'NULL' if self.is_nullable else 'NOT NULL'}"
+        sql = f"`{self.name}` {self.column_type_utf8}{'' if self.is_nullable else ' NOT NULL'}"
         sql += f"{' AUTO_INCREMENT' if self.is_auto_increment else ''}"
         if self.default_option != "":
             sql += f" DEFAULT ({self.default_option})"
         elif not self.default_value_utf8_null:
             sql += f" DEFAULT '{self.default_value_utf8}'"
+        elif self.default_value_utf8_null:
+            sql += f" DEFAULT NULL"
         if self.update_option != "":
             sql += f" ON UPDATE {self.update_option}"
         sql += " COMMENT '" + self.comment + "'" if self.comment else ""
