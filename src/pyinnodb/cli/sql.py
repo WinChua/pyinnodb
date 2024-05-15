@@ -18,7 +18,7 @@ def tosql(ctx, mode):
     fsp_page = ctx.obj["fsp_page"]
     logger.debug("fsp header is %s", fsp_page.fsp_header)
     logger.debug("fsp page is %s", fsp_page.fil)
-    if fsp_page.has_sdi_page == 1:
+    if fsp_page.sdi_version == 1:
         f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
         sdi_page = MSDIPage.parse_stream(f)
         if mode == "sdi":
