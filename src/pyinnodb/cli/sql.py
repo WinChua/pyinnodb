@@ -1,16 +1,14 @@
-import click
+from . import *
 from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.index import MSDIPage
-from pyinnodb import const
 from pyinnodb.sdi.table import Table
 
 import json
 
-import logging
-
 logger = logging.getLogger(__name__)
 
 
+@main.command()
 @click.pass_context
 @click.option("--sdionly", type=click.BOOL, default=False)
 def tosql(ctx, sdionly):
