@@ -41,17 +41,19 @@ class MFsegHeader(CC):
     # pointer INODE entry in INODE page
     internal_pointer: MPointer = cfield(MPointer)
 
-    def get_first_leaf_page(self, f):
-        if self.leaf_pointer.page_number != 4294967295:
-            f.seek(self.leaf_pointer.seek_loc())
-            inode_entry = MInodeEntry.parse_stream(f)
-            fp = inode_entry.first_page()
-            if fp is not None:
-                return fp
+    # should not use this way to determine the first leaf page number
+    # as off-page may allocate first
+    # def get_first_leaf_page(self, f):
+    #     if self.leaf_pointer.page_number != 4294967295:
+    #         f.seek(self.leaf_pointer.seek_loc())
+    #         inode_entry = MInodeEntry.parse_stream(f)
+    #         fp = inode_entry.first_page()
+    #         if fp is not None:
+    #             return fp
 
-        f.seek(self.internal_pointer.seek_loc())
-        inode_entry = MInodeEntry.parse_stream(f)
-        return inode_entry.first_page()
+    #     f.seek(self.internal_pointer.seek_loc())
+    #     inode_entry = MInodeEntry.parse_stream(f)
+    #     return inode_entry.first_page()
 
 class MSystemRecord(CC):
     info_flags: int = cfield(cs.BitsInteger(4))
