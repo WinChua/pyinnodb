@@ -190,6 +190,14 @@ class Partition:
     indexes: typing.List[PartitionIndex] = None
     subpartitions: typing.List["Partition"] = None
 
+    def __post_init__(self):
+        vs : typing.List[PartitionValue] = [PartitionValue(**v) for v in self.values]
+        self.values = vs
+        idx : typing.List[PartitionIndex] = [PartitionIndex(**v) for v in self.indexes]
+        self.indexes = idx
+        sp: typing.List["Partition"] = [Partition(**v) for v in self.subpartitions]
+        self.subpartitions = sp
+
 @modify_init
 @dataclass
 class Table:
