@@ -63,6 +63,7 @@ class SV(Base):
     VAR_F = Column(dmysql.types.TINYBLOB(10000))
     DATE_F = Column(sqlalchemy.DATE)
     TIMESTAMP_F = Column(dmysql.types.TIMESTAMP(fsp=6))
+    YEAR_F = Column(dmysql.types.YEAR)
 
 def test_varchar_overflow(containerOp: ContainerOp):
     Base.metadata.create_all(containerOp.engine, [SV.__table__])
@@ -71,6 +72,7 @@ def test_varchar_overflow(containerOp: ContainerOp):
             VAR_F = b"z" * 255, INT_F = 42, TIME_FSP_F = datetime.timedelta(hours=1, milliseconds=42),
             DATETIME_F = datetime.datetime(year=2024, month=3, day=2, hour=2, minute=3, second=2, microsecond=872),
             DATE_F = datetime.date(1999, 1, 2),TIMESTAMP_F = datetime.datetime(2024, 3,4, 1, 23, 31, 897),
+            YEAR_F = 2154,
         ),
     )
     time.sleep(3)
