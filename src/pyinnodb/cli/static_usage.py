@@ -2,7 +2,18 @@ import click
 
 from pyinnodb.disk_struct.inode import MInodePage
 from pyinnodb.disk_struct.fsp import MFspPage
+from pyinnodb.disk_struct.fil import MFil
 from pyinnodb import const
+
+@click.pass_context
+def list_page(ctx):
+    f = ctx.obj["fn"]
+    fsp_page = ctx.obj["fsp_page"]
+    for pn in range(fsp_page.fsp_header.highest_page_number):
+        f.seek(pn * const.PAGE_SIZE)
+        fil = MFil.parse_stream(f)
+        page_name = const.get_page_type_name(fil.page_type)
+        print(f"{pn} {page_name}")
 
 
 @click.pass_context

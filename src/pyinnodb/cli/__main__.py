@@ -1,6 +1,7 @@
 import click
 from . import static_usage
 from . import sql
+from . import validate
 from pyinnodb.disk_struct.fsp import MFspPage
 import logging
 
@@ -21,7 +22,9 @@ def main(ctx, fn, log_level):
 
 
 main.command()(static_usage.static_page_usage)
+main.command()(static_usage.list_page)
 main.command()(sql.tosql)
+main.command()(validate.validate)
 
 
 if __name__ == "__main__":
