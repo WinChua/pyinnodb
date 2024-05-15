@@ -1,18 +1,18 @@
-from elftools import construct
-from .meta import *
-from .list import ListBaseNode, ListNode
+from ..mconstruct import *
+from .list import MListBaseNode, MListNode
 
 
-class FspHeader(OStruct):
-    space_id = UBInt32
-    unused = UBInt32
-    highest_page_number = UBInt32  # size, 已经在磁盘上分配的页数
-    highest_page_number_init = UBInt32  # 已经初始化, 但不一定在磁盘上分配, 大于该值的page是free
-    flags = UBInt32
-    free_frag_page_number = UBInt32
-    list_base_free = ListBaseNode
-    list_base_free_frag = ListBaseNode
-    list_base_full_frag = ListBaseNode
-    next_seg_id = UBInt64
-    list_base_full_inode = ListBaseNode
-    list_base_free_inode = ListBaseNode
+class MFspHeader(CC):
+    space_id: int = cfield(cs.Int32ub)
+    unused: int = cfield(cs.Int32ub)
+    highest_page_number: int = cfield(cs.Int32ub)  # size, 已经在磁盘上分配的页数
+    highest_page_number_init: int = cfield(
+        cs.Int32ub)  # 已经初始化, 但不一定在磁盘上分配, 大于该值的page是free
+    flags: int = cfield(cs.Int32ub)
+    free_frag_page_number: int = cfield(cs.Int32ub)
+    list_base_free: MListBaseNode = cfield(MListBaseNode)
+    list_base_free_frag: MListBaseNode = cfield(MListBaseNode)
+    list_base_full_frag: MListBaseNode = cfield(MListBaseNode)
+    next_seg_id: int = cfield(cs.Int64ub)
+    list_base_full_inode: MListBaseNode = cfield(MListBaseNode)
+    list_base_free_inode: MListBaseNode = cfield(MListBaseNode)
