@@ -407,11 +407,13 @@ class Column:
         elif dtype == DDColumnType.JSON:
             # data = stream.read(dsize)
             data = self._read_varchar(stream, dsize)
+            if isinstance(data, Lob):
+                data = data.data
             try:
-                v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data.data)))
+                v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data)))
                 return v.get_json()
             except:
-                return data.data
+                return data
             # return stream.read(dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)

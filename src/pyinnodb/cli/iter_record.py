@@ -108,25 +108,26 @@ def with_dd_object(dd_object: Table):
             if null_mask & (1 << i):
                 null_col_data[c.ordinal_position] = 1
         may_var_col = [
-            c[0]
-            for c in cols_disk_layout
+            (i, c[0])
+            for i, c in enumerate(cols_disk_layout)
             if DDColumnType.is_big(c[0].type) or DDColumnType.is_var(c[0].type)
         ]
 
         ## read var
         f.seek(-nullcol_bitmask_size, 1)
         var_size = {}
-        for c in may_var_col:
+        for i, c in may_var_col:
             if c.ordinal_position in null_col_data:
                 continue
-            var_size[c.ordinal_position] = const.parse_var_size(f)
+            var_size[i] = const.parse_var_size(f)
+            logger.debug("c.name is %s, varsize is %d", c.name, var_size[i])
 
         logger.debug("varsize is %s", var_size)
 
         disk_data_parsed = {}
         f.seek(cur)
 
-        for col, size_spec in cols_disk_layout:
+        for i, (col, size_spec) in enumerate(cols_disk_layout):
             col_value = None
             logger.debug(
                 "parse col.name[%s], version_dropped[%s], spec size[%d]",
@@ -148,12 +149,12 @@ def with_dd_object(dd_object: Table):
                     col.ordinal_position,
                     f.tell() % const.PAGE_SIZE,
                 )
-                vs = var_size.get(col.ordinal_position, None)
-                if size_spec != 4294967295:
-                    if vs is None:
-                        vs = size_spec
-                    else:
-                        vs = min(vs, size_spec)
+                vs = var_size.get(i, None)
+                ## if size_spec != 4294967295:
+                ##     if vs is None:
+                ##         vs = size_spec
+                ##     else:
+                ##         vs = min(vs, size_spec)
                 col_value = col.read_data(f, vs)
             disk_data_parsed[col.name] = col_value
 
@@ -168,7 +169,7 @@ def with_dd_object(dd_object: Table):
             if col.name not in disk_data_parsed:
                 disk_data_parsed[col.name] = col.get_instant_default()
 
-        print(disk_data_parsed)
+        print(dd_object.DataClass(**disk_data_parsed))
         return
 
 
