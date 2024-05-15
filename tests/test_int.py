@@ -59,6 +59,7 @@ class SV(Base):
     TIME_F = Column(dmysql.types.TIME())
     INT_F = Column(dmysql.types.INTEGER(10))
     TIME_FSP_F = Column(dmysql.types.TIME(fsp=6))
+    DATETIME_F = Column(dmysql.types.DATETIME(fsp=6))
     VAR_F = Column(dmysql.types.TINYBLOB(10000))
 
 def test_varchar_overflow(containerOp: ContainerOp):
@@ -66,6 +67,7 @@ def test_varchar_overflow(containerOp: ContainerOp):
     containerOp.build_ibd(
         insert(SV).values(
             VAR_F = b"z" * 255, INT_F = 42, TIME_FSP_F = datetime.timedelta(hours=1, milliseconds=42),
+            DATETIME_F = datetime.datetime(year=2024, month=3, day=2, hour=2, minute=3, second=2, microsecond=872),
         ),
     )
     time.sleep(3)
