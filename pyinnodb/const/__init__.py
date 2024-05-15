@@ -1,5 +1,6 @@
 from enum import Enum
 import crcmod
+from .collations import get_collation_by_id
 
 PAGE_SIZE = 16 * 1024
 
@@ -197,3 +198,9 @@ def show_seq_page_list(page_list):
             end = start
     lines.append(show_start_end_format(start, end))
     return "/".join(lines)
+
+
+COLUMN_IDX_TYPE_NONE = 1
+COLUMN_IDX_TYPE_PRIM = 2
+COLUMN_IDX_TYPE_UNIQ = 3
+COLUMN_IDX_TYPE_MULT = 4
