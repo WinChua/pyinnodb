@@ -190,8 +190,8 @@ class Column:
             sql += f" DEFAULT ({self.default_option})"
         elif not self.default_value_utf8_null:
             sql += f" DEFAULT '{self.default_value_utf8}'"
-        elif self.is_virtual:
-            sql += f" GENERATED ALWAYS AS ({self.generation_expression_utf8}) VIRTUAL"
+        elif len(self.generation_expression_utf8) != 0:
+            sql += f" GENERATED ALWAYS AS ({self.generation_expression_utf8}) {'VIRTUAL' if self.is_virtual else 'STORED'}"
         elif self.default_value_utf8_null and self.is_nullable:
             sql += f" DEFAULT NULL"
         if self.update_option != "":
@@ -629,7 +629,7 @@ class Table:
                 continue
             if c.private_data.get("version_dropped", None) is not None:
                 continue
-            if c.is_virtual:
+            if c.is_virtual or c.generation_expression_utf8 != "":
                 continue
             cols.append(c.name)
 

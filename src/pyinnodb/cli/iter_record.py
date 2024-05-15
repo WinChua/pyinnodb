@@ -159,6 +159,8 @@ def with_dd_object(dd_object: Table, hidden_col):
                 ##     else:
                 ##         vs = min(vs, size_spec)
                 col_value = col.read_data(f, vs)
+            if col.generation_expression_utf8 != "":
+                continue
             disk_data_parsed[col.name] = col_value
 
         for col in dd_object.columns:
@@ -169,7 +171,7 @@ def with_dd_object(dd_object: Table, hidden_col):
                 if col.name in disk_data_parsed:
                     disk_data_parsed.pop(col.name)
                 continue
-            if col.is_virtual:
+            if col.is_virtual or col.generation_expression_utf8 != "":
                 continue
             if col.name not in disk_data_parsed:
                 disk_data_parsed[col.name] = col.get_instant_default()
