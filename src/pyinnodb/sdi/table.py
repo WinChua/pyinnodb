@@ -7,6 +7,7 @@ import dataclasses
 from functools import cache
 from dataclasses import dataclass
 from collections import namedtuple
+from base64 import b64decode
 
 from .. import const
 from ..const.dd_column_type import DDColumnType, DDColConf
@@ -45,7 +46,7 @@ def modify_init(cls):
 @dataclass(eq=False)
 class ColumnElement:
     name: str = "" ## BINARY VARBINARY
-    index: str = ""
+    index: int = 0
 
 @modify_init
 @dataclass(eq=False)
@@ -118,6 +119,12 @@ class Column:
             return 4 + int(self.datetime_precision/2+0.5)
         elif DDColumnType(self.type) == DDColumnType.BIT:
             return int((self.numeric_precision + 7)/8)
+        elif DDColumnType(self.type) == DDColumnType.ENUM: # value is index
+            if len(self.elements) > 0xFF:
+                return 2
+            return 1
+        elif DDColumnType(self.type) == DDColumnType.SET: # bit mask
+            return int((len(self.elements) + 7)/ 8)
 
         else:
             dtype = DDColumnType(self.type)
@@ -141,6 +148,14 @@ class Column:
         if should_signed:
             byte_data = (byte_data[0] ^ 0x80).to_bytes(1) + byte_data[1:]
         return int.from_bytes(byte_data, "big", signed=should_signed)
+
+    @property
+    @cache
+    def element_map(self):
+        data = {}
+        for e in self.elements:
+            data[e.index] = e.name
+        return data
 
     @property
     @cache
@@ -277,6 +292,16 @@ class Column:
             return int.from_bytes(stream.read(dsize)) + 1900
         elif dtype == DDColumnType.BIT:
             return self._read_int(stream, dsize, False)
+        elif dtype == DDColumnType.ENUM:
+            idx = self._read_int(stream, dsize, False)
+            return b64decode(self.element_map[idx])
+        elif dtype == DDColumnType.SET:
+            mask = self._read_int(stream, dsize, False)
+            r = []
+            for m, v in self.element_map.items():
+                if mask & m:
+                    r.append(b64decode(v))
+            return r
             #return stream.read(dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)

@@ -57,7 +57,6 @@ class SV(Base):
     __tablename__ = "SVOVER"
     id = Column(dmysql.types.INTEGER(10), primary_key=True)
     TIME_F = Column(dmysql.types.TIME())
-    INT_F = Column(dmysql.types.INTEGER(10))
     TIME_FSP_F = Column(dmysql.types.TIME(fsp=6))
     DATETIME_F = Column(dmysql.types.DATETIME(fsp=6))
     VAR_F = Column(dmysql.types.TINYBLOB(10000))
@@ -65,6 +64,9 @@ class SV(Base):
     TIMESTAMP_F = Column(dmysql.types.TIMESTAMP(fsp=6))
     YEAR_F = Column(dmysql.types.YEAR)
     BIT_F = Column(dmysql.types.BIT(19))
+    ENUM_F = Column(dmysql.ENUM("hello", "world", "A"))
+    SET_F = Column(dmysql.SET("OK", "WORLD"))
+    INT_F = Column(dmysql.types.INTEGER(10))
 
 def test_varchar_overflow(containerOp: ContainerOp):
     Base.metadata.create_all(containerOp.engine, [SV.__table__])
@@ -73,7 +75,8 @@ def test_varchar_overflow(containerOp: ContainerOp):
             VAR_F = b"z" * 255, INT_F = 42, TIME_FSP_F = datetime.timedelta(hours=1, milliseconds=42),
             DATETIME_F = datetime.datetime(year=2024, month=3, day=2, hour=2, minute=3, second=2, microsecond=872),
             DATE_F = datetime.date(1999, 1, 2),TIMESTAMP_F = datetime.datetime(2024, 3,4, 1, 23, 31, 897),
-            YEAR_F = 2154,BIT_F = 8923,
+            YEAR_F = 2154,BIT_F = 8923, ENUM_F = "A",
+            SET_F = ["WORLD", "OK"],
         ),
     )
     time.sleep(3)
