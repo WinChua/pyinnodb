@@ -68,7 +68,8 @@ class MetaClass(type):
                 )
                 bits_names = ",".join([f.name for f in bits_fields])
                 obj = Field(
-                    CommonField(name=bits_names, parser=bits_parser, is_bit=True)
+                    CommonField(name=bits_names,
+                                parser=bits_parser, is_bit=True)
                 )
                 obj.name = bits_names
                 bits_fields.clear()
@@ -139,7 +140,8 @@ class Struct(Construct, metaclass=MetaClass):
 
     def _build(self, obj, stream, context=None):
         for field in self._parse_order:
-            field.parser(field.name).build_stream(getattr(obj, field.name), stream)
+            field.parser(field.name).build_stream(
+                getattr(obj, field.name), stream)
 
 
 class ArrayEntry(Construct):

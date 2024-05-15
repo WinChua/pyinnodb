@@ -1,7 +1,6 @@
 from context import *
 from pyinnodb.struct import *
 
-test_filename = "/home/winchua/github/mysql-server/make/data/test/t1.ibd"
 
 def test_ibuf_page():
     with open(test_filename, "rb") as f:

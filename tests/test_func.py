@@ -3,10 +3,6 @@ from pyinnodb.struct import *
 from pyinnodb.const import get_page_type_name
 from pyinnodb import const
 
-test_filename1 = parent_dir + "/data/t1.ibd"
-test_filename = "/home/winchua/github/mysql-server/make/data/test/t1.ibd"
-test_filename2 = test_filename
-
 
 def test_list_page():
     with open(test_filename, "rb") as f:
@@ -17,11 +13,9 @@ def test_list_page():
         for i in range(fsp_header.highest_page_number):
             f.seek(i * 16 * 1024)
             page_fil = struct_parse(Fil(), f)
-            logger.info(
-                "offset: %d, page_type: %s",
-                page_fil.offset,
-                const.get_page_type_name(page_fil.page_type),
-            )
+            logger.info("offset: %d, page_type: %s",
+                        page_fil.offset,
+                        const.get_page_type_name(page_fil.page_type),)
 
 
 def test_fsp_header():
@@ -34,6 +28,7 @@ def test_fsp_header():
             xdess.append(XdesEntry.parse_stream(f))
             logger.info("idx: %d, segid: %d", i, xdess[-1].fseg_id)
 
+
 def test_sdi_page():
     with open(test_filename, "rb") as f:
         f.seek(3 * 16 * 1024)
@@ -43,9 +38,12 @@ def test_sdi_page():
         # logger.info("fil size %d, index_header size %d, fseg_header size %d", len(index_page.fil.build()), len(index_page.index_header.build()), len(index_page.fseg_header.build()))
         # logger.info("infimum size %d", len(index_page.system_records.infimum.build()))
         logger.info("leaf pointer: %s", index_page.fseg_header.leaf_pointer)
-        logger.info("internal_pointer %s", index_page.fseg_header.internal_pointer)
-        logger.info("fil: %d, index_header: %d, fseg_header: %d", index_page.fil._consume_num, index_page.index_header._consume_num, index_page.fseg_header._consume_num)
-        logger.info("system.infimum: %d, system.supremum: %d", index_page.system_records.infimum._consume_num, index_page.system_records.supremum._consume_num)
+        logger.info("internal_pointer %s",
+                    index_page.fseg_header.internal_pointer)
+        logger.info("fil: %d, index_header: %d, fseg_header: %d", index_page.fil._consume_num,
+                    index_page.index_header._consume_num, index_page.fseg_header._consume_num)
+        logger.info("system.infimum: %d, system.supremum: %d",
+                    index_page.system_records.infimum._consume_num, index_page.system_records.supremum._consume_num)
         logger.info("infimum is %s", index_page.system_records.infimum)
         logger.info("supremum is %s", index_page.system_records.supremum)
         assert index_page.system_records.infimum.marker == b"infimum\x00"
@@ -69,7 +67,8 @@ def test_index_page():
         # logger.info("fil size %d, index_header size %d, fseg_header size %d", len(index_page.fil.build()), len(index_page.index_header.build()), len(index_page.fseg_header.build()))
         # logger.info("infimum size %d", len(index_page.system_records.infimum.build()))
         logger.info("leaf pointer: %s", index_page.fseg_header.leaf_pointer)
-        logger.info("internal_pointer %s", index_page.fseg_header.internal_pointer)
+        logger.info("internal_pointer %s",
+                    index_page.fseg_header.internal_pointer)
         logger.info("infimum is %s", index_page.system_records.infimum)
         logger.info("supremum is %s", index_page.system_records.supremum)
 
@@ -92,7 +91,8 @@ def test_inode_page():
         f.seek(4 * 16 * 1024)
         index_page = IndexPage.parse_stream(f)
         logger.debug("leaf_pointer: %s", index_page.fseg_header.leaf_pointer)
-        logger.debug("internal_pointer: %s", index_page.fseg_header.internal_pointer)
+        logger.debug("internal_pointer: %s",
+                     index_page.fseg_header.internal_pointer)
         _, idx = index_page.fseg_header.leaf_pointer.inode_idx()
         logger.debug("inode_entry is %s", inode_page.inodes[idx])
         _, idx = index_page.fseg_header.internal_pointer.inode_idx()
@@ -120,6 +120,7 @@ def test_index_iter():
         logger.info("leaf_space_id %d", index_page.fseg_header.leaf_space_id)
         logger.info("root page is %d", internal_inode.fragment_array[0])
 
+
 def test_iter_record():
     with open(test_filename, "rb") as f:
         f.seek(4 * 16 * 1024)
@@ -129,8 +130,8 @@ def test_iter_record():
         logger.info("supremum is %s", index_page.system_records.supremum)
         logger.info("page_dir is %s", index_page.page_directory)
         logger.info("infimum consume %d", index_page.fil._consume_num + index_page.index_header._consume_num
-                + index_page.fseg_header._consume_num + index_page.system_records.infimum._consume_num-8)
-        f.seek(4 * 16 * 1024 
+                    + index_page.fseg_header._consume_num + index_page.system_records.infimum._consume_num-8)
+        f.seek(4 * 16 * 1024
                + index_page.fil._consume_num
                + index_page.index_header._consume_num
                + index_page.fseg_header._consume_num

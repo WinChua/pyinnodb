@@ -1,7 +1,6 @@
 from context import *
 from pyinnodb.struct import Fil
 
-
 test_fil_case = [
     (
         b"\x86$\xad\x90\x00\x00\x00\x00\x00\x018\xe4\x00\x00\x00\x01\x00\x00\x00\x00\x01*\x07\xa2\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03",
@@ -85,8 +84,4 @@ test_fil_case = [
 
 
 def test_fil():
-    # idx = 4
-    # logger.info(str(test_fil_case[idx][1]))
-    # logger.info(struct_parse(Fil(), BytesIO(test_fil_case[idx][0])))
-    # return
     totest(Fil, test_fil_case)

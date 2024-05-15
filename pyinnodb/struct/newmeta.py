@@ -12,6 +12,7 @@ logger = logging.Logger(__name__)
 def BitArray(size, length):
     return construct.Bitwise(construct.Array(size, construct.Bits("", length)))
 
+
 class AttrNameCall(object):
     def __init__(self, func):
         self.func = func
@@ -19,17 +20,23 @@ class AttrNameCall(object):
     def __call__(self, name):
         return self.func(name)
 
-String = lambda size: AttrNameCall(lambda name: construct.String(name, size))
+
+def String(size): return AttrNameCall(
+    lambda name: construct.String(name, size))
+
+
 UBInt8 = AttrNameCall(lambda name: OrderFormatField(name, ">", "B"))
 UBInt16 = AttrNameCall(lambda name: OrderFormatField(name, ">", "H"))
 UBInt32 = AttrNameCall(lambda name: OrderFormatField(name, ">", "L"))
 UBInt64 = AttrNameCall(lambda name: OrderFormatField(name, ">", "Q"))
-OBits = lambda length: AttrNameCall(lambda name: OMBits(name, length))
+def OBits(length): return AttrNameCall(lambda name: OMBits(name, length))
+
 
 SBInt8 = AttrNameCall(lambda name: OrderFormatField(name, ">", "b"))
-SBInt16= AttrNameCall(lambda name: OrderFormatField(name, ">", "h"))
-SBInt32= AttrNameCall(lambda name: OrderFormatField(name, ">", "l"))
-SBInt64= AttrNameCall(lambda name: OrderFormatField(name, ">", "q"))
+SBInt16 = AttrNameCall(lambda name: OrderFormatField(name, ">", "h"))
+SBInt32 = AttrNameCall(lambda name: OrderFormatField(name, ">", "l"))
+SBInt64 = AttrNameCall(lambda name: OrderFormatField(name, ">", "q"))
+
 
 class Array(Construct):
     def __init__(self, size, constructor):
@@ -49,6 +56,7 @@ class Array(Construct):
     def _build(self, obj, stream, context=None):
         for e in obj:
             self.constructor.build_stream(e, stream)
+
 
 class intfrombytes(construct.Construct):
     def __init__(self, length):
@@ -78,7 +86,7 @@ class ostruct(Construct):
 class OrderParseMeta(type):
     def __new__(
         cls, name, bases, attrs
-    ):  ## after py3.7 key of dict is iterated in insert order
+    ):  # after py3.7 key of dict is iterated in insert order
         klass = super().__new__(cls, name, bases, attrs)
         keys_order = []
         parser_fields = []
@@ -93,20 +101,20 @@ class OrderParseMeta(type):
                 continue
             elif len(bits_fields) > 0:
                 bits_parser = construct.EmbeddedBitStruct(
-                    *[f[1]._make_con() for f in bits_fields]    
+                    *[f[1]._make_con() for f in bits_fields]
                 )
                 parser_fields.append(("", bits_parser))
                 bits_fields = []
             if isinstance(parser, construct.Construct) or (
                 isinstance(parser, type) and issubclass(parser, ostruct)
-            ):  ## for class that we define
+            ):  # for class that we define
                 keys_order.append(attr_name)
                 parser_fields.append((attr_name, parser))
 
         # parser_fields.sort(key = lambda x: x[1])
         if len(bits_fields) > 0:
             bits_parser = construct.EmbeddedBitStruct(
-                *[f[1]._make_con() for f in bits_fields]    
+                *[f[1]._make_con() for f in bits_fields]
             )
             parser_fields.append(("", bits_parser))
             bits_fields = []
@@ -208,32 +216,3 @@ class OStruct(ostruct, metaclass=OrderParseMeta):
 
 class OrderFormatField(construct.FormatField):
     pass
-
-
-class TestOStruct(OStruct):
-    a = UBInt8("a")
-    b = UBInt16("b")
-
-
-class TestOStruct2(OStruct):
-    e = TestOStruct
-    c = UBInt8("c")
-
-
-class Test(OStruct):
-    e = TestOStruct
-    d = UBInt8
-
-    @classmethod
-    def hello(cls):
-        return cls()
-
-
-if __name__ == "__main__":
-    stream = BytesIO(b"\x01\x02\x03")
-    print(TestOStruct.parse_stream(stream))
-    print(TestOStruct.parse(b"\x01\x02\x03"))
-    print(TestOStruct2.parse(b"\x01\x02\x03\x04"))
-    a = TestOStruct2.parse(b"\x01\x01\x02\x04")
-    print(TestOStruct.parse(b"\x01\x02\x04") == TestOStruct.parse(b"\x01\x02\x04"))
-    print(Test.parse(b"\x01\x02\x03\x04"))

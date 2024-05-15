@@ -6,7 +6,6 @@ from .meta import *
 
 import logging
 import json
-
 import zlib
 
 logger = logging.getLogger(__name__)
@@ -14,8 +13,6 @@ logger = logging.getLogger(__name__)
 
 class IndexHeader(OStruct):
     dir_slot_number = UBInt16
-    # slots number, mini:2, which is for infmum, supremum
-    # own: each record in slot owns the records between prev slot, up to and include itself
     heap_top_pos = UBInt16
     headp_records_number = UBInt16
     first_garbage = UBInt16
@@ -31,9 +28,9 @@ class IndexHeader(OStruct):
 
 class FsegHeader(OStruct):
     leaf_space_id = UBInt32
-    leaf_pointer = Pointer  ## pointer INODE entry in INODE page
+    leaf_pointer = Pointer  # pointer INODE entry in INODE page
     internal_space_id = UBInt32
-    internal_pointer = Pointer  ## pointer INODE entry in INODE page
+    internal_pointer = Pointer  # pointer INODE entry in INODE page
 
 
 class SystemRecord(OStruct):
@@ -50,17 +47,17 @@ class IndexSystemRecord(OStruct):
     supremum = SystemRecord
 
 
-## index page: fil/index_header/fseg_header/system records/user records/free space
+# index page: fil/index_header/fseg_header/system records/user records/free space
 class IndexPage(OStruct):
-    ## system records: 26
-    ## user records grown up
-    ## free space
-    ## page directory grown down
-    ## fil trailer
+    # system records: 26
+    # user records grown up
+    # free space
+    # page directory grown down
+    # fil trailer
     fil = Fil
     index_header = IndexHeader
     fseg_header = FsegHeader
-    ## only root index page contains pointer to the fseg, other page, zero-filled
+    # only root index page contains pointer to the fseg, other page, zero-filled
     system_records = IndexSystemRecord
 
     @classmethod
@@ -69,7 +66,7 @@ class IndexPage(OStruct):
         n = self.index_header.dir_slot_number
         stream.seek(-self._consume_num + 1024 * 16 - 8 - (2 * n), 1)
         parser = Array(n, SBInt16(""))
-        v = parser._parse(stream , context)
+        v = parser._parse(stream, context)
         self.page_directory = v
         return self
 
@@ -78,7 +75,7 @@ class SDIPage(OStruct):
     fil = Fil
     index_header = IndexHeader
     fseg_header = FsegHeader
-    ## only root index page contains pointer to the fseg, other page, zero-filled
+    # only root index page contains pointer to the fseg, other page, zero-filled
     system_records = IndexSystemRecord
 
     @classmethod
@@ -86,7 +83,8 @@ class SDIPage(OStruct):
         self = super()._parse(stream, context)
         stream.seek(1024 * 16 - self._consume_num - 8, 1)
         logger.debug(
-            "from index page, consume %d, seek %d", self._consume_num, stream.seek(0, 1)
+            "from index page, consume %d, seek %d", self._consume_num, stream.seek(
+                0, 1)
         )
         logger.debug(
             "from index page, system_records _consume_num %d",
@@ -117,9 +115,9 @@ class SDIPage(OStruct):
         zipdata = stream.read(ddl_field.zip_len)
         json_data = json.loads(zlib.decompress(zipdata))
         for col in json_data["dd_object"]["columns"]:
-            logger.debug(f"{col['name']}:{col['type']},{col['column_type_utf8']},")
+            logger.debug(
+                f"{col['name']}:{col['type']},{col['column_type_utf8']},")
         return json_data
-
 
 
 class ddl(OStruct):

@@ -1,7 +1,8 @@
 from .meta import *
 
+# Fil size 38
 
-## Fil size 38
+
 class Fil(OStruct):
     checksum = UBInt32
     offset = UBInt32  # page_number, once the page initialized, it'll stored in header => indicator for if the page had been initialized
