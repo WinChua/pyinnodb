@@ -86,7 +86,6 @@ mpmath==1.3.0
 multidict==6.0.4
 multipledispatch==1.0.0
 multiprocess==0.70.15
--e git+https://git.woa.com/yongcai/musicu.git@f2878090dd1b1e41ae69ff0d4d2d1fef5a66e520#egg=musicu
 mypy-extensions==1.0.0
 nbclassic==0.4.8
 nbclient==0.7.1
