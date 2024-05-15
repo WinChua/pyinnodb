@@ -90,7 +90,7 @@ def with_dd_object(dd_object: Table):
 
         f.seek(cur)
         for col in primary_col:
-            print(col.name, col.read_data(f))
+            print(col.name, col.size, col.read_data(f))
 
         for col in db_hidden_col:
             data = col.read_data(f)
