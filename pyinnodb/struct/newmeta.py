@@ -199,6 +199,10 @@ class Test(OStruct):
     e = TestOStruct
     d = UBInt8
 
+    @classmethod
+    def hello(cls):
+        return cls()
+
 
 if __name__ == "__main__":
     stream = BytesIO(b"\x01\x02\x03")

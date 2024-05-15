@@ -38,11 +38,10 @@ def test_fsp_header():
             xdess.append(XdesEntry().parse_stream(f))
             logger.info("idx: %d, segid: %d", i, xdess[-1].fseg_id)
 
-
 def test_sdi_page():
     with open(test_filename1, "rb") as f:
         f.seek(3 * 16 * 1024)
-        index_page = SDIPage.parse_stream(f)
+        index_page = SDIPage._parse(f)
         # logger.info("index page size %d", len(index_page.build()))
         # logger.info("page_type %s", get_page_type_name(index_page.fil.page_type))
         # logger.info("fil size %d, index_header size %d, fseg_header size %d", len(index_page.fil.build()), len(index_page.index_header.build()), len(index_page.fseg_header.build()))
