@@ -15,7 +15,6 @@ def tosql(ctx):
     fsp_page = ctx.obj["fsp_page"]
     logger.debug("fsp page is %s", fsp_page.fil)
     if fsp_page.has_sdi_page == 1:
-        print(f"ibd file contains sdi information at page {fsp_page.sdi_page_no}")
         f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
         sdi_page = MSDIPage.parse_stream(f)
         dd_object = sdi_page.ddl["dd_object"]
@@ -34,6 +33,9 @@ def tosql(ctx):
             "collation_id",
             "is_unsigned",
         )
+        g_cols = gen_column(dd_object["columns"], 1)
+        table_create = f"CREATE TABLE `{databases}`.`{table_name}` ({'\n'+',\n'.join(g_cols) + '\n'})"
+        print(table_create)
 
 
 # 'type': sql/dd/types/column.h::enum_column_type
@@ -57,22 +59,24 @@ def get_col(columns, *col_name):
 def gen_column(column, mysqld_version_id):
     ddl_lines = []
     for col in column:
-        ddl_lines.append(f"`{col['name']}` {col['column_type_utf8']}")  # column name
+        if col['name'] in ['DB_TRX_ID', 'DB_ROLL_PTR', 'DB_ROW_ID']:
+            continue
+        line = (f"`{col['name'].strip()}` {col['column_type_utf8']}")  # column name
         if False and col["type"] != "int":
-            ddl_lines.append(
+            line += (
                 f" CHARACTER SET {col['character_set']} COLLATE {col['collation']}"
             )
         if not col["is_virtual"] and col["default_option"] == "":
             # nullabel
-            ddl_lines.append(f"{' NOT' if not col['is_nullable'] else ''} NULL")
+            line += (f"{' NOT' if not col['is_nullable'] else ''} NULL")
         else:
             # 虚拟列 VIRTUAL
-            ddl_lines.append(
+            line += (
                 f"{' GENERATED ALWAYS AS (' + col['generation_expression'] + ') VIRTUAL' if col['is_virtual'] else '' }"
             )
         if col["default_option"] != "":
-            # ddl_lines.append(f" DEFAULT ({col['default_option']})"
-            ddl_lines.append(
+            # line += (f" DEFAULT ({col['default_option']})"
+            line += (
                 (
                     f" DEFAULT ({col['default_option']})"
                     if mysqld_version_id > 80012
@@ -81,16 +85,17 @@ def gen_column(column, mysqld_version_id):
             )
         else:
             # default
-            ddl_lines.append(
-                f"{' DEFAULT '+repr(col['default']) if col['have_default'] else ''}"
+            line += (
+                f"{' DEFAULT '+repr(col['default']) if col.get('have_default', None) else ''}"
             )
         # auto_increment
-        ddl_lines.append(f"{' AUTO_INCREMENT' if col['is_auto_increment'] else ''}")
+        line += (f"{' AUTO_INCREMENT' if col.get('is_auto_increment', None) else ''}")
         # comment
-        ddl_lines.append(
-            f"{' COMMENT '+repr(col['comment']) if col['comment'] != '' else '' }"
+        line += (
+            f"{' COMMENT '+repr(col['comment']) if col.get('comment', '') != '' else '' }"
         )
+        ddl_lines.append(line)
         # COLUMN_FORMAT
         # STORAGE
         # SECONDARY_ENGINE_ATTRIBUTE
-    return "\n".join(ddl_lines)
+    return ddl_lines
