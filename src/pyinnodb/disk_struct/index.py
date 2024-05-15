@@ -142,6 +142,8 @@ class MIndexPage(CC):
                     if col.name in disk_data_parsed:
                         disk_data_parsed.pop(col.name)
                     continue
+                if col.is_virtual:
+                    continue
                 if col.name not in disk_data_parsed:
                     disk_data_parsed[col.name] = col.get_instant_default()
 

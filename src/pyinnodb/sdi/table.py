@@ -629,6 +629,8 @@ class Table:
                 continue
             if c.private_data.get("version_dropped", None) is not None:
                 continue
+            if c.is_virtual:
+                continue
             cols.append(c.name)
 
         return namedtuple(self.name, " ".join(cols))
