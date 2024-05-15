@@ -78,6 +78,7 @@ _var_type = [
     DDColumnType.BLOB,
     DDColumnType.STRING,
     DDColumnType.JSON,
+    DDColumnType.TINY_BLOB,
 ]
 
 _big_type = [

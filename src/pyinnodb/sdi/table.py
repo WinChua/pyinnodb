@@ -243,7 +243,9 @@ class Column:
             return self._read_new_decimal(stream)
         elif dtype == DDColumnType.VARCHAR:
             return self._read_varchar(stream, dsize)
-        elif dtype == DDColumnType.LONG_BLOB:
+        elif dtype in [DDColumnType.LONG_BLOB, DDColumnType.MEDIUM_BLOB]:
+            return self._read_varchar(stream, dsize)
+        elif dtype == DDColumnType.TINY_BLOB:
             return self._read_varchar(stream, dsize)
         # if dtype == DDColumnType.JSON:
         #     size = const.parse_var_size(stream)
