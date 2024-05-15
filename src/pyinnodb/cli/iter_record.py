@@ -95,7 +95,7 @@ def with_dd_object(dd_object: Table, delete):
         logger.debug("null_col_data is %s, %s", null_col_data, ",".join(c.name for c in nullable_cols))
 
         ## read var
-        f.seek(-nullcol_bitmask_size, 1)
+        f.seek(-nullcol_bitmask_size - rh.no_use_1, 1)
         var_size = {}
         for c in may_var_col:
             if c.ordinal_position in null_col_data:
@@ -103,6 +103,10 @@ def with_dd_object(dd_object: Table, delete):
             if rh.no_use_1 == 0 and c.is_instant_col: # for the record no insert before instant col
                 continue
             var_size[c.ordinal_position] = const.parse_var_size(f)
+            logger.debug("read var size %s for col %s", var_size[c.ordinal_position], c.name)
+
+
+        logger.debug("var size is %s", var_size)
 
         kv = {}
         f.seek(cur)
@@ -123,10 +127,10 @@ def with_dd_object(dd_object: Table, delete):
                 #print(col.name, col.type, "NULL")
                 continue
             if rh.no_use_1 == 0 and col.is_instant_col:
-                kv[col.name] = col.read_data(BytesIO(bytes.fromhex(c.get_instant_default()))) # try to get the default value for instant col
+                kv[col.name] = col.get_instant_default() # try to get the default value for instant col
                 continue
             if instant_col_deal > instant_col_count_in_rec:
-                kv[col.name] = col.read_data(BytesIO(bytes.fromhex(c.get_instant_default()))) # try to get the default value for instant col
+                kv[col.name] = col.get_instant_default() # try to get the default value for instant col
                 continue
             kv[col.name] = col.read_data(f, var_size.get(col.ordinal_position, None))
             # print(
