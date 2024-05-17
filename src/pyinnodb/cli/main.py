@@ -1,6 +1,7 @@
 import click
 import logging
 from pyinnodb.disk_struct.fsp import MFspPage
+from pyinnodb.disk_struct.fil import MFil
 from pyinnodb import const
 from io import BytesIO
 import sys
@@ -38,8 +39,8 @@ def main(ctx, fn, log_level):
         fsp_page = MFspPage.parse_stream(fn)
         ctx.obj["fsp_page"] = fsp_page
         for pn in range(fsp_page.fsp_header.highest_page_number):
-            f.seek(const.PAGE_SIZE * pn)
-            page_data = f.read(const.PAGE_SIZE)
+            fn.seek(const.PAGE_SIZE * pn)
+            page_data = fn.read(const.PAGE_SIZE)
             fil = MFil.parse(page_data)
             if fil.page_type == const.FIL_PAGE_TYPE_ALLOCATED:
                 continue
@@ -49,5 +50,6 @@ def main(ctx, fn, log_level):
                 print("use validate to get a more detail output of the validation")
                 sys.exit(1)
     except Exception as e:
+        print(e)
         print("the file parse faile")
 
