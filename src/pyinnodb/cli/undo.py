@@ -12,6 +12,7 @@ from pyinnodb.sdi.table import Column, Table
 @click.pass_context
 @click.option("--pageno", type=click.INT, default=9)
 def undo_list(ctx, pageno):
+    ''' dump the undo page '''
     f = ctx.obj["fn"]
     fsp_page = ctx.obj["fsp_page"]
     f.seek(pageno * const.PAGE_SIZE)
@@ -22,11 +23,12 @@ def undo_list(ctx, pageno):
 
 @main.command()
 @click.pass_context
-@click.option("--pageno", type=click.INT)
-@click.option("--offset", type=click.INT)
-@click.option("--insert", type=click.INT)
-@click.option("--rsegid", type=click.INT)
+@click.option("--pageno", type=click.INT, help="page number the pointer stored at")
+@click.option("--offset", type=click.INT, help="page offset the pointer stored at")
+@click.option("--insert", type=click.INT, help="insert flag: 1: pointer is an insert undo type")
+@click.option("--rsegid", type=click.INT, help="undo tablespace id of the pointer")
 def undo_record(ctx, pageno, offset, insert, rsegid):
+    ''' show the history version of an RollbackPointer '''
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
@@ -66,6 +68,7 @@ def undo_record(ctx, pageno, offset, insert, rsegid):
 @click.pass_context
 @click.option("--pageno", type=click.INT)
 def rseg_array(ctx, pageno):
+    ''' show the RSEGArrayPage '''
     f = ctx.obj["fn"]
     f.seek(pageno * const.PAGE_SIZE)
     page = MRSEGArrayPage.parse_stream(f)

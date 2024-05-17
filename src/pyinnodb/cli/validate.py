@@ -7,6 +7,7 @@ from pyinnodb.disk_struct.fsp import MFspHeader
 @main.command()
 @click.pass_context
 def validate(ctx):
+    ''' output the calculated checksum and the checksum stored in page '''
     f = ctx.obj["fn"]
     fsp_page = ctx.obj["fsp_page"]
     f.seek(0)

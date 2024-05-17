@@ -14,6 +14,14 @@ logger = logging.getLogger(__name__)
 @click.pass_context
 @click.option("--mode", type=click.Choice(["sdi", "ddl", "dump"]), default="ddl")
 def tosql(ctx, mode):
+    ''' dump the ddl/dml/sdi of the ibd table 
+
+    ddl) output the create table ddl; 
+    dump) output the dml of ibd file; 
+    sdi) output the dd_object stored in the SDIPage as json format
+    '''
+
+    
     f = ctx.obj["fn"]
     fsp_page = ctx.obj["fsp_page"]
     logger.debug("fsp header is %s", fsp_page.fsp_header)

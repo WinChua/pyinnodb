@@ -31,6 +31,7 @@ def list_first_page(ctx, pageno):
 @click.option("--pageno", default=None, type=click.INT)
 @click.option("--with-hist/--no-with-hist", type=click.BOOL, default=False)
 def search(ctx, primary_key, pageno, hidden_col, with_hist):
+    ''' search the primary-key(int support only now) '''
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
@@ -117,10 +118,16 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist):
 @main.command()
 @click.pass_context
 @click.option("--garbage/--no-garbage", default=False, help="include garbage mark data")
-@click.option("--hidden-col/--no-hidden-col", type=click.BOOL, default=False)
-@click.option("--pageno", default=None, type=click.INT)
-@click.option("--primary-key", type=click.STRING, default="")
-def iter_record(ctx, garbage, hidden_col, pageno, primary_key):
+@click.option("--hidden-col/--no-hidden-col", type=click.BOOL, default=False, help="show the DB_ROLL_PTR and DB_TRX_ID")
+@click.option("--pageno", default=None, type=click.INT, help="iterate on pageno only")
+def iter_record(ctx, garbage, hidden_col, pageno):
+    """iterate on the leaf pages
+
+    by default, iter_record will iterate from the first leaf page
+    output every record as a namedtuple whose filed is all the column
+    name of the ibd file. 
+
+    """
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
