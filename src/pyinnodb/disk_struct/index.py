@@ -97,6 +97,8 @@ class MIndexPage(CC):
                 f.seek(-1, 1)
                 data_schema_version = int.from_bytes(f.read(1), "big")
 
+                logger.debug("record header is instant, with data version: %d", data_schema_version)
+
             cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
 
             nullable_cols = [d[0] for d in cols_disk_layout if d[1] == 4294967295 and d[0].is_nullable]
@@ -108,6 +110,7 @@ class MIndexPage(CC):
             for i, c in enumerate(nullable_cols):
                 if null_mask & (1 << i):
                     null_col_data[c.ordinal_position] = 1
+            logger.debug("null_col_data is %s", null_col_data)
             may_var_col = [
                 (i, c[0])
                 for i, c in enumerate(cols_disk_layout)
@@ -122,6 +125,7 @@ class MIndexPage(CC):
                     continue
                 var_size[i] = const.parse_var_size(f)
 
+            logger.debug("var_size is %s", var_size)
             disk_data_parsed = {}
             f.seek(cur)
 

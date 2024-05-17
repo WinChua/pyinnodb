@@ -11,6 +11,7 @@ from typing import Callable
 @main.command()
 @click.pass_context
 def list_page(ctx):
+    ''' show page type of every page '''
     f = ctx.obj["fn"]
     fsp_page = ctx.obj["fsp_page"]
     for pn in range(fsp_page.fsp_header.highest_page_number):
@@ -23,6 +24,7 @@ def list_page(ctx):
 @main.command()
 @click.pass_context
 def static_page_usage(ctx):
+    ''' show the page usage of every inode '''
     f = ctx.obj["fn"]
     f.seek(0)
     fsp_page = MFspPage.parse_stream(f)
