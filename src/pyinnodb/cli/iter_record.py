@@ -36,7 +36,7 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist):
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
-    dd_object = Table(**sdi_page.ddl["dd_object"])
+    dd_object = Table(**sdi_page.ddl(f)["dd_object"])
 
     hidden_col = hidden_col or with_hist
 
@@ -132,7 +132,7 @@ def iter_record(ctx, garbage, hidden_col, pageno):
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
-    dd_object = Table(**sdi_page.ddl["dd_object"])
+    dd_object = Table(**sdi_page.ddl(f)["dd_object"])
     root_page_no = int(dd_object.indexes[0].private_data.get("root", 4))
     f.seek(root_page_no * const.PAGE_SIZE)
     root_index_page = MIndexPage.parse_stream(f)

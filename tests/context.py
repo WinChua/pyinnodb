@@ -143,7 +143,6 @@ def containerOp():
 
         logger.debug("end test mysql database container ....")
     except Exception as e:
-        mysql.stop()
         raise e
 
 

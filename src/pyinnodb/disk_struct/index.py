@@ -251,7 +251,42 @@ class MSDIPage(CC):
         size = self.sizeof()
         stream.seek(const.PAGE_SIZE - size - 8, 1)
         self.fil_tailer = MFilTrailer.parse_stream(stream)
-        self.ddl = self._get_first_record(stream)
+        #self.ddl = next(self.iterate_sdi_record(stream))
+
+    def ddl(self, stream):
+        return next(self.iterate_sdi_record(stream))
+
+    def iterate_sdi_record(self, stream):
+        cur_page_num = self.fil.offset
+        while True:
+            stream.seek(const.PAGE_SIZE * cur_page_num)
+            fil = MFil.parse_stream(stream)
+            index_header = MIndexHeader.parse_stream(stream)
+            if index_header.page_level == 0:
+                break
+            fseg_header = MFsegHeader.parse_stream(stream)
+            infimum = MSystemRecord.parse_stream(stream)
+            stream.seek(-8+infimum.next_record_offset+12, 1)
+            cur_page_num = int.from_bytes(stream.read(4), byteorder="big")
+
+        while cur_page_num != 4294967295:
+            stream.seek(cur_page_num * const.PAGE_SIZE)
+            sdi_page = MSDIPage.parse_stream(stream)
+            stream.seek(cur_page_num * const.PAGE_SIZE + sdi_page.system_records.infimum.get_current_offset())
+
+            next_offset = sdi_page.system_records.infimum.next_record_offset
+            while next_offset != 0:
+                stream.seek(next_offset-MRecordHeader.sizeof(), 1)
+                rh = MRecordHeader.parse_stream(stream)
+                if const.RecordType(rh.record_type) == const.RecordType.Supremum:
+                    break
+                next_offset = rh.next_record_offset
+                cur = stream.tell()
+                ddl = MDDL.parse_stream(stream)
+                data = stream.read(ddl.zip_len)
+                yield json.loads(zlib.decompress(data))
+                stream.seek(cur)
+            cur_page_num = sdi_page.fil.next_page
 
     def _get_first_record(self, stream):
         stream.seek(

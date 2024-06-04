@@ -12,7 +12,7 @@ dependencies = [
     "click>=8.1.7",
 ]
 readme = "README.md"
-requires-python = ">= 3.7"
+requires-python = ">= 3.9"
 
 [build-system]
 requires = ["hatchling"]
@@ -24,6 +24,8 @@ dev-dependencies = [
     "pytest>=8.1.1",
     "testcontainers>=4.1.1",
     "docker>=7.0.0",
+    "sqlalchemy>=2.0.30",
+    "pymysql>=1.1.1",
 ]
 
 [tool.hatch.metadata]
@@ -48,3 +50,4 @@ of = { chain = ["of:init", "of:req", "of:cp", "of:clean",  "of:zip", "of:patch",
 "of:zip" = "python -m zipapp target/ -m pyinnodb.cli:main -o pyinnodb.sh"
 "of:patch" = 'sed -i "1i\#!/usr/bin/env python3" pyinnodb.sh'
 "of:ex" = 'chmod a+x pyinnodb.sh'
+"deploy_dev" = "python devtools/deploy_mysqld.py"
