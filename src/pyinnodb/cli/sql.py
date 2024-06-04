@@ -30,9 +30,9 @@ def tosql(ctx, mode):
         f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
         sdi_page = MSDIPage.parse_stream(f)
         if mode == "sdi":
-            print(json.dumps(sdi_page.ddl["dd_object"]))
+            print(json.dumps(sdi_page.ddl(f)["dd_object"]))
         elif mode == "ddl":
-            table_object = Table(**sdi_page.ddl["dd_object"])
+            table_object = Table(**sdi_page.ddl(f)["dd_object"])
 
             table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
             columns_dec = []
@@ -60,7 +60,7 @@ def tosql(ctx, mode):
                 f"CREATE TABLE {table_name} ({columns_dec}) {desc} {chr(10)+parts if parts else ''}{comment}"
             )
         else:
-            table_object = Table(**sdi_page.ddl["dd_object"])
+            table_object = Table(**sdi_page.ddl(f)["dd_object"])
             root_page_no = int(table_object.indexes[0].private_data.get("root", 4))
             f.seek(root_page_no * const.PAGE_SIZE)
             root_index_page = MIndexPage.parse_stream(f)

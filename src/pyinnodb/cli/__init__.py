@@ -5,3 +5,4 @@ from . import sql
 from . import validate
 from . import undo
 from . import parse
+from . import sdi

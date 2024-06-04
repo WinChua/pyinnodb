@@ -23,8 +23,8 @@ def validate(ctx):
         fil = MFil.parse(page_data)
         checksum = const.page_checksum_crc32c(page_data)
         if fil.page_type == const.FIL_PAGE_TYPE_ALLOCATED:
-            print(f"page[{page_number}] is allocated, no need to calculate checksum")
+            continue
         else:
             print(
-                f"page[{page_number}], fil.checksum[{hex(fil.checksum)}], calculate checksum[{hex(checksum)}]"
+                f"page[{page_number}], fil.checksum[{hex(fil.checksum)}], calculate checksum[{hex(checksum)}], eq[{fil.checksum == checksum}]"
             )
