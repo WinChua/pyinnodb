@@ -354,14 +354,16 @@ class Column:
             first_page = pointer.get_first_page(stream)
             real_data = first_page.get_data(stream)
             stream.seek(cur)
+            return real_data
             if len(real_data) > 200:
                 return Lob(real_data, True)
             else:
                 return real_data
         else:
             data = stream.read(size)
+            return data
             if len(data) > 200:
-                return Lob(stream.read(size), False)
+                return Lob(data, False)
             else:
                 return data
 
@@ -390,7 +392,7 @@ class Column:
         elif dtype == DDColumnType.VARCHAR:
             return self._read_varchar(stream, dsize).decode()
         elif dtype in [DDColumnType.LONG_BLOB, DDColumnType.MEDIUM_BLOB]:
-            return self._read_varchar(stream, dsize)
+            return self._read_varchar(stream, dsize).decode()
         elif dtype == DDColumnType.TINY_BLOB:
             return self._read_varchar(stream, dsize)
         elif dtype == DDColumnType.TIME2:
