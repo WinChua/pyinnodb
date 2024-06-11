@@ -38,6 +38,21 @@ class MFirstPage(CC):  ## first_page_t
     index_entry: typing.List[MIndexEntryNode] = cfield(carray(10, MIndexEntryNode))
 
     def get_data(self, stream):
+        ie = self.index_entry[0]
+        data = b''
+        for i in range(self.index_list.length):
+            stream.seek(ie.page_no * const.PAGE_SIZE)
+            dp = MDataPage.parse_stream(stream)
+            data += stream.read(dp.data_len)
+            if ie.node.next.page_number == 4294967295:
+                break
+            stream.seek(ie.node.next.seek_loc())
+            ie = MIndexEntryNode.parse_stream(stream)
+
+        return data
+
+
+        
         stream.seek(self.index_entry[0].page_no * const.PAGE_SIZE + self.sizeof())
         first_page_data = stream.read(self.data_len)
         for i in range(1, self.index_list.length):
