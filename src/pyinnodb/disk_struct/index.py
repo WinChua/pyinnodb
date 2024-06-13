@@ -74,6 +74,24 @@ class MIndexSystemRecord(CC):
     infimum: MSystemRecord = cfield(MSystemRecord)
     supremum: MSystemRecord = cfield(MSystemRecord)
 
+def get_rec_insert_state(rh: MRecordHeader, dd_object: Table):
+    if rh.instant_version != 0: ## is_versioned
+        # if version == 0:
+        #     return INSERTED_AFTER_UPGRADE_BEFORE_INSTANT_ADD_NEW_IMPLEMENTATION
+        # else:
+        #     return INSERTED_AFTER_INSTANT_ADD_NEW_IMPLEMENTATION
+        pass
+    elif rh.instant != 0:
+        # return INSERTED_AFTER_INSTANT_ADD_OLD_IMPLEMENTATION
+        pass
+    else:
+        pass
+        ## is_upgraded_instant
+        # if dd_object.private_data.get("instant_cols", None):
+        #     return INSERTED_BEFORE_INSTANT_ADD_OLD_IMPLEMENTATION
+        # else:
+        #     return INSERTED_BEFORE_INSTANT_ADD_NEW_IMPLEMENTATION
+
 
 class MIndexPage(CC):
     fil: MFil = cfield(MFil)
@@ -101,6 +119,13 @@ class MIndexPage(CC):
                 logger.debug("record header is instant, with data version: %d", data_schema_version)
 
             cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
+
+            if rh.instant == 1:
+                f.seek(-1, 1)
+                extra_byte = int.from_bytes(f.read(1), "big")
+                logger.debug("instant col extra byte is %s, &0x80 is %s, len(cols) is %d", hex(extra_byte), extra_byte & 0x80, 
+                        len(cols_disk_layout))
+                cols_disk_layout = cols_disk_layout[:extra_byte]
 
             nullable_cols = [d[0] for d in cols_disk_layout if d[1] == 4294967295 and d[0].is_nullable]
 

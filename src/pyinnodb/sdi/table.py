@@ -616,6 +616,12 @@ class Table:
 
     @property
     @cache
+    def private_data(self):
+        data = const.line_to_dict(self.se_private_data, ";", "=")
+        return data
+
+    @property
+    @cache
     def DataClassHiddenCol(self):
         cols = []
         for c in self.columns:
