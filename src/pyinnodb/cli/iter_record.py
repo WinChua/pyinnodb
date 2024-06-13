@@ -94,7 +94,7 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist):
                         if record_primary_key == primary_key:
                             f.seek(-len(primary_key), 1)
                             v = value_parser(start_rh, f)
-                            logger.debug("found rh: %s, value: %s", start_rh, v)
+                            #logger.debug("found rh: %s, value: %s", start_rh, v)
                             print("found: ", v)
                             if with_hist:
                                 rptr = v.DB_ROLL_PTR

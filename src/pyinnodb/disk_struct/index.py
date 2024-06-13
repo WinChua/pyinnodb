@@ -85,8 +85,8 @@ class MIndexPage(CC):
     def default_value_parser(cls, dd_object: Table, transfter = None, hidden_col=False):
         primary_data_layout_col = dd_object.get_disk_data_layout()
         def value_parser(rh: MRecordHeader, f):
-            logger.debug("-------start parse-----------rh: %s", rh)
             cur = f.tell()
+            logger.debug("-------start parse-----------rh: %s, @cur: %d/(%d, %d)", rh, cur, int(cur / const.PAGE_SIZE), cur % const.PAGE_SIZE)
             if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
                 next_page_no = const.parse_mysql_int(f.read(4))
                 return
