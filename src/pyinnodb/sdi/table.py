@@ -696,6 +696,22 @@ class Table:
         return cols
 
     def get_disk_data_layout(self):
+        c_l = {}
+        for idx in self.indexes:
+            if idx.name != "PRIMARY":
+                continue
+            for ie in idx.elements:
+                col = self.columns[ie.column_opx]
+                prekey_len, ok = col.index_prefix(ie)
+                if ok:
+                    c_l[ie.column_opx] = prekey_len
+                else:
+                    c_l[ie.column_opx] = ie.length
+        data_layout_col = []
+        for i, c in enumerate(self.columns):
+            data_layout_col.append((c, c_l.get(i, 4294967295)))
+        data_layout_col.sort(key = lambda c: c[0].private_data.get("physical_pos", 0))
+        return data_layout_col
         data_layout_col = []
         for idx in self.indexes:
             if (
