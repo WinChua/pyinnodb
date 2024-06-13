@@ -83,9 +83,7 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist):
                 logger.debug("not found in page directory, search at %s, page_dir offset is %d", start_rh, index_page.page_directory[page_dir_idx+1])
                 owned = end_rh.num_record_owned
                 first_leaf_page = 4294967295 # no match if cur page is leaf then break loop
-                for i in range(owned):
-                    f.seek(start_rh.next_record_offset - 5, 1)
-                    start_rh = MRecordHeader.parse_stream(f)
+                for i in range(owned+1):
                     cur = f.tell()
                     logger.debug("cur is %s, next_rh is %s", cur % const.PAGE_SIZE, start_rh)
                     if const.RecordType(start_rh.record_type) == const.RecordType.Conventional:
@@ -129,6 +127,8 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist):
                         # else:
                         #     logger.debug("rh: %s, record_key: %s", start_rh, record_key)
                     f.seek(cur)
+                    f.seek(start_rh.next_record_offset - 5, 1)
+                    start_rh = MRecordHeader.parse_stream(f)
 
 
 def primary_key_only(key_len: int):
