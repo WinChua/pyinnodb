@@ -86,6 +86,7 @@ class MIndexPage(CC):
         primary_data_layout_col = dd_object.get_disk_data_layout()
         def value_parser(rh: MRecordHeader, f):
             cur = f.tell()
+            logger.debug("-------start parse-----------rh: %s, @cur: %d/(%d, %d)", rh, cur, int(cur / const.PAGE_SIZE), cur % const.PAGE_SIZE)
             if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
                 next_page_no = const.parse_mysql_int(f.read(4))
                 return
@@ -93,7 +94,7 @@ class MIndexPage(CC):
             # data scheme version
             data_schema_version = 0
             f.seek(-MRecordHeader.sizeof(), 1)
-            if rh.instant == 1:
+            if rh.instant_version == 1:
                 f.seek(-1, 1)
                 data_schema_version = int.from_bytes(f.read(1), "big")
 
@@ -102,15 +103,21 @@ class MIndexPage(CC):
             cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
 
             nullable_cols = [d[0] for d in cols_disk_layout if d[1] == 4294967295 and d[0].is_nullable]
+
+
+            if rh.instant == 0:
+                nullable_cols = [c for c in nullable_cols if "default_null" not in c.se_private_data]
+                cols_disk_layout = [d for d in cols_disk_layout if "default_null" not in d[0].se_private_data]
+
             nullcol_bitmask_size = int((len(nullable_cols) + 7) / 8)
-            f.seek(-nullcol_bitmask_size - rh.instant, 1)
+            f.seek(-nullcol_bitmask_size - rh.instant_version - rh.instant, 1)
             null_bitmask = f.read(nullcol_bitmask_size)
             null_col_data = {}
             null_mask = int.from_bytes(null_bitmask, "big", signed=False)
             for i, c in enumerate(nullable_cols):
                 if null_mask & (1 << i):
                     null_col_data[c.ordinal_position] = 1
-            logger.debug("null_col_data is %s", null_col_data)
+            logger.debug("null_col_data is %s, null_col size is %s, null_mask is %s", null_col_data, len(nullable_cols), null_bitmask)
             may_var_col = [
                 (i, c[0])
                 for i, c in enumerate(cols_disk_layout)
@@ -131,11 +138,27 @@ class MIndexPage(CC):
 
             for i, (col, size_spec) in enumerate(cols_disk_layout):
                 col_value = None
-                if col.ordinal_position in null_col_data:
-                    col_value = None
-                else:
-                    vs = var_size.get(i, None)
-                    col_value = col.read_data(f, vs)
+                vs = var_size.get(i, None)
+                cur_before = f.tell()
+                try:
+                    if col.ordinal_position in null_col_data:
+                        col_value = None
+                    else:
+                        col_value = col.read_data(f, vs)
+                except Exception as e:
+                    print("cur before is ", cur_before, vs, col)
+                    raise e
+                finally:
+                    p_value = col_value
+                    if isinstance(p_value, bytes):
+                        if len(p_value) > 100:
+                            p_value = p_value[:10] + b"..." + p_value[-10:]
+                    elif isinstance(p_value, str):
+                        if len(p_value) > 100:
+                            p_value = p_value[:10] + "..." + p_value[-10:]
+
+                    logger.debug("read_data: col[%s], value[%s], i[%d], op[%d], vs[%s], from[%s],to[%s]",
+                            col.name, p_value, i, col.ordinal_position, vs, cur_before%const.PAGE_SIZE, f.tell()%const.PAGE_SIZE)
                 if col.generation_expression_utf8 != "":
                     continue
                 disk_data_parsed[col.name] = col_value
@@ -217,11 +240,12 @@ class MIndexPage(CC):
         key_len = len(key)
         low, high = 0, len(self.page_directory) - 1
         cnt = 0
+        logger.debug("page dir is %s", ",".join(map(str, self.page_directory)))
         while high > low + 1:
             target = int((high + low)/2)
             stream.seek(cur_post + self.page_directory[target])
             record_key = stream.read(key_len)
-            logger.debug("low: %d, high: %d, target: %d, record_key: %s, key: %s", low, high, target, record_key, key)
+            logger.debug("low: %d, high: %d, target: %d, record_key: %s, key: %s, dir: %s", low, high, target, record_key, key, self.page_directory[target])
             if record_key == key:
                 return target, True
             elif key > record_key:

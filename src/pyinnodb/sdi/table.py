@@ -21,6 +21,10 @@ from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp
 from ..disk_struct.json import MJson
 from ..disk_struct.rollback import MRollbackPointer
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Lob:
     def __init__(self, data, off_page):
@@ -351,17 +355,20 @@ class Column:
             data = stream.read(20)
             cur = stream.tell()
             pointer = OffPagePointer.parse_stream(io.BytesIO(data))
+            logger.debug("pointer is %s", pointer)
             first_page = pointer.get_first_page(stream)
             real_data = first_page.get_data(stream)
             stream.seek(cur)
+            return real_data
             if len(real_data) > 200:
                 return Lob(real_data, True)
             else:
                 return real_data
         else:
             data = stream.read(size)
+            return data
             if len(data) > 200:
-                return Lob(stream.read(size), False)
+                return Lob(data, False)
             else:
                 return data
 
@@ -388,9 +395,9 @@ class Column:
         elif dtype == DDColumnType.DECIMAL or dtype == DDColumnType.NEWDECIMAL:
             return self._read_new_decimal(stream)
         elif dtype == DDColumnType.VARCHAR:
-            return self._read_varchar(stream, dsize).decode()
+            return self._read_varchar(stream, dsize).decode(errors='ignore')
         elif dtype in [DDColumnType.LONG_BLOB, DDColumnType.MEDIUM_BLOB]:
-            return self._read_varchar(stream, dsize)
+            return self._read_varchar(stream, dsize).decode(errors='ignore')
         elif dtype == DDColumnType.TINY_BLOB:
             return self._read_varchar(stream, dsize)
         elif dtype == DDColumnType.TIME2:
@@ -400,7 +407,10 @@ class Column:
         elif dtype == DDColumnType.DATETIME2:
             datetime_data = MDatetime.parse_stream(stream)
             datetime_data.parse_fsp(stream, dsize - 5)  # 5 is MDatetime.sizeof()
-            return datetime_data.to_datetime()
+            try:
+                return datetime_data.to_datetime()
+            except:
+                return datetime_data
         elif dtype == DDColumnType.NEWDATE:
             return MDate.parse_stream(stream).to_date()
         elif dtype == DDColumnType.TIMESTAMP2:
