@@ -437,9 +437,11 @@ class Column:
             if isinstance(data, Lob):
                 data = data.data
             try:
+                if len(data) == 0:
+                    return 'null'
                 v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data)))
                 return v.get_json()
-            except:
+            except Exception as e:
                 return data
 
 
