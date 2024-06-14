@@ -119,6 +119,14 @@ class MIndexPage(CC):
                 logger.debug("record header is instant, with data version: %d", data_schema_version)
 
             cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
+            logger.debug("primary data layout is %s", ",".join(c[0].name for c in primary_data_layout_col))
+
+            if rh.instant == 1:
+                f.seek(-1, 1)
+                extra_byte = int.from_bytes(f.read(1), "big")
+                logger.debug("instant col extra byte is %s, &0x80 is %s, len(cols) is %d", hex(extra_byte), extra_byte & 0x80, 
+                        len(cols_disk_layout))
+                cols_disk_layout = cols_disk_layout[:extra_byte]
 
             if rh.instant == 1:
                 f.seek(-1, 1)
@@ -129,8 +137,11 @@ class MIndexPage(CC):
 
             nullable_cols = [d[0] for d in cols_disk_layout if d[1] == 4294967295 and d[0].is_nullable]
 
+            logger.debug("cols_disk_layout is %s", ",".join(c[0].name for c in cols_disk_layout))
+            logger.debug("nullable_cols is %s", ",".join(c.name for c in nullable_cols))
 
-            if rh.instant == 0:
+
+            if rh.instant == 0 and rh.instant_version == 0:
                 nullable_cols = [c for c in nullable_cols if "default_null" not in c.se_private_data]
                 cols_disk_layout = [d for d in cols_disk_layout if "default_null" not in d[0].se_private_data]
 
@@ -148,6 +159,8 @@ class MIndexPage(CC):
                 for i, c in enumerate(cols_disk_layout)
                 if DDColumnType.is_big(c[0].type) or DDColumnType.is_var(c[0].type)
             ]
+            logger.debug("may_var_col is %s", ",".join(c.name for i, c in may_var_col))
+
 
             ## read var
             f.seek(-nullcol_bitmask_size, 1)
