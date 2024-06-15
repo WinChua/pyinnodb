@@ -159,6 +159,8 @@ class CC(cs.Construct, metaclass=CMeta):
         # obj = self._encode(obj, context, path)
         # print(obj)
         self.subcon._build(obj, stream, context, path)
+        if getattr(self, "_post_build", None) is not None:
+            self._post_build(obj, stream, context, path)
 
 
 def cstring(size):
@@ -184,6 +186,20 @@ def cfield(subcon, default=None):
         )
     return csfield(subcon)
 
+class CLenString(cs.Construct):
+    def __init__(self, len_size):
+        super().__init__()
+        self._len_size = len_size
+
+    def _parse(self, stream, context, path):
+        len_bytes = stream.read(self._len_size)
+        data_size = int.from_bytes(len_bytes, "big")
+        data = stream.read(data_size)
+        return data
+    def _build(self, obj, stream, context, path):
+        data_size = len(obj)
+        stream.write(int.to_bytes(data_size, self._len_size, "big"))
+        stream.write(obj)
 
 class IntFromBytes(cs.Construct):
     def __init__(self, length):
