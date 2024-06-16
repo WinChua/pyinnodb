@@ -30,7 +30,8 @@ def list_first_page(ctx, pageno):
 @click.option("--hidden-col/--no-hidden-col", type=click.BOOL, default=False)
 @click.option("--pageno", default=None, type=click.INT)
 @click.option("--with-hist/--no-with-hist", type=click.BOOL, default=False)
-def search(ctx, primary_key, pageno, hidden_col, with_hist):
+@click.option("--datadir", type=click.Path(exists=False), default=None)
+def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
     ''' search the primary-key(int support only now) '''
     f = ctx.obj["fn"]
     #print("search start cost:", time.time() - ctx.obj["start_time"])
@@ -40,6 +41,14 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist):
     dd_object = Table(**sdi_page.ddl(f)["dd_object"])
 
     hidden_col = hidden_col or with_hist
+
+    if with_hist:
+        if datadir is None:
+            print("--datadir should be specified")
+            return
+        if not os.path.exists(datadir):
+            print(f"--datadir {datadir} not exists")
+            return
 
     root_page_no = int(dd_object.indexes[0].private_data.get("root", 4))
     f.seek(root_page_no * const.PAGE_SIZE)
@@ -99,7 +108,7 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist):
                                 rptr = v.DB_ROLL_PTR
                                 primary_key_col = dd_object.get_primary_key_col()
                                 disk_data_layout = dd_object.get_disk_data_layout()
-                                undo_map = {1: open("datadir/undo_001", "rb"), 2: open("datadir/undo_002", "rb")}
+                                undo_map = {1: open(f"{datadir}/undo_001", "rb"), 2: open(f"{datadir}/undo_002", "rb")}
                                 history = []
                                 while rptr is not None:
                                     hist, rptr = rptr.last_version(
