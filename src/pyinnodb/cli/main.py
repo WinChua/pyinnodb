@@ -5,6 +5,8 @@ from pyinnodb.disk_struct.fil import MFil
 from pyinnodb import const
 from io import BytesIO
 import sys
+import os
+import time
 
 import dataclasses
 
@@ -16,8 +18,11 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--log-level", type=click.Choice(["DEBUG", "ERROR", "INFO"]), default="ERROR"
 )
+@click.option(
+    "--validate-first/--no-validate-first", type=click.BOOL, default=False
+)
 @click.pass_context
-def main(ctx, fn, log_level):
+def main(ctx, fn, log_level, validate_first):
     '''A ibd file parser for MySQL 8.0 above, help you to know innodb better.
 
     It offer several function bellow:
@@ -30,6 +35,10 @@ def main(ctx, fn, log_level):
     many other function to explore your ibd file
 
     '''
+    # pid = os.getpid()
+    # start_time = os.stat(f"/proc/{pid}").st_ctime
+    # print("cost to startup:", time.time() - start_time)
+    # ctx.obj["start_time"] = start_time
     logging.basicConfig(
         format="[%(levelname)s]-[%(filename)s:%(lineno)d] %(message)s", level=log_level
     )
@@ -38,17 +47,18 @@ def main(ctx, fn, log_level):
     try:
         fsp_page = MFspPage.parse_stream(fn)
         ctx.obj["fsp_page"] = fsp_page
-        for pn in range(fsp_page.fsp_header.highest_page_number):
-            fn.seek(const.PAGE_SIZE * pn)
-            page_data = fn.read(const.PAGE_SIZE)
-            fil = MFil.parse(page_data)
-            if fil.page_type == const.FIL_PAGE_TYPE_ALLOCATED:
-                continue
-            checksum = const.page_checksum_crc32c(page_data)
-            if checksum != fil.checksum:
-                print(f"PAGE {pn}'s checksum is invalid, stored[{hex(fil.checksum)}] != calculate[{hex(checksum)}]")
-                print("use validate to get a more detail output of the validation")
-                sys.exit(1)
+        if validate_first:
+            for pn in range(fsp_page.fsp_header.highest_page_number):
+                fn.seek(const.PAGE_SIZE * pn)
+                page_data = fn.read(const.PAGE_SIZE)
+                fil = MFil.parse(page_data)
+                if fil.page_type == const.FIL_PAGE_TYPE_ALLOCATED:
+                    continue
+                checksum = const.page_checksum_crc32c(page_data)
+                if checksum != fil.checksum:
+                    print(f"PAGE {pn}'s checksum is invalid, stored[{hex(fil.checksum)}] != calculate[{hex(checksum)}]")
+                    print("use validate to get a more detail output of the validation")
+                    sys.exit(1)
     except Exception as e:
         print(e)
         print("the file parse faile")
