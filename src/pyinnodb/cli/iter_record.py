@@ -33,6 +33,7 @@ def list_first_page(ctx, pageno):
 def search(ctx, primary_key, pageno, hidden_col, with_hist):
     ''' search the primary-key(int support only now) '''
     f = ctx.obj["fn"]
+    #print("search start cost:", time.time() - ctx.obj["start_time"])
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)

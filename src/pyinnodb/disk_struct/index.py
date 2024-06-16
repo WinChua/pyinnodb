@@ -121,12 +121,6 @@ class MIndexPage(CC):
             cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
             logger.debug("primary data layout is %s", ",".join(c[0].name for c in primary_data_layout_col))
 
-            if rh.instant == 1:
-                f.seek(-1, 1)
-                extra_byte = int.from_bytes(f.read(1), "big")
-                logger.debug("instant col extra byte is %s, &0x80 is %s, len(cols) is %d", hex(extra_byte), extra_byte & 0x80, 
-                        len(cols_disk_layout))
-                cols_disk_layout = cols_disk_layout[:extra_byte]
 
             if rh.instant == 1:
                 f.seek(-1, 1)
