@@ -1,3 +1,5 @@
+<img align="center" src="arts/logo.png" alt="logo">
+
 # A parser for InnoDB file formats, in Python
 
 This library is written to acheive a better understanding of the articles from 
