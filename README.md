@@ -1,4 +1,7 @@
-<img align="center" src="arts/logo.png" alt="logo">
+<div align="center">
+<img align="center" src="arts/logo.png" alt="logo" width="200px">
+<h1></h1>
+</div>
 
 # A parser for InnoDB file formats, in Python
 
