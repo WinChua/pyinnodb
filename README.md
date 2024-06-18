@@ -16,11 +16,22 @@ Jeremycole also write a parser in ruby[<sup>[2]</sup>](#r2), which is not avalia
 
 # Install
 
+## pre build
+```bash
+$ wget https://github.com/WinChua/pyinnodb/releases/latest/download/pyinnodb.sh
+$ chmod a+x pyinnodb.sh
+$ ./pyinnodb.sh --help
+```
+pyinnodb.sh require py3.8+
+
+
+## from source
+
 This project use rye[<sup>[4]</sup>](#r4), a comprehensive project and package management tool written in Rust by [Armin Ronacher](https://github.com/mitsuhiko), to manage
 the dependencies, so you need to setup rye first by:
 
 ```bash
-curl -sSf https://rye-up.com/get | bash
+curl -sSf https://rye.astral.sh/get | bash
 ```
 
 After that cd the root path of the project and run:
