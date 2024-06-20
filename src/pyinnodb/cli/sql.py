@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 @main.command()
 @click.pass_context
 @click.option("--mode", type=click.Choice(["sdi", "ddl", "dump"]), default="ddl")
-def tosql(ctx, mode):
+@click.option("--sdi-idx", type=click.INT, default=0)
+def tosql(ctx, mode, sdi_idx):
     ''' dump the ddl/dml/sdi of the ibd table 
 
     ddl) output the create table ddl; 
@@ -32,7 +33,7 @@ def tosql(ctx, mode):
         if mode == "sdi":
             print(json.dumps(sdi_page.ddl(f)["dd_object"]))
         elif mode == "ddl":
-            table_object = Table(**sdi_page.ddl(f)["dd_object"])
+            table_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
 
             table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
             columns_dec = []
