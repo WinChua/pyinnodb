@@ -3,11 +3,13 @@ import sys
 import shutil
 
 if len(sys.argv) > 1 and sys.argv[1] == "clean":
-    shutil.rmtree("datadir")
-    with open(".deploy_mysqld") as f:
-        data = f.readlines()
-        os.system(f"docker stop {data[1].strip()}")
-    os.remove(".deploy_mysqld")
+    if os.path.exists("datadir"):
+        shutil.rmtree("datadir")
+    if os.path.exists(".deploy_mysqld"):
+        with open(".deploy_mysqld") as f:
+            data = f.readlines()
+            os.system(f"docker stop {data[1].strip()}")
+        os.remove(".deploy_mysqld")
     
 else:
     if os.path.exists(".deploy_mysqld"):
