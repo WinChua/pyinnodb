@@ -3,6 +3,7 @@ import typing
 import struct
 import decimal
 import dataclasses
+import re
 
 import sys
 if sys.version_info.minor >= 9:
@@ -25,6 +26,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+column_type_size = re.compile("[^(]*[(]([^)]*)[)]")
 
 class Lob:
     def __init__(self, data, off_page):
@@ -227,6 +229,13 @@ class Column:
         elif DDColumnType(self.type) == DDColumnType.SET:  # bit mask
             return int((len(self.elements) + 7) / 8)
 
+        elif DDColumnType(self.type) == DDColumnType.STRING:
+            sizes = column_type_size.findall(self.column_type_utf8)
+            if len(sizes) == 0:
+                return 0
+            else:
+                return int(sizes[0])
+
         else:
             dtype = DDColumnType(self.type)
             return DDColConf.get_col_type_conf(self.type).size
@@ -394,10 +403,10 @@ class Column:
         ## https://dev.mysql.com/doc/refman/8.0/en/precision-math-decimal-characteristics.html
         elif dtype == DDColumnType.DECIMAL or dtype == DDColumnType.NEWDECIMAL:
             return self._read_new_decimal(stream)
-        elif dtype == DDColumnType.VARCHAR:
-            return self._read_varchar(stream, dsize).decode(errors='ignore')
+        elif dtype == DDColumnType.VARCHAR or dtype == DDColumnType.STRING:
+            return self._read_varchar(stream, dsize).decode(errors='replace').strip()
         elif dtype in [DDColumnType.LONG_BLOB, DDColumnType.MEDIUM_BLOB]:
-            return self._read_varchar(stream, dsize).decode(errors='ignore')
+            return self._read_varchar(stream, dsize).decode(errors='replace')
         elif dtype == DDColumnType.TINY_BLOB:
             return self._read_varchar(stream, dsize)
         elif dtype == DDColumnType.TIME2:
@@ -423,7 +432,10 @@ class Column:
             return self._read_int(stream, dsize, False)
         elif dtype == DDColumnType.ENUM:
             idx = self._read_int(stream, dsize, False)
-            return b64decode(self.element_map[idx])
+            if idx in self.element_map:
+                return b64decode(self.element_map[idx])
+            else:
+                return idx
         elif dtype == DDColumnType.SET:
             mask = self._read_int(stream, dsize, False)
             r = []
@@ -704,10 +716,11 @@ class Table:
             if "phsical_pos" in c.private_data:
                 phsical_post_exists = True
                 break
+        logger.debug("has physical %s", phsical_post_exists)
         if phsical_post_exists:
             c_l = {}
             for idx in self.indexes:
-                if idx.name != "PRIMARY":
+                if idx.name != "PRIMARY" and len(self.indexes) != 1:
                     continue
                 for ie in idx.elements:
                     col = self.columns[ie.column_opx]
@@ -721,10 +734,11 @@ class Table:
                 data_layout_col.append((c, c_l.get(i, 4294967295)))
             data_layout_col.sort(key = lambda c: c[0].private_data.get("physical_pos", 0))
             return data_layout_col
+
         data_layout_col = []
         for idx in self.indexes:
             if (
-                idx.name == "PRIMARY"
+                idx.name == "PRIMARY" or len(self.indexes) == 1
                 # const.index_type.IndexType(idx.type)
                 # == const.index_type.IndexType.IT_PRIMARY
             ):
@@ -735,6 +749,17 @@ class Table:
                         data_layout_col.append((col, prekey_len))
                     else:
                         data_layout_col.append((col, ie.length))
+
+        if len(data_layout_col) == 0:
+            for idx in self.indexes:
+                for ie in idx.elements:
+                    col = self.columns[ie.column_opx]
+                    prekey_len, ok = col.index_prefix(ie)
+                    if ok: # prefix
+                        data_layout_col.append((col, prekey_len))
+                    else:
+                        data_layout_col.append((col, ie.length))
+                break
 
         return data_layout_col
 
