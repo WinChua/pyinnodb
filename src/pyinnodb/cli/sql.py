@@ -31,7 +31,7 @@ def tosql(ctx, mode, sdi_idx):
         f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
         sdi_page = MSDIPage.parse_stream(f)
         if mode == "sdi":
-            print(json.dumps(sdi_page.ddl(f)["dd_object"]))
+            print(json.dumps(sdi_page.ddl(f, sdi_idx)["dd_object"]))
         elif mode == "ddl":
             table_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
 
@@ -61,11 +61,14 @@ def tosql(ctx, mode, sdi_idx):
                 f"CREATE TABLE {table_name} ({columns_dec}) {desc} {chr(10)+parts if parts else ''}{comment}"
             )
         else:
-            table_object = Table(**sdi_page.ddl(f)["dd_object"])
+            table_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
             root_page_no = int(table_object.indexes[0].private_data.get("root", 4))
             f.seek(root_page_no * const.PAGE_SIZE)
             root_index_page = MIndexPage.parse_stream(f)
             first_leaf_page_no = root_index_page.get_first_leaf_page(f, table_object.get_primary_key_col())
+            if first_leaf_page_no is None:
+                print("no data")
+                return
             values = []
             def transfter(nd):
                 vs = []
