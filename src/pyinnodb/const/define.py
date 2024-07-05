@@ -71,4 +71,4 @@ PAGE_TYPE_MAP = {
 
 
 def get_page_type_name(typ):
-    return PAGE_TYPE_MAP.get(typ, "unknow")
+    return PAGE_TYPE_MAP.get(typ, f"unknow {typ}")
