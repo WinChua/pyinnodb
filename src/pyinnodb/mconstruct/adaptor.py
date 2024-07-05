@@ -187,30 +187,32 @@ def cfield(subcon, default=None):
     return csfield(subcon)
 
 class CLenString(cs.Construct):
-    def __init__(self, len_size):
+    def __init__(self, len_size, byte_order="big"):
         super().__init__()
         self._len_size = len_size
+        self._byte_order = byte_order
 
     def _parse(self, stream, context, path):
         len_bytes = stream.read(self._len_size)
-        data_size = int.from_bytes(len_bytes, "big")
+        data_size = int.from_bytes(len_bytes, self._byte_order)
         data = stream.read(data_size)
         return data
     def _build(self, obj, stream, context, path):
         data_size = len(obj)
-        stream.write(int.to_bytes(data_size, self._len_size, "big"))
+        stream.write(int.to_bytes(data_size, self._len_size, self._byte_order))
         stream.write(obj)
 
 class IntFromBytes(cs.Construct):
-    def __init__(self, length):
+    def __init__(self, length, byte_order="big"):
         super().__init__()
         self.length = length
+        self._byte_order = byte_order
 
     def _parse(self, stream, context, path):
-        return int.from_bytes(stream.read(self.length), "big")
+        return int.from_bytes(stream.read(self.length), self._byte_order)
 
     def _build(self, obj, stream, context, path):
-        v = int.to_bytes(obj, self.length, "big")
+        v = int.to_bytes(obj, self.length, self._byte_order)
         stream.write(v)
 
     def _sizeof(self, context, path):

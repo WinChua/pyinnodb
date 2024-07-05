@@ -56,7 +56,7 @@ block_char_v = ["░", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
 block_char_h = ["░", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"]
 char = ["╭", "╮","│","╰","╯","─"]
 
-def heatmap_matrix_width_high(data, w, h):
+def heatmap_matrix_width_high(data, w, h, prefix=""):
     max_data, min_data = max(data), min(data)
     step = (max_data - min_data) / len(ansi_heatmap_color)
 
@@ -68,11 +68,16 @@ def heatmap_matrix_width_high(data, w, h):
 
     ic = itertools.chain(iter(colors), itertools.repeat(" "))
     line = w*char[-1]
-    top = f"{char[0]}{line}{char[1]}"
-    bottom = f"{char[3]}{line}{char[4]}"
+    # top_legend = " " * 2 + "0" + " " * (w - 1) + str(w)
+    # print(top_legend)
+    top = prefix + f"{char[0]}{line}{char[1]}"
+    bottom = " " * len(prefix) + f"{char[3]}{line}{char[4]}"
     print(top)
     for i in range(h):
-        print(f"{char[2]}{''.join([next(ic) for i in range(w)])}{char[2]}")
+        l = f"{char[2]}{''.join([next(ic) for i in range(w)])}{char[2]}"
+        if prefix != "":
+            l = str(i*w).rjust(len(prefix)) + l
+        print(l)
     print(bottom)
 
 
@@ -96,4 +101,4 @@ if __name__ == "__main__":
 
     heatmap_matrix_data(data)
 
-    heatmap_matrix_width_high(list(range(1000)), 64, 20)
+    heatmap_matrix_width_high(list(range(1000)), 64, 20, "Start Page")
