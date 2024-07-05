@@ -75,7 +75,7 @@ _var_type = [
     DDColumnType.MEDIUM_BLOB,
     DDColumnType.LONG_BLOB,
     DDColumnType.BLOB,
-    DDColumnType.STRING,
+    #DDColumnType.STRING,
     DDColumnType.JSON,
     DDColumnType.TINY_BLOB,
 ]

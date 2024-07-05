@@ -153,7 +153,8 @@ def primary_key_only(key_len: int):
 @click.option("--hidden-col/--no-hidden-col", type=click.BOOL, default=False, help="show the DB_ROLL_PTR and DB_TRX_ID")
 @click.option("--pageno", default=None, type=click.INT, help="iterate on pageno only")
 @click.option("--primary-key-len", type=click.INT, help="primary key only if not 0", default=0)
-def iter_record(ctx, garbage, hidden_col, pageno, primary_key_len):
+@click.option("--sdi-idx", type=click.INT, default=0, help="idx of sdi")
+def iter_record(ctx, garbage, hidden_col, pageno, primary_key_len, sdi_idx):
     """iterate on the leaf pages
 
     by default, iter_record will iterate from the first leaf page
@@ -165,7 +166,7 @@ def iter_record(ctx, garbage, hidden_col, pageno, primary_key_len):
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
-    dd_object = Table(**sdi_page.ddl(f)["dd_object"])
+    dd_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
     root_page_no = int(dd_object.indexes[0].private_data.get("root", 4))
     f.seek(root_page_no * const.PAGE_SIZE)
     root_index_page = MIndexPage.parse_stream(f)
@@ -173,6 +174,9 @@ def iter_record(ctx, garbage, hidden_col, pageno, primary_key_len):
     # as the first page of leaf inode may be the off-page of large column, we should not use this way
     #first_leaf_page = root_index_page.fseg_header.get_first_leaf_page(f)
     logger.debug("first_leaf_page is %s", first_leaf_page)
+    if first_leaf_page is None:
+        print("there is no data in this table")
+        return
     if pageno is not None:
         first_leaf_page = pageno
     default_value_parser = MIndexPage.default_value_parser(dd_object, hidden_col=hidden_col)

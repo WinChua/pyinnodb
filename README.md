@@ -1,9 +1,9 @@
 <div align="center">
 <img align="center" src="arts/logo.png" alt="logo" width="200px">
-<h1></h1>
+<p><strong>pyinnodb</strong>: a parser for innodb file format</p>
 </div>
 
-# A parser for InnoDB file formats, in Python
+----
 
 This library is written to acheive a better understanding of the articles from 
 jeremycole's blog[<sup>[1]</sup>](#r1) about innodb.

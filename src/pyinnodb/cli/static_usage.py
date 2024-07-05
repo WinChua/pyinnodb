@@ -4,22 +4,31 @@ from pyinnodb.disk_struct.inode import MInodePage, MInodeEntry
 from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb import const
+from pyinnodb import color
 
 from typing import Callable
 
 
 @main.command()
 @click.pass_context
-def list_page(ctx):
+@click.option("--kind", type=click.Choice(["type", "lsn"]), default="type")
+def list_page(ctx, kind):
     ''' show page type of every page '''
     f = ctx.obj["fn"]
     fsp_page = ctx.obj["fsp_page"]
+    lsns = []
     for pn in range(fsp_page.fsp_header.highest_page_number):
         f.seek(pn * const.PAGE_SIZE)
         fil = MFil.parse_stream(f)
-        page_name = const.get_page_type_name(fil.page_type)
-        print(f"{pn} {page_name}")
+        if kind == "type":
+            page_name = const.get_page_type_name(fil.page_type)
+            print(f"{pn} {page_name}")
+        elif kind == "lsn":
+            if fil.lsn != 0:
+                lsns.append(fil.lsn)
 
+    if len(lsns) > 0:
+        color.heatmap_matrix_width_high(lsns, 64, int((len(lsns) / 64) + 1), "Page NO.")
 
 @main.command()
 @click.pass_context

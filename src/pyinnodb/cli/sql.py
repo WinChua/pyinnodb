@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 @main.command()
 @click.pass_context
 @click.option("--mode", type=click.Choice(["sdi", "ddl", "dump"]), default="ddl")
-def tosql(ctx, mode):
+@click.option("--sdi-idx", type=click.INT, default=0)
+def tosql(ctx, mode, sdi_idx):
     ''' dump the ddl/dml/sdi of the ibd table 
 
     ddl) output the create table ddl; 
@@ -30,9 +31,9 @@ def tosql(ctx, mode):
         f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
         sdi_page = MSDIPage.parse_stream(f)
         if mode == "sdi":
-            print(json.dumps(sdi_page.ddl(f)["dd_object"]))
+            print(json.dumps(sdi_page.ddl(f, sdi_idx)["dd_object"]))
         elif mode == "ddl":
-            table_object = Table(**sdi_page.ddl(f)["dd_object"])
+            table_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
 
             table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
             columns_dec = []
@@ -60,11 +61,14 @@ def tosql(ctx, mode):
                 f"CREATE TABLE {table_name} ({columns_dec}) {desc} {chr(10)+parts if parts else ''}{comment}"
             )
         else:
-            table_object = Table(**sdi_page.ddl(f)["dd_object"])
+            table_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
             root_page_no = int(table_object.indexes[0].private_data.get("root", 4))
             f.seek(root_page_no * const.PAGE_SIZE)
             root_index_page = MIndexPage.parse_stream(f)
             first_leaf_page_no = root_index_page.get_first_leaf_page(f, table_object.get_primary_key_col())
+            if first_leaf_page_no is None:
+                print("no data")
+                return
             values = []
             def transfter(nd):
                 vs = []

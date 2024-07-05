@@ -7,6 +7,12 @@ from pyinnodb.disk_struct.rollback import MRollbackPointer
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.sdi.table import Column, Table
 
+@main.command()
+@click.pass_context
+@click.option("--datadir", type=click.Path(exists=True))
+def undo_tablespaces(ctx, datadir):
+    pass
+
 
 @main.command()
 @click.pass_context

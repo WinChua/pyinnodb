@@ -189,8 +189,8 @@ class MIndexPage(CC):
                         if len(p_value) > 100:
                             p_value = p_value[:10] + "..." + p_value[-10:]
 
-                    logger.debug("read_data: col[%s], value[%s], i[%d], op[%d], vs[%s], from[%s],to[%s]",
-                            col.name, p_value, i, col.ordinal_position, vs, cur_before%const.PAGE_SIZE, f.tell()%const.PAGE_SIZE)
+                    logger.debug("read_data: col[%s], col.type[%s], value[%s], i[%d], op[%d], vs[%s], from[%s],to[%s]",
+                            col.name, col.type, p_value, i, col.ordinal_position, vs, cur_before%const.PAGE_SIZE, f.tell()%const.PAGE_SIZE)
                 if col.generation_expression_utf8 != "":
                     continue
                 disk_data_parsed[col.name] = col_value
@@ -309,7 +309,8 @@ class MSDIPage(CC):
         self.fil_tailer = MFilTrailer.parse_stream(stream)
         #self.ddl = next(self.iterate_sdi_record(stream))
 
-    def ddl(self, stream):
+    def ddl(self, stream, idx):
+        return list(self.iterate_sdi_record(stream))[idx]
         return next(self.iterate_sdi_record(stream))
 
     def iterate_sdi_record(self, stream):
