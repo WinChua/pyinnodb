@@ -1,6 +1,7 @@
 from . import *
 
 from pyinnodb.disk_struct.inode import MInodePage, MInodeEntry
+from pyinnodb.disk_struct.index import MIndexHeader
 from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb import const
@@ -11,12 +12,13 @@ from typing import Callable
 
 @main.command()
 @click.pass_context
-@click.option("--kind", type=click.Choice(["type", "lsn"]), default="type")
+@click.option("--kind", type=click.Choice(["type", "lsn", "ratio"]), default="type")
 def list_page(ctx, kind):
     ''' show page type of every page '''
     f = ctx.obj["fn"]
     fsp_page = ctx.obj["fsp_page"]
     lsns = []
+    ratios = []
     for pn in range(fsp_page.fsp_header.highest_page_number):
         f.seek(pn * const.PAGE_SIZE)
         fil = MFil.parse_stream(f)
@@ -26,9 +28,17 @@ def list_page(ctx, kind):
         elif kind == "lsn":
             if fil.lsn != 0:
                 lsns.append(fil.lsn)
+        elif kind == "ratio":
+            if const.PageType(fil.page_type) == const.PageType.INDEX:
+                index_header = MIndexHeader.parse_stream(f)
+                ratios.append(index_header.heap_top_pos / const.PAGE_SIZE)
+            else:
+                ratios.append(-1)
 
     if len(lsns) > 0:
         color.heatmap_matrix_width_high(lsns, 64, int((len(lsns) / 64) + 1), "Page NO.")
+    if len(ratios) > 0:
+        color.ratio_matrix_width_high(ratios, 64, int((len(ratios)/64) + 1), "Page NO.")
 
 @main.command()
 @click.pass_context
