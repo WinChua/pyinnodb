@@ -22,7 +22,6 @@ with open(".deploy_mysqld") as f:
 
 # mysql -u root -h 127.0.0.1 -P19203 -ptest
 print(url)
-url = "mysql+pymysql://root:test@localhost:49617/test"
 engine = create_engine(url)
 Base.metadata.create_all(engine)
 

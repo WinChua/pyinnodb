@@ -56,6 +56,21 @@ block_char_v = ["░", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
 block_char_h = ["░", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"]
 char = ["╭", "╮","│","╰","╯","─"]
 
+def ratio_matrix_width_high(data, w, h, prefix=""):
+    idxs = [0 if v == -1 else int(v * 8) for v in data]
+    texts = [block_char_v[idx] for idx in idxs]
+    ic = itertools.chain(iter(texts), itertools.repeat(" "))
+    line = w * char[-1]
+    top = prefix + f"{char[0]}{line}{char[1]}"
+    bottom = " " * len(prefix) + f"{char[3]}{line}{char[4]}"
+    print(top)
+    for i in range(h):
+        l = f"{char[2]}{''.join([next(ic) for i in range(w)])}{char[2]}"
+        if prefix != "":
+            l = str(i*w).rjust(len(prefix)) + l
+        print(l)
+    print(bottom)
+
 def heatmap_matrix_width_high(data, w, h, prefix=""):
     max_data, min_data = max(data), min(data)
     step = (max_data - min_data) / len(ansi_heatmap_color)

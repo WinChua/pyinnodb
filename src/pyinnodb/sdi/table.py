@@ -22,6 +22,8 @@ from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp
 from ..disk_struct.json import MJson
 from ..disk_struct.rollback import MRollbackPointer
 
+from ..disk_struct.index import MIndexPage
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -797,6 +799,27 @@ class Table:
 
     def get_default_DB_col(self) -> typing.List[Column]:
         return [c for c in self.columns if c.name in ["DB_TRX_ID", "DB_ROLL_PTR"]]
+
+    def iter_record(self, f, hidden_col=False, garbage=False, transfter=None):
+        root_page_no = int(self.indexes[0].private_data.get("root", 4))
+        f.seek(root_page_no * const.PAGE_SIZE)
+        root_index_page = MIndexPage.parse_stream(f)
+        first_leaf_page = root_index_page.get_first_leaf_page(f, self.get_primary_key_col())
+        if first_leaf_page is None:
+            return
+
+        default_value_parser = MIndexPage.default_value_parser(self, hidden_col=hidden_col, transfter=transfter)
+
+        result = []
+        while first_leaf_page != 4294967295:
+            f.seek(first_leaf_page * const.PAGE_SIZE)
+            index_page = MIndexPage.parse_stream(f)
+            result.extend(index_page.iterate_record_header(f, value_parser = default_value_parser, garbage=garbage))
+            first_leaf_page = index_page.fil.next_page
+
+
+        return result
+
 
     def __post_init__(self):
         cols: typing.List[Column] = [Column(**c) for c in self.columns]

@@ -38,7 +38,7 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
-    dd_object = Table(**sdi_page.ddl(f)["dd_object"])
+    dd_object = Table(**sdi_page.ddl(f, 0)["dd_object"])
 
     hidden_col = hidden_col or with_hist
 
@@ -80,7 +80,9 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
             logger.debug("page_dir_idx: %s, match: %s", page_dir_idx, match)
             logger.debug("end_rh is %s", end_rh)
             if match and const.RecordType(end_rh.record_type) == const.RecordType.Conventional: # the key
-                logger.debug("match: %s", value_parser(end_rh, f))
+                v = value_parser(end_rh, f)
+                logger.debug("match: %s", v)
+                print("found: ", v)
                 break
             elif match and const.RecordType(end_rh.record_type) == const.RecordType.NodePointer:
                 record_key = f.read(len(primary_key))
@@ -95,7 +97,7 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
                 first_leaf_page = 4294967295 # no match if cur page is leaf then break loop
                 for i in range(owned+1):
                     cur = f.tell()
-                    logger.debug("cur is %s, next_rh is %s", cur % const.PAGE_SIZE, start_rh)
+                    logger.debug("cur is %s, next_rh is %s, i is %s", cur % const.PAGE_SIZE, start_rh, i)
                     if const.RecordType(start_rh.record_type) == const.RecordType.Conventional:
                         record_primary_key = f.read(len(primary_key))
                         logger.debug("record primary key is %s, primary key search is %s", record_primary_key, primary_key)
@@ -108,7 +110,8 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
                                 rptr = v.DB_ROLL_PTR
                                 primary_key_col = dd_object.get_primary_key_col()
                                 disk_data_layout = dd_object.get_disk_data_layout()
-                                undo_map = {1: open(f"{datadir}/undo_001", "rb"), 2: open(f"{datadir}/undo_002", "rb")}
+                                ##undo_map = {1: open(f"{datadir}/undo_001", "rb"), 2: open(f"{datadir}/undo_002", "rb")}
+                                undo_map = const.util.get_undo_tablespacefile(f"{datadir}/mysql.ibd")
                                 history = []
                                 while rptr is not None:
                                     hist, rptr = rptr.last_version(
@@ -122,6 +125,8 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
                         record_key = f.read(len(primary_key))
                         logger.debug("record node is %s, primary_key is %s, result is %s", record_key, primary_key, record_key <= primary_key)
                         if record_key > primary_key:
+                            if i == 1:
+                                page_num = f.read(4)
                             first_leaf_page = int.from_bytes(page_num, "big")
                             break
                         elif record_key == primary_key:

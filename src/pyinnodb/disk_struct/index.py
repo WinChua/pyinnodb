@@ -7,7 +7,14 @@ from .inode import MInodeEntry
 
 from .. import const
 from ..const.dd_column_type import DDColumnType
-from ..sdi.table import Table
+
+from typing import TYPE_CHECKING
+import typing
+
+Table = typing.Type["Table"]
+if TYPE_CHECKING:
+    from ..sdi.table import Table
+
 
 import logging
 import json
@@ -242,13 +249,14 @@ class MIndexPage(CC):
 
     def iterate_record_header(self, f, value_parser=None, garbage=False):
         page_no = self.fil.offset
+        result = []
         infimum_offset = self.system_records.infimum.get_current_offset()
         if not garbage:
             f.seek(page_no * const.PAGE_SIZE + infimum_offset)
             next_offset = self.system_records.infimum.next_record_offset
         else:
             if self.index_header.first_garbage == 0:
-                return
+                return result
             f.seek(page_no * const.PAGE_SIZE)
             next_offset = self.index_header.first_garbage
         while True:
@@ -260,9 +268,11 @@ class MIndexPage(CC):
                 break
             if value_parser is not None:
                 cur = f.tell()
-                value_parser(rh, f)
+                result.append(value_parser(rh, f))
                 f.seek(cur)
             next_offset = rh.next_record_offset
+
+        return result
 
     def binary_search_with_page_directory(self, key, stream):
         # stream should be the start of a page
