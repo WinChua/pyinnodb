@@ -978,6 +978,36 @@ table_opts = [
 
 column_spec_size = {"DB_ROW_ID": 6, "DB_TRX_ID": 6, "DB_ROLL_PTR": 7}
 
+def get_sys_col(name, pos):
+    if name == "DB_TRX_ID":
+        return Column(
+            name = "DB_TRX_ID",
+            type = 10,
+            hidden = 2,
+            ordinal_position = pos,
+            char_length = 6,
+            has_no_default = False,
+            default_value = "",
+            default_value_utf8_null = True,
+            collation_id = 63,
+            is_explicit_collation = False)
+    elif name == "DB_ROLL_PTR":
+        return Column(
+            name = name,
+            type = 9,
+            hidden = 2,
+            ordinal_position = pos,
+            char_length = 6,
+            has_no_default = False,
+            default_value = "",
+            default_value_utf8_null = True,
+            collation_id = 63,
+            is_explicit_collation = False)
+        pass
+    elif name == "DB_ROW_ID":
+        pass
+    return
+
 if __name__ == "__main__":
     import json
 
