@@ -366,8 +366,8 @@ class Column:
             data = stream.read(20)
             cur = stream.tell()
             pointer = OffPagePointer.parse_stream(io.BytesIO(data))
-            logger.debug("pointer is %s", pointer)
             first_page = pointer.get_first_page(stream)
+            logger.debug("pointer is %s, size of first page is %d", pointer, first_page.sizeof())
             real_data = first_page.get_data(stream)
             stream.seek(cur)
             return real_data
