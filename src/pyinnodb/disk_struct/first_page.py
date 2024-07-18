@@ -37,10 +37,14 @@ class MFirstPage(CC):  ## first_page_t
     )  # index_entry list locate after index_free_node, which indicate the free entry in index_entry
     index_entry: typing.List[MIndexEntryNode] = cfield(carray(10, MIndexEntryNode))
 
+    def _post_parsed(self, stream, context, path):
+        self.first_page_data = stream.read(self.data_len)
+
     def get_data(self, stream):
         ie = self.index_entry[0]
-        data = b''
+        data = self.first_page_data
         for i in range(self.index_list.length):
+            logger.debug("ie is %s", ie)
             stream.seek(ie.page_no * const.PAGE_SIZE)
             dp = MDataPage.parse_stream(stream)
             data += stream.read(dp.data_len)
