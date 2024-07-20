@@ -366,15 +366,9 @@ class Column:
             data = stream.read(20)
             cur = stream.tell()
             pointer = OffPagePointer.parse_stream(io.BytesIO(data))
-            first_page = pointer.get_first_page(stream)
-            logger.debug("pointer is %s, size of first page is %d", pointer, first_page.sizeof())
-            real_data = first_page.get_data(stream)
+            real_data = pointer.read_data(stream)
             stream.seek(cur)
             return real_data
-            if len(real_data) > 200:
-                return Lob(real_data, True)
-            else:
-                return real_data
         else:
             data = stream.read(size)
             return data
