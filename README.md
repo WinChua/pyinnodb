@@ -1,5 +1,5 @@
 <div align="center">
-<img align="center" src="arts/logo.png" alt="logo" width="200px">
+<img align="center" src="https://s3.bmp.ovh/imgs/2024/07/20/13701166ef090a1e.png" alt="logo" width="200px">
 <p><strong>pyinnodb</strong>: a parser for innodb file format</p>
 </div>
 
