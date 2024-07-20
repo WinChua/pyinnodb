@@ -5,6 +5,24 @@ from .fil import MFil
 
 from pyinnodb import const
 
+blob_hdr_size = 8
+
+class MBlobHdr(CC): # only used in MySQL 5
+    part_len: int = cfield(cs.Int32ub)
+    next_page_no: int = cfield(cs.Int32ub) # FIL_NULL if none 0xffffffff
+
+    def get_data(self, stream):
+        data = stream.read(self.part_len)
+        if self.next_page_no == 0xffffffff:
+            return data
+        else:
+            stream.seek(self.next_page_no * const.PAGE_SIZE + 38)
+            blob_header = MBlobHdr.parse_stream(stream)
+            return data + blob_header.get_data(stream)
+
+def btr_blob_get_next_page_no():
+    return 0
+
 
 class MIndexEntryNode(CC):  ## index_entry_t
     node: MListNode = cfield(MListNode)

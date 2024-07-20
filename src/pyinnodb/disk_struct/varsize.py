@@ -1,6 +1,7 @@
 from ..mconstruct import *
 from .. import const
-from .first_page import MFirstPage
+from .first_page import MFirstPage, MBlobHdr
+from .fil import MFil
 
 
 class OffPagePointer(CC):
@@ -8,6 +9,19 @@ class OffPagePointer(CC):
     page_num: int = cfield(cs.Int32ub)
     page_offset: int = cfield(cs.Int32ub)
     data_length: int = cfield(cs.Int64ub)
+
+    def read_data(self, stream):
+        stream.seek(self.page_num * const.PAGE_SIZE)
+        fil = MFil.parse_stream(stream)
+        logger.debug("fil is %s", fil)
+        if fil.page_type == const.FIL_PAGE_TYPE_BLOB:
+            blob_header = MBlobHdr.parse_stream(stream)
+            logger.debug("blob header is %s", blob_header)
+            return blob_header.get_data(stream)
+        else:
+            first_page = pointer.get_first_page(stream)
+            real_data = first_page.get_data(stream)
+            return real_data
 
     def read(self, stream):
         cur = stream.tell()
