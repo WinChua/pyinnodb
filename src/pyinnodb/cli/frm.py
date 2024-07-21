@@ -15,7 +15,8 @@ def frm(ctx, frmfile):
 
     cols = []
     for i, col in enumerate(frm_header.cols):
-        cols.append(col.to_dd_column(col.name, i))
+        cols.append(col.to_dd_column(col.name, i, frm_header.column_labels))
+
 
     #print(frm_header.keys[0][0].key_parts)
     keys, key_name, key_comment = frm_header.keys[0]

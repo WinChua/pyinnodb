@@ -438,9 +438,9 @@ class Column:
             mask = self._read_int(stream, dsize, False)
             r = []
             for m, v in self.element_map.items():
-                if mask & m:
-                    r.append(b64decode(v))
-            return r
+                if mask & (1 << (m-1)):
+                    r.append(b64decode(v).decode(errors='replace'))
+            return ','.join(r)
         elif dtype == DDColumnType.JSON:
             # data = stream.read(dsize)
             data = self._read_varchar(stream, dsize)
