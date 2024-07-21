@@ -38,7 +38,6 @@ def frm(ctx, frmfile):
     ibd.seek(root_page_no * const.PAGE_SIZE)
     root_index_page = MIndexPage.parse_stream(ibd)
     first_leaf_page = root_index_page.get_first_leaf_page(ibd, t.get_primary_key_col())
-    print(first_leaf_page)
 
     default_value_parser = MIndexPage.default_value_parser(t, hidden_col=False)
 
