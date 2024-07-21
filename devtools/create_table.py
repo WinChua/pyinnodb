@@ -12,7 +12,6 @@ all_type = [
     "BINARY",
     "BLOB",
     "BOOLEAN",
-    # 'CLOB',
     "DATE",
     "DATETIME",
     "DECIMAL",
@@ -22,16 +21,13 @@ all_type = [
     "INT",
     "INTEGER",
     "JSON",
-    # 'NULLTYPE',
     "NUMERIC",
     "REAL",
     "SMALLINT",
-    # 'STRINGTYPE',
     "TEXT",
     "TIME",
     "TIMESTAMP",
     "ENUM",
-    ## 'UUID',
 ]
 
 all_type_with_length = ["VARBINARY", "CHAR", "NCHAR", "NVARCHAR", "VARCHAR"]
