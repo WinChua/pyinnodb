@@ -1,10 +1,11 @@
 from ..mconstruct import *
 from io import BytesIO
-from pyinnodb.sdi.table import Column, Index, IndexElement
+from pyinnodb.sdi.table import Column, Index, IndexElement, ColumnElement
 import typing
 from pyinnodb.const.index_type import IndexType
 from pyinnodb import const
 import enum
+from base64 import b64encode
 
 # header_size: 64
 # forminfo_offset: header_size+${names_length}
@@ -63,7 +64,7 @@ class MFrmColumn(CC):  # 17
     charset_id2: int = cfield(cs.Int8ul)
     comment_length: str = cfield(cs.Bytes(2))
 
-    def to_dd_column(self, name: str, pos: int) -> Column:
+    def to_dd_column(self, name: str, pos: int, labels: typing.List[typing.List[str]]) -> Column:
         c = Column()
         c.hidden = const.column_hidden_type.ColumnHiddenType.HT_VISIBLE.value
         c.ordinal_position = pos
@@ -79,6 +80,12 @@ class MFrmColumn(CC):  # 17
                 c.numeric_precision -= 1
             if c.numeric_precision:
                 c.numeric_precision -= 1
+        elif c.type == [const.dd_column_type.DDColumnType.ENUM.value, 
+                const.dd_column_type.DDColumnType.SET.value]:
+            if self.label_id <= len(labels):
+                for i, name in enumerate(labels[self.label_id-1]):
+                    c.elements.append(ColumnElement(name=b64encode(name), index=i+1))
+
 
         c.is_nullable = bool(self.flags & FieldFlag.MAYBE_NULL.value)
 
@@ -263,7 +270,7 @@ class MFrm(CC):
             stream.read(2)
 
         column_names = names[1:-2].split(b"\xff")
-        column_labels = [
+        self.column_labels = [
             g.split(b"\xff") for g in labels[1:-2].split(b"\x00") if g
         ]
 
