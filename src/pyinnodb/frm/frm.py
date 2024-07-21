@@ -82,6 +82,7 @@ class MFrmColumn(CC):  # 17
                 c.numeric_precision -= 1
         elif c.type == [const.dd_column_type.DDColumnType.ENUM.value, 
                 const.dd_column_type.DDColumnType.SET.value]:
+            c.size = 1
             if self.label_id <= len(labels):
                 for i, name in enumerate(labels[self.label_id-1]):
                     c.elements.append(ColumnElement(name=b64encode(name), index=i+1))
