@@ -126,7 +126,7 @@ class MIndexPage(CC):
                 logger.debug("record header is instant, with data version: %d", data_schema_version)
 
             cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
-            logger.debug("primary data layout is %s", ",".join(c[0].name for c in primary_data_layout_col))
+            logger.debug("primary data layout is %s", ",".join(f"{c[0].name}({c[0].ordinal_position})" for c in primary_data_layout_col))
 
 
             if rh.instant == 1:
@@ -158,9 +158,9 @@ class MIndexPage(CC):
             may_var_col = [
                 (i, c[0])
                 for i, c in enumerate(cols_disk_layout)
-                if DDColumnType.is_big(c[0].type) or DDColumnType.is_var(c[0].type)
+                if DDColumnType.is_big(c[0].type) or DDColumnType.is_var(c[0].type, mysqld_version=dd_object.mysql_version_id)
             ]
-            logger.debug("may_var_col is %s", ",".join(c.name for i, c in may_var_col))
+            logger.debug("may_var_col is %s", ",".join(f"({i})({c.ordinal_position}){c.name}" for i, c in may_var_col))
 
 
             ## read var

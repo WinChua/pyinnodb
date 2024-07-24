@@ -67,7 +67,7 @@ class MFrmColumn(CC):  # 17
     def to_dd_column(self, name: str, pos: int, labels: typing.List[typing.List[str]]) -> Column:
         c = Column()
         c.hidden = const.column_hidden_type.ColumnHiddenType.HT_VISIBLE.value
-        c.ordinal_position = pos
+        c.ordinal_position = pos + 1
         if self.type_code < 20:
             c.type = self.type_code + 1
         else:
@@ -80,11 +80,15 @@ class MFrmColumn(CC):  # 17
                 c.numeric_precision -= 1
             if c.numeric_precision:
                 c.numeric_precision -= 1
+        elif c.type == const.dd_column_type.DDColumnType.BIT.value:
+            c.numeric_precision = self.length
         elif c.type in [const.dd_column_type.DDColumnType.ENUM.value, 
                 const.dd_column_type.DDColumnType.SET.value]:
             if self.label_id <= len(labels):
                 for i, name in enumerate(labels[self.label_id-1]):
                     c.elements.append(ColumnElement(name=b64encode(name), index=i+1))
+        elif c.type == const.dd_column_type.DDColumnType.STRING.value:
+            c.column_type_utf8 = f"char({self.length})"
 
 
         c.is_nullable = bool(self.flags & FieldFlag.MAYBE_NULL.value)

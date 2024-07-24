@@ -19,7 +19,7 @@ class OffPagePointer(CC):
             logger.debug("blob header is %s", blob_header)
             return blob_header.get_data(stream)
         else:
-            first_page = pointer.get_first_page(stream)
+            first_page = self.get_first_page(stream)
             real_data = first_page.get_data(stream)
             return real_data
 

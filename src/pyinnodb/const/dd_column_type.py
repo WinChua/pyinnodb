@@ -45,8 +45,17 @@ class DDColumnType(Enum):
         return cls(t) in _number_type
 
     @classmethod
-    def is_var(cls, t):
-        return cls(t) in _var_type
+    def is_var(cls, t, mysqld_version=None):
+        tt = cls(t)
+        if tt != DDColumnType.STRING:
+            return tt in _var_type
+        else:
+            if mysqld_version is None:
+                return False
+            elif mysqld_version < 80000:
+                return False
+            else:
+                return True
 
     @classmethod
     def is_big(cls, t):

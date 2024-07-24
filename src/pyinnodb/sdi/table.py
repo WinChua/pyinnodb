@@ -232,7 +232,7 @@ class Column:
         elif dtype == DDColumnType.SET:  # bit mask
             return int((len(self.elements) + 7) / 8)
 
-        elif dtype == DDColumnType.STRING:
+        elif dtype == DDColumnType.STRING: # if column don't have varsize 
             sizes = column_type_size.findall(self.column_type_utf8)
             if len(sizes) == 0:
                 return 0
@@ -403,7 +403,7 @@ class Column:
             return self._read_varchar(stream, dsize).decode(errors='replace').strip()
         elif dtype == DDColumnType.VARCHAR:
             return self._read_varchar(stream, dsize).decode(errors='replace')
-        elif dtype in [DDColumnType.LONG_BLOB, DDColumnType.MEDIUM_BLOB]:
+        elif dtype in [DDColumnType.LONG_BLOB, DDColumnType.MEDIUM_BLOB, DDColumnType.BLOB]:
             return self._read_varchar(stream, dsize).decode(errors='replace')
         elif dtype == DDColumnType.TINY_BLOB:
             return self._read_varchar(stream, dsize).decode(errors='replace')
