@@ -7,29 +7,6 @@ from sqlalchemy import text
 with open(".deploy_mysqld") as f:
     url = f.readline().strip()
 
-all_type = [
-    "BIGINT",
-    "BINARY",
-    "BLOB",
-    "BOOLEAN",
-    "DATE",
-    "DATETIME",
-    "DECIMAL",
-    "DOUBLE",
-    "DOUBLE_PRECISION",
-    "FLOAT",
-    "INT",
-    "INTEGER",
-    "JSON",
-    "NUMERIC",
-    "REAL",
-    "SMALLINT",
-    "TEXT",
-    "TIME",
-    "TIMESTAMP",
-    "ENUM",
-]
-
 all_type_with_length = ["VARBINARY", "CHAR", "NCHAR", "NVARCHAR", "VARCHAR"]
 
 all_clob_type = [
@@ -53,6 +30,7 @@ all_type_column.extend(
     [f"    {t} = Column(dmysql.types.{t}, comment='COMMENT FOR {t}')" for t in all_type]
 )
 all_type_column.append("    ENUM = Column(dmysql.ENUM('hello', 'world', 'a'))")
+all_type_column.append("    SET = Column(dmysql.SET('a', 'b', 'c'))")
 all_type_column.append(
     "    int_def_col = Column(dmysql.types.BIGINT, server_default=text('42'))"
 )
