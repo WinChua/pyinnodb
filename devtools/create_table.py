@@ -1,8 +1,9 @@
 import sqlalchemy
 from sqlalchemy.dialects import mysql as dmysql
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy import Column
-from sqlalchemy import text
+from sqlalchemy import text, insert
+import time
 
 with open(".deploy_mysqld") as f:
     url = f.readline().strip()
@@ -18,7 +19,7 @@ all_clob_type = [
 all_type = [
     t
     for t in dir(dmysql.types)
-    if t.isupper() and t not in ["ARRAY", "NULLTYPE", "STRINGTYPE"] and "CHAR" not in t
+    if t.isupper() and t not in ["ARRAY", "NULLTYPE", "STRINGTYPE", "DECIMAL"] and "CHAR" not in t
 ]
 Base = declarative_base()
 all_type_column = [
@@ -32,6 +33,15 @@ all_type_column.extend(
 all_type_column.append("    ENUM = Column(dmysql.ENUM('hello', 'world', 'a'))")
 all_type_column.append("    SET = Column(dmysql.SET('a', 'b', 'c'))")
 all_type_column.append(
+    "    DECIMAL = Column(dmysql.types.DECIMAL(10, 2))"
+)
+all_type_column.append(
+    "    CHAR = Column(dmysql.types.CHAR(20))"
+)
+all_type_column.append(
+    "    VARBINARY = Column(dmysql.VARBINARY(203))"
+)
+all_type_column.append(
     "    int_def_col = Column(dmysql.types.BIGINT, server_default=text('42'))"
 )
 all_type_column.append(
@@ -40,4 +50,41 @@ all_type_column.append(
 exec("\n".join(all_type_column))
 AllType = locals().get("AllType")
 engine = sqlalchemy.create_engine(url)
+
+with engine.connect() as conn:
+    conn.exec_driver_sql("use test")
+    conn.exec_driver_sql("drop table if exists all_type")
+    conn.commit()
+
 Base.metadata.create_all(engine)
+
+with sessionmaker(bind=engine)() as session:
+    test_data = AllType(BIGINT=98283201,
+        BIT = 1,
+        DATETIME='2024-01-01 09:00:01',
+        DOUBLE = 3.1415926,
+        FLOAT = 6.189,
+        INTEGER = 8621,
+        DECIMAL=910.79,
+        LONGBLOB=text("repeat('x', 100)"),
+        LONGTEXT = text("repeat('g', 3)"),
+        MEDIUMBLOB = text("NULL"),
+        MEDIUMINT = 999999,
+        MEDIUMTEXT = text("NULL"),
+        NUMERIC = 10.9,
+        REAL = 1092.892,
+        SMALLINT = 981,
+        TEXT = "TEXT",
+        TIME = '03:04:00',
+        TIMESTAMP = "2024-07-24 09:05:28",
+        YEAR = 2024,
+        ENUM = "a",
+        SET  = "a,b,c",
+        TINYBLOB = b"TINYBLOB",
+        TINYINT = 99,
+        TINYTEXT = "TINYTEXT",
+        CHAR = "09283012",
+        VARBINARY = b"VARBINARY",
+    )
+    session.add(test_data)
+    session.commit()
