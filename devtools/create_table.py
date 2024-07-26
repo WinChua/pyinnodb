@@ -5,6 +5,7 @@ from sqlalchemy import Column
 from sqlalchemy import text, insert
 import time
 
+
 with open(".deploy_mysqld") as f:
     url = f.readline().strip()
 
@@ -36,7 +37,7 @@ all_type_column.append(
     "    DECIMAL = Column(dmysql.types.DECIMAL(10, 2))"
 )
 all_type_column.append(
-    "    CHAR = Column(dmysql.types.CHAR(20))"
+    "    CHAR = Column(dmysql.types.CHAR(20), nullable=True)"
 )
 all_type_column.append(
     "    VARBINARY = Column(dmysql.VARBINARY(203))"
@@ -86,5 +87,33 @@ with sessionmaker(bind=engine)() as session:
         CHAR = "09283012",
         VARBINARY = b"VARBINARY",
     )
+    test_data2 = AllType(BIGINT=98283201,
+        BIT = 1,
+        DATETIME='2024-01-01 09:00:01',
+        DOUBLE = 3.1415926,
+        FLOAT = 6.189,
+        INTEGER = 8621,
+        DECIMAL=910.79,
+        LONGBLOB=text("repeat('x', 100)"),
+        LONGTEXT = text("repeat('g', 3)"),
+        MEDIUMBLOB = text("NULL"),
+        MEDIUMINT = 999999,
+        MEDIUMTEXT = text("NULL"),
+        NUMERIC = 10.9,
+        REAL = 1092.892,
+        SMALLINT = 981,
+        TEXT = "TEXT",
+        TIME = '03:04:00',
+        TIMESTAMP = "2024-07-24 09:05:28",
+        YEAR = 2024,
+        ENUM = "a",
+        SET  = "a,b,c",
+        TINYBLOB = b"TINYBLOB",
+        TINYINT = 99,
+        TINYTEXT = "TINYTEXT",
+        CHAR = text("NULL"),
+        VARBINARY = b"VARBINARY",
+    )
     session.add(test_data)
+    session.add(test_data2)
     session.commit()
