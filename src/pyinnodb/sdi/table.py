@@ -626,6 +626,7 @@ class Table:
     collation_id: int = 0
     # tablespace_ref: ?
 
+
     @property
     @cache
     def private_data(self):

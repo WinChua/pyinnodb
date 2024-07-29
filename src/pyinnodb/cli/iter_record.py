@@ -64,6 +64,9 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
             primary_key = (dd_object.build_primary_key_bytes(eval(primary_key)))
         else:
             primary_key = (dd_object.build_primary_key_bytes((primary_key,)))
+    else:
+        print("must specify the --primary-key like --primary-key 10")
+        return
 
     value_parser = MIndexPage.default_value_parser(dd_object, hidden_col=hidden_col, transfter=lambda id: id)
     cnt = 0
@@ -134,13 +137,6 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
                             first_leaf_page = int.from_bytes(page_num, "big")
                             break
                         page_num = f.read(4)
-                        # if record_key <= primary_key:
-                        #     page_num = f.read(4)
-                        #     first_leaf_page = int.from_bytes(page_num, "big")
-                        #     logger.debug("rh: %s, record_key: %s, to next level page: %d", start_rh, record_key, first_leaf_page)
-                        #     break
-                        # else:
-                        #     logger.debug("rh: %s, record_key: %s", start_rh, record_key)
                     f.seek(cur)
                     f.seek(start_rh.next_record_offset - 5, 1)
                     start_rh = MRecordHeader.parse_stream(f)
@@ -157,9 +153,9 @@ def primary_key_only(key_len: int):
 @click.option("--garbage/--no-garbage", default=False, help="include garbage mark data")
 @click.option("--hidden-col/--no-hidden-col", type=click.BOOL, default=False, help="show the DB_ROLL_PTR and DB_TRX_ID")
 @click.option("--pageno", default=None, type=click.INT, help="iterate on pageno only")
-@click.option("--primary-key-len", type=click.INT, help="primary key only if not 0", default=0)
+# @click.option("--primary-key-len", type=click.INT, help="primary key only if not 0", default=0)
 @click.option("--sdi-idx", type=click.INT, default=0, help="idx of sdi")
-def iter_record(ctx, garbage, hidden_col, pageno, primary_key_len, sdi_idx):
+def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx):
     """iterate on the leaf pages
 
     by default, iter_record will iterate from the first leaf page
@@ -172,26 +168,8 @@ def iter_record(ctx, garbage, hidden_col, pageno, primary_key_len, sdi_idx):
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
-    root_page_no = int(dd_object.indexes[0].private_data.get("root", 4))
-    f.seek(root_page_no * const.PAGE_SIZE)
-    root_index_page = MIndexPage.parse_stream(f)
-    first_leaf_page = root_index_page.get_first_leaf_page(f, dd_object.get_primary_key_col())
-    # as the first page of leaf inode may be the off-page of large column, we should not use this way
-    #first_leaf_page = root_index_page.fseg_header.get_first_leaf_page(f)
-    logger.debug("first_leaf_page is %s", first_leaf_page)
-    if first_leaf_page is None:
-        print("there is no data in this table")
-        return
-    if pageno is not None:
-        first_leaf_page = pageno
-    default_value_parser = MIndexPage.default_value_parser(dd_object, hidden_col=hidden_col)
-    if primary_key_len != 0:
-        default_value_parser = primary_key_only(primary_key_len)
-    while first_leaf_page != 4294967295:
-        f.seek(first_leaf_page * const.PAGE_SIZE)
-        index_page = MIndexPage.parse_stream(f)
-        logger.debug("page dir: %s, page no: %s", index_page.page_directory, index_page.fil.offset)
-        index_page.iterate_record_header(f, value_parser = default_value_parser, garbage=garbage)
-        first_leaf_page = index_page.fil.next_page
-    
+
+    dd_object.iter_record(f, hidden_col=hidden_col, garbage=garbage)
+
+    return
 
