@@ -1,5 +1,5 @@
 from ..mconstruct import *
-from datetime import timedelta, datetime, date
+from datetime import timedelta, datetime, date, UTC
 import time
 
 
@@ -64,6 +64,7 @@ class MTimestamp(CC):
         self.fsp = stream.read(fsp)
 
     def to_time(self) -> datetime:
-        return datetime.utcfromtimestamp(
-            self.timestamp + int.from_bytes(self.fsp, "big") / 1000000
+        return datetime.fromtimestamp(
+            self.timestamp + int.from_bytes(self.fsp, "big") / 1000000,
+            UTC,
         )
