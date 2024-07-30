@@ -713,7 +713,7 @@ class Table:
     def get_disk_data_layout(self):
         phsical_post_exists = False
         for c in self.columns:
-            if "phsical_pos" in c.private_data:
+            if "physical_pos" in c.private_data:
                 phsical_post_exists = True
                 break
         logger.debug("has physical %s", phsical_post_exists)
