@@ -19,12 +19,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup rye
+    - name: Setup rye and Test
       run: |
         curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION=-y bash
         source ~/.rye/env
         rye sync
-    - name: Test with pytest
-      run: |
         rye test
 
