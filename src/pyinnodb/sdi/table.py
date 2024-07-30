@@ -21,6 +21,7 @@ from ..disk_struct.varsize import VarSize, OffPagePointer
 from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp
 from ..disk_struct.json import MJson
 from ..disk_struct.rollback import MRollbackPointer
+from ..disk_struct.record import MRecordHeader
 
 from ..disk_struct.index import MIndexPage
 
@@ -712,7 +713,7 @@ class Table:
     def get_disk_data_layout(self):
         phsical_post_exists = False
         for c in self.columns:
-            if "phsical_pos" in c.private_data:
+            if "physical_pos" in c.private_data:
                 phsical_post_exists = True
                 break
         logger.debug("has physical %s", phsical_post_exists)
@@ -794,6 +795,60 @@ class Table:
 
     def get_default_DB_col(self) -> typing.List[Column]:
         return [c for c in self.columns if c.name in ["DB_TRX_ID", "DB_ROLL_PTR"]]
+
+    def search(self, f, primary_key, hidden_col):
+        root_page_no = int(self.indexes[0].private_data.get("root", 4))
+        f.seek(root_page_no * const.PAGE_SIZE)
+        root_index_page = MIndexPage.parse_stream(f)
+        first_leaf_page = root_index_page.get_first_leaf_page(f, self.get_primary_key_col())
+        if isinstance(primary_key, tuple):
+            primary_key = (self.build_primary_key_bytes(primary_key))
+        else:
+            primary_key = (self.build_primary_key_bytes((primary_key,)))
+        value_parser = MIndexPage.default_value_parser(self, hidden_col=hidden_col, transfter=lambda id: id)
+
+        while first_leaf_page != 4294967295:
+            f.seek(first_leaf_page * const.PAGE_SIZE)
+            index_page = MIndexPage.parse_stream(f)
+            f.seek(first_leaf_page * const.PAGE_SIZE)
+            page_dir_idx, match = index_page.binary_search_with_page_directory(primary_key, f)
+            f.seek(first_leaf_page * const.PAGE_SIZE + index_page.page_directory[page_dir_idx] - 5)
+            end_rh = MRecordHeader.parse_stream(f)
+            if match and const.RecordType(end_rh.record_type) == const.RecordType.Conventional: # the key
+                return value_parser(end_rh, f)
+            elif match and const.RecordType(end_rh.record_type) == const.RecordType.NodePointer:
+                record_key = f.read(len(primary_key))
+                page_num = f.read(4)
+                first_leaf_page = int.from_bytes(page_num, "big")
+            else:
+                f.seek(first_leaf_page * const.PAGE_SIZE + index_page.page_directory[page_dir_idx+1] - 5)
+                start_rh = MRecordHeader.parse_stream(f)
+                owned = end_rh.num_record_owned
+                first_leaf_page = 4294967295 # no match if cur page is leaf then break loop
+                for i in range(owned+1):
+                    cur = f.tell()
+                    if const.RecordType(start_rh.record_type) == const.RecordType.Conventional:
+                        record_primary_key = f.read(len(primary_key))
+                        if record_primary_key == primary_key:
+                            f.seek(-len(primary_key), 1)
+                            v = value_parser(start_rh, f)
+                            return v
+                    elif const.RecordType(start_rh.record_type) == const.RecordType.NodePointer:
+                        record_key = f.read(len(primary_key))
+                        if record_key > primary_key:
+                            if i == 1:
+                                page_num = f.read(4)
+                            first_leaf_page = int.from_bytes(page_num, "big")
+                            break
+                        elif record_key == primary_key:
+                            page_num = f.read(4)
+                            first_leaf_page = int.from_bytes(page_num, "big")
+                            break
+                        page_num = f.read(4)
+                    f.seek(cur)
+                    f.seek(start_rh.next_record_offset - 5, 1)
+                    start_rh = MRecordHeader.parse_stream(f)
+
 
     def iter_record(self, f, hidden_col=False, garbage=False, transfter=None):
         root_page_no = int(self.indexes[0].private_data.get("root", 4))

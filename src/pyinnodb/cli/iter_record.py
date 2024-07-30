@@ -42,105 +42,43 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
 
     hidden_col = hidden_col or with_hist
 
-    if with_hist:
-        if datadir is None:
-            print("--datadir should be specified")
-            return
-        if not os.path.exists(datadir):
-            print(f"--datadir {datadir} not exists")
-            return
-
-    root_page_no = int(dd_object.indexes[0].private_data.get("root", 4))
-    f.seek(root_page_no * const.PAGE_SIZE)
-    root_index_page = MIndexPage.parse_stream(f)
-    first_leaf_page = root_index_page.get_first_leaf_page(f, dd_object.get_primary_key_col())
-    logger.debug("root index page: %d, first_leaf_page: %d", root_page_no, first_leaf_page)
-
-    first_leaf_page = root_page_no
-
     if primary_key != "":
         primary_key = eval(primary_key)
-        if isinstance(primary_key, tuple):
-            primary_key = (dd_object.build_primary_key_bytes(eval(primary_key)))
-        else:
-            primary_key = (dd_object.build_primary_key_bytes((primary_key,)))
     else:
         print("must specify the --primary-key like --primary-key 10")
         return
 
-    value_parser = MIndexPage.default_value_parser(dd_object, hidden_col=hidden_col, transfter=lambda id: id)
-    cnt = 0
-    while first_leaf_page != 4294967295:
-        cnt += 1
-        f.seek(first_leaf_page * const.PAGE_SIZE)
-        index_page = MIndexPage.parse_stream(f)
-        logger.debug("page: %d", index_page.fil.offset)
-        if primary_key != "":
-            f.seek(first_leaf_page * const.PAGE_SIZE)
-            page_dir_idx, match = index_page.binary_search_with_page_directory(primary_key, f)
-            f.seek(first_leaf_page * const.PAGE_SIZE + index_page.page_directory[page_dir_idx] - 5)
-            end_rh = MRecordHeader.parse_stream(f)
-            logger.debug("page_dir_idx: %s, match: %s", page_dir_idx, match)
-            logger.debug("end_rh is %s", end_rh)
-            if match and const.RecordType(end_rh.record_type) == const.RecordType.Conventional: # the key
-                v = value_parser(end_rh, f)
-                logger.debug("match: %s", v)
-                print("found: ", v)
-                break
-            elif match and const.RecordType(end_rh.record_type) == const.RecordType.NodePointer:
-                record_key = f.read(len(primary_key))
-                page_num = f.read(4)
-                first_leaf_page = int.from_bytes(page_num, "big")
-                logger.debug("match: %s, page_num is %s, to next level page, record_key is %s", first_leaf_page, page_num, record_key)
-            else:
-                f.seek(first_leaf_page * const.PAGE_SIZE + index_page.page_directory[page_dir_idx+1] - 5)
-                start_rh = MRecordHeader.parse_stream(f)
-                logger.debug("not found in page directory, search at %s, page_dir offset is %d", start_rh, index_page.page_directory[page_dir_idx+1])
-                owned = end_rh.num_record_owned
-                first_leaf_page = 4294967295 # no match if cur page is leaf then break loop
-                for i in range(owned+1):
-                    cur = f.tell()
-                    logger.debug("cur is %s, next_rh is %s, i is %s", cur % const.PAGE_SIZE, start_rh, i)
-                    if const.RecordType(start_rh.record_type) == const.RecordType.Conventional:
-                        record_primary_key = f.read(len(primary_key))
-                        logger.debug("record primary key is %s, primary key search is %s", record_primary_key, primary_key)
-                        if record_primary_key == primary_key:
-                            f.seek(-len(primary_key), 1)
-                            v = value_parser(start_rh, f)
-                            #logger.debug("found rh: %s, value: %s", start_rh, v)
-                            print("found: ", v)
-                            if with_hist:
-                                rptr = v.DB_ROLL_PTR
-                                primary_key_col = dd_object.get_primary_key_col()
-                                disk_data_layout = dd_object.get_disk_data_layout()
-                                ##undo_map = {1: open(f"{datadir}/undo_001", "rb"), 2: open(f"{datadir}/undo_002", "rb")}
-                                undo_map = const.util.get_undo_tablespacefile(f"{datadir}/mysql.ibd")
-                                history = []
-                                while rptr is not None:
-                                    hist, rptr = rptr.last_version(
-                                        undo_map, primary_key_col, disk_data_layout,
-                                    )
-                                    history.append(hist)
-                                for h in history:
-                                    print(h)
-                            return
-                    elif const.RecordType(start_rh.record_type) == const.RecordType.NodePointer:
-                        record_key = f.read(len(primary_key))
-                        logger.debug("record node is %s, primary_key is %s, result is %s", record_key, primary_key, record_key <= primary_key)
-                        if record_key > primary_key:
-                            if i == 1:
-                                page_num = f.read(4)
-                            first_leaf_page = int.from_bytes(page_num, "big")
-                            break
-                        elif record_key == primary_key:
-                            page_num = f.read(4)
-                            first_leaf_page = int.from_bytes(page_num, "big")
-                            break
-                        page_num = f.read(4)
-                    f.seek(cur)
-                    f.seek(start_rh.next_record_offset - 5, 1)
-                    start_rh = MRecordHeader.parse_stream(f)
+    result = dd_object.search(f, primary_key, hidden_col)
+    if result is None:
+        print("not found")
+        return
 
+    print(result)
+
+    if not with_hist:
+        return
+
+    if datadir is None:
+        print("--datadir should be specified to view the history")
+        return
+    if not os.path.exists(datadir):
+        print(f"--datadir {datadir} not exists")
+        return
+
+    rptr = result.DB_ROLL_PTR
+    primary_key_col = dd_object.get_primary_key_col()
+    disk_data_layout = dd_object.get_disk_data_layout()
+    undo_map = const.util.get_undo_tablespacefile(f"{datadir}/mysql.ibd")
+    history = []
+    while rptr is not None:
+        hist, rptr = rptr.last_version(
+            undo_map, primary_key_col, disk_data_layout,
+        )
+        history.append(hist)
+    for h in history:
+        print(h)
+
+    return
 
 def primary_key_only(key_len: int):
     def value_parser(rh: MRecordHeader, f):

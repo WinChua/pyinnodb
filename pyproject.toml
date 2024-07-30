@@ -26,7 +26,8 @@ dev-dependencies = [
     "docker>=7.0.0",
     "sqlalchemy>=2.0.30",
     "pymysql>=1.1.1",
-    "requests>=2.32.3",
+    "requests==2.31.0",
+    "cryptography>=43.0.0",
 ]
 
 [tool.hatch.metadata]
