@@ -34,7 +34,7 @@ MysqlFile = namedtuple("MysqlFile", "mysql8ibd mysql5ibd mysql5frm mysql8instant
 def download_test_file():
     import requests
     import tarfile
-    testfile = "https://github.com/user-attachments/files/16420657/test_data.tgz"
+    testfile = "https://github.com/user-attachments/files/16426987/mysql_test.tgz"
     resp = requests.get(testfile)
     fileobj = BytesIO(resp.content)
     tar = tarfile.open(fileobj=fileobj)
