@@ -1,6 +1,6 @@
 from context import *
-from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.sdi.table import Table
+from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.disk_struct.fsp import MFspPage
 import datetime
 from decimal import Decimal
