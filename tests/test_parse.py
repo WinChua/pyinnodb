@@ -7,7 +7,23 @@ from decimal import Decimal
 
 timeformat = "%Y-%m-%d %H:%M:%S"
 
+testfile = "https://github.com/user-attachments/files/16420657/test_data.tgz"
+
+def download_test_file():
+    import requests
+    import tarfile
+    resp = requests.get(testfile)
+    fileobj = BytesIO(resp.content)
+    tar = tarfile.open(fileobj=fileobj)
+    tar.extractall(test_mysql8_ibd.parent.parent)
+
+    
+
 def test_parse_mysql8():
+    if not test_mysql8_ibd.exists():
+        print("download test file")
+        download_test_file()
+        # download first
     with open(test_mysql8_ibd, "rb") as f:
         fsp_page = MFspPage.parse_stream(f)
         f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)

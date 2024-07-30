@@ -4,7 +4,6 @@ import tarfile
 import pytest
 import sqlalchemy
 
-from io import BytesIO
 
 from testcontainers.mysql import MySqlContainer
 
