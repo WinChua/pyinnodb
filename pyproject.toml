@@ -53,3 +53,4 @@ of = { chain = ["of:init", "of:req", "of:cp", "of:clean",  "of:zip", "of:patch",
 "of:patch" = 'sed -i "1i\#!/usr/bin/env python3" pyinnodb.sh'
 "of:ex" = 'chmod a+x pyinnodb.sh'
 "deploy_dev" = "python devtools/deploy_mysqld.py"
+"td" = "tar cvzf tests/test_data.tgz tests/mysql5/ tests/mysql8"
