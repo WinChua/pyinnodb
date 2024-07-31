@@ -132,9 +132,9 @@ class MIndexPage(CC):
             if rh.instant == 1:
                 f.seek(-1, 1)
                 extra_byte = int.from_bytes(f.read(1), "big")
+                cols_disk_layout = cols_disk_layout[:extra_byte]
                 logger.debug("instant col extra byte is %s, &0x80 is %s, len(cols) is %d", hex(extra_byte), extra_byte & 0x80, 
                         len(cols_disk_layout))
-                cols_disk_layout = cols_disk_layout[:extra_byte]
 
             nullable_cols = [d[0] for d in cols_disk_layout if d[1] == 4294967295 and d[0].is_nullable]
 
@@ -143,8 +143,8 @@ class MIndexPage(CC):
 
 
             if rh.instant == 0 and rh.instant_version == 0:
-                nullable_cols = [c for c in nullable_cols if "default_null" not in c.se_private_data]
-                cols_disk_layout = [d for d in cols_disk_layout if "default_null" not in d[0].se_private_data]
+                nullable_cols = [c for c in nullable_cols if not c.is_instant_col_80017]
+                cols_disk_layout = [d for d in cols_disk_layout if not d[0].is_instant_col_80017]
 
             nullcol_bitmask_size = int((len(nullable_cols) + 7) / 8)
             f.seek(-nullcol_bitmask_size - rh.instant_version - rh.instant, 1)

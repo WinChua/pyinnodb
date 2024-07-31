@@ -37,4 +37,13 @@ alter table test_for_instant drop column drop1
     conn.exec_driver_sql('''
 alter table test_for_instant add column drop1 int(11) not null default '99'
 ''')
-
+    conn.exec_driver_sql('''
+insert into test_for_instant (name, drop1, drop2, add2) values ('insert after first add', 23, 'drop2 after first add', 'add2')
+''')
+    conn.exec_driver_sql('''
+alter table test_for_instant add column add3 varchar(255) not null 
+''')
+    conn.exec_driver_sql('''
+insert into test_for_instant (name, drop1, drop2, add2, add3) values ('insert after second add', 23, 'drop2 after second add', 'add2', 'add3')
+''')
+    conn.commit()
