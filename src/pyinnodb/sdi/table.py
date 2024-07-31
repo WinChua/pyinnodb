@@ -169,7 +169,11 @@ class Column:
     @cache
     def is_instant_col(self):
         return "version_added" in self.private_data or "version_dropped" in self.private_data
-        #return "default_null" in self.private_data or "default" in self.private_data
+
+    @property
+    @cache
+    def is_instant_col_80017(self):
+        return "default_null" in self.private_data or "default" in self.private_data
 
     def get_instant_default(self):
         # if self.default_value_utf8_null:
