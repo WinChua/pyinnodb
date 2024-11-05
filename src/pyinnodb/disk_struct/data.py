@@ -1,5 +1,10 @@
 from ..mconstruct import *
-from datetime import timedelta, datetime, date, UTC
+from datetime import timedelta, datetime, date
+try:
+    from datetime import UTC
+except:
+    from datetime import timezone
+    UTC = timezone.utc
 import time
 
 
