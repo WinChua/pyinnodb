@@ -207,8 +207,8 @@ class Column:
             sql += f" DEFAULT ({self.default_option})"
         elif not self.default_value_utf8_null:
             sql += f" DEFAULT '{self.default_value_utf8}'"
-        elif len(self.generation_expression_utf8) != 0:
-            sql += f" GENERATED ALWAYS AS ({self.generation_expression_utf8}) {'VIRTUAL' if self.is_virtual else 'STORED'}"
+        elif len(self.generation_expression) != 0:
+            sql += f" GENERATED ALWAYS AS ({self.generation_expression}) {'VIRTUAL' if self.is_virtual else 'STORED'}"
         elif self.default_value_utf8_null and self.is_nullable:
             sql += f" DEFAULT NULL"
         if self.update_option != "":
