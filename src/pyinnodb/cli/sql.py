@@ -50,6 +50,11 @@ def tosql(ctx, mode, sdi_idx):
                     continue
                 idx_dec.append(table_object.gen_sql_for_index(i))
             columns_dec.extend(idx_dec)
+
+            constraints = table_object.gen_check_constraints()
+            columns_dec.extend(constraints)
+            foreign_keys = table_object.gen_foreign_key()
+            columns_dec.extend(foreign_keys)
             columns_dec = "\n    " + ",\n    ".join(columns_dec) + "\n"
             table_collation = const.get_collation_by_id(table_object.collation_id)
             parts = table_object.gen_sql_for_partition()

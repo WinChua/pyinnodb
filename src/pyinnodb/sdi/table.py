@@ -207,13 +207,18 @@ class Column:
             sql += f" DEFAULT ({self.default_option})"
         elif not self.default_value_utf8_null:
             sql += f" DEFAULT '{self.default_value_utf8}'"
-        elif len(self.generation_expression_utf8) != 0:
-            sql += f" GENERATED ALWAYS AS ({self.generation_expression_utf8}) {'VIRTUAL' if self.is_virtual else 'STORED'}"
+        elif len(self.generation_expression) != 0:
+            sql += f" GENERATED ALWAYS AS ({self.generation_expression}) {'VIRTUAL' if self.is_virtual else 'STORED'}"
         elif self.default_value_utf8_null and self.is_nullable:
             sql += f" DEFAULT NULL"
         if self.update_option != "":
             sql += f" ON UPDATE {self.update_option}"
         sql += " COMMENT '" + self.comment + "'" if self.comment else ""
+
+        if not self.srs_id_null:
+            sql += f" /*!80003 SRID {self.srs_id} */"
+        if self.is_hidden_from_user:
+            sql += " /*!80023 INVISIBLE */"
         return sql
 
     @property
@@ -482,6 +487,9 @@ class CheckCons:
     check_clause: str = ""  # write binary
     check_clause_utf8: str = ""
 
+    def gen(self):
+        return f"CONSTRAINT `{self.name}` CHECK ({self.check_clause_utf8})"
+
 
 @modify_init
 @dataclass(eq=False)
@@ -532,7 +540,7 @@ class Index:
 @modify_init
 @dataclass(eq=False)
 class ForeignElement:
-    # column_opx: Column = None
+    column_opx: int = None
     ordinal_position: str = ""
     referenced_column_name: str = ""
     pass
@@ -550,6 +558,15 @@ class ForeignKeys:
     referenced_table_schema_name: str = ""
     referenced_table_name: str = ""
     elements: typing.List[ForeignElement] = None
+
+    def __post_init__(self):
+        elements: typing.List[ForeignElement] = [ForeignElement(**c) for c in self.elements]
+        self.elements = elements
+
+    def gen(self, column_name: typing.List[str]):
+        cols = ",".join([f"`{column_name[c.column_opx]}`" for c in self.elements])
+        rcols = ",".join([f"`{c.referenced_column_name}`" for c in self.elements])
+        return f"CONSTRAINT `{self.name}` FOREIGN KEY ({cols}) REFERENCES `{self.referenced_table_schema_name}`.`{self.referenced_table_name}` ({rcols})"
 
 
 @modify_init
@@ -924,6 +941,13 @@ class Table:
         key_part = ",".join(cols_name)
         comment = f" COMMENT '{idx.comment}'" if idx.comment else ""
         return f"{idx_type_part}{idx_name_part}({key_part}){comment}"
+
+    def gen_foreign_key(self) -> typing.List[str]:
+        column_name = [c.name for c in self.columns]
+        return [f.gen(column_name) for f in self.foreign_keys]
+
+    def gen_check_constraints(self) -> typing.List[str]:
+        return [c.gen() for c in self.check_constraints]
 
     def gen_sql_for_partition(self) -> str:
         pt = const.partition.PartitionType(self.partition_type)
