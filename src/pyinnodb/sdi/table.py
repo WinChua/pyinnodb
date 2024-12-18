@@ -214,6 +214,9 @@ class Column:
         if self.update_option != "":
             sql += f" ON UPDATE {self.update_option}"
         sql += " COMMENT '" + self.comment + "'" if self.comment else ""
+
+        if self.is_hidden_from_user:
+            sql += " /*!80023 INVISIBLE */"
         return sql
 
     @property
