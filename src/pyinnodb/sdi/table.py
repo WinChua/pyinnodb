@@ -487,6 +487,9 @@ class CheckCons:
     check_clause: str = ""  # write binary
     check_clause_utf8: str = ""
 
+    def gen(self):
+        return f"CONSTRAINT `{self.name}` CHECK ({self.check_clause_utf8})"
+
 
 @modify_init
 @dataclass(eq=False)
@@ -929,6 +932,9 @@ class Table:
         key_part = ",".join(cols_name)
         comment = f" COMMENT '{idx.comment}'" if idx.comment else ""
         return f"{idx_type_part}{idx_name_part}({key_part}){comment}"
+
+    def gen_check_constraints(self) -> str:
+        return [c.gen() for c in self.check_constraints]
 
     def gen_sql_for_partition(self) -> str:
         pt = const.partition.PartitionType(self.partition_type)
