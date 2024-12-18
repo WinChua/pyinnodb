@@ -540,7 +540,7 @@ class Index:
 @modify_init
 @dataclass(eq=False)
 class ForeignElement:
-    # column_opx: Column = None
+    column_opx: int = None
     ordinal_position: str = ""
     referenced_column_name: str = ""
     pass
@@ -558,6 +558,15 @@ class ForeignKeys:
     referenced_table_schema_name: str = ""
     referenced_table_name: str = ""
     elements: typing.List[ForeignElement] = None
+
+    def __post_init__(self):
+        elements: typing.List[ForeignElement] = [ForeignElement(**c) for c in self.elements]
+        self.elements = elements
+
+    def gen(self, column_name: typing.List[str]):
+        cols = ",".join([f"`{column_name[c.column_opx]}`" for c in self.elements])
+        rcols = ",".join([f"`{c.referenced_column_name}`" for c in self.elements])
+        return f"CONSTRAINT `{self.name}` FOREIGN KEY ({cols}) REFERENCES `{self.referenced_table_schema_name}`.`{self.referenced_table_name}` ({rcols})"
 
 
 @modify_init
@@ -933,7 +942,11 @@ class Table:
         comment = f" COMMENT '{idx.comment}'" if idx.comment else ""
         return f"{idx_type_part}{idx_name_part}({key_part}){comment}"
 
-    def gen_check_constraints(self) -> str:
+    def gen_foreign_key(self) -> typing.List[str]:
+        column_name = [c.name for c in self.columns]
+        return [f.gen(column_name) for f in self.foreign_keys]
+
+    def gen_check_constraints(self) -> typing.List[str]:
         return [c.gen() for c in self.check_constraints]
 
     def gen_sql_for_partition(self) -> str:
