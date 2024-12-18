@@ -215,6 +215,8 @@ class Column:
             sql += f" ON UPDATE {self.update_option}"
         sql += " COMMENT '" + self.comment + "'" if self.comment else ""
 
+        if not self.srs_id_null:
+            sql += f" /*!80003 SRID {self.srs_id} */"
         if self.is_hidden_from_user:
             sql += " /*!80023 INVISIBLE */"
         return sql
