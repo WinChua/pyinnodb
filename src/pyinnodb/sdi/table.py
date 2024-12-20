@@ -219,6 +219,10 @@ class Column:
             sql += f" /*!80003 SRID {self.srs_id} */"
         if self.is_hidden_from_user:
             sql += " /*!80023 INVISIBLE */"
+        if self.engine_attribute != "":
+            sql += " /*!80021 ENGINE_ATTRIBUTE */"
+        if self.secondary_engine_attribute != "":
+            sql += " /*!80021 SECONDARY_ENGINE_ATTRIBUTE */"
         return sql
 
     @property
