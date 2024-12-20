@@ -5,6 +5,8 @@ import click
 import json
 
 from dataclasses import dataclass, asdict
+from testcontainers.mysql import MySqlContainer
+from docker.models.containers import Container
 
 @click.group()
 def main():
@@ -57,16 +59,12 @@ def dump_deploy(data, f):
 
     json.dump(data, f)
 
-@main.command()
-@click.option("--version", type=click.STRING, default="8.0.17")
-def deploy(version):
+def mDeploy(version):
     deploy_container = load_deploy()
     if version in deploy_container:
         print(f"a container of mysqld[{version}] has been deploy at {deploy_container[version]}")
         return
 
-    from testcontainers.mysql import MySqlContainer
-    from docker.models.containers import Container
 
     os.environ["TESTCONTAINERS_RYUK_DISABLED"] = "true"
     mContainer = MySqlContainer(f"mysql:{version}")
@@ -83,6 +81,23 @@ def deploy(version):
                 datadir=datadir,
         )
         dump_deploy(deploy_container, f)
+
+
+@main.command()
+@click.option("--version", type=click.STRING, default="8.0.17")
+def deploy(version):
+    mDeploy(version)
+
+
+@main.command()
+@click.option("--version", type=click.STRING, default="8.0.17")
+def connect(version):
+    deploy_container = load_deploy()
+    if version not in deploy_container:
+        mDeploy(version)
+        deploy_container = load_deploy()
+
+    os.system(deploy_container.get(version).cmd)
 
 if __name__ == "__main__":
     main()
