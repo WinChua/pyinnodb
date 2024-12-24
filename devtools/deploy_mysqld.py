@@ -3,6 +3,7 @@ import sys
 import shutil
 import click
 import json
+from pprint import pprint
 
 from dataclasses import dataclass, asdict
 from testcontainers.mysql import MySqlContainer
@@ -11,6 +12,11 @@ from docker.models.containers import Container
 @click.group()
 def main():
     pass
+
+@main.command()
+def list():
+    data = load_deploy()
+    pprint(data)
 
 @main.command()
 @click.option("--version", type=click.STRING)

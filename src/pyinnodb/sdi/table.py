@@ -18,7 +18,7 @@ from .. import const
 from ..const.dd_column_type import DDColumnType, DDColConf
 from ..disk_struct.varsize import VarSize, OffPagePointer
 
-from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp
+from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp, MGeo
 from ..disk_struct.json import MJson
 from ..disk_struct.rollback import MRollbackPointer
 from ..disk_struct.record import MRecordHeader
@@ -467,6 +467,10 @@ class Column:
                 return v.get_json()
             except Exception as e:
                 return data
+        elif dtype == DDColumnType.GEOMETRY:
+            data = MGeo.parse_stream(stream)
+            logging.debug("geometry data is %s, size is %d", data, dsize)
+            return data
 
 
 decimal_leftover_part = {
