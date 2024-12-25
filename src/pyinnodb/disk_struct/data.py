@@ -92,7 +92,11 @@ class MGPoint(CC):
             for i in range(self.size):
                 self.points.append(MPoint.parse_stream(stream))
         elif self.point_type == 4: # MULTIPOINT
-            self.data = stream.read(25)
+            self.size = cs.Int32ul.parse_stream(stream)
+            self.points = []
+            for i in range(self.size):
+                self.points.append(MGPoint.parse_stream(stream))
+
 
     def _post_build(self, obj, stream, context, path):
         if self.point_type == 1:
@@ -104,7 +108,9 @@ class MGPoint(CC):
                 stream.write(p.build())
 
         elif self.point_type == 4:
-            stream.write(self.data)
+            stream.write(cs.Int32ul.build(self.size))
+            for p in self.points:
+                stream.write(p.build())
 
 class MGeo(CC):
     SRID: int = cfield(cs.Int32ub)
