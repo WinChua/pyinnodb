@@ -56,6 +56,19 @@ class CAdaptor(cs.Adapter):
         if getattr(cls, "parsed", None) is not None:
             self.parsed = cls.parsed
 
+    def _parse(self, stream, context, path):
+        obj = super()._parse(stream, context, path)
+        if getattr(obj, "_post_parsed", None) is not None:
+            obj._post_parsed(stream, context, path)
+        return obj
+
+    def _build(self, obj, stream, context, path):
+        obj = super()._build(obj, stream, context, path)
+        if getattr(obj, "_post_build", None) is not None:
+            obj._post_build(obj, stream, context, path)
+
+        return obj
+
     def _decode(self, obj, context, path):
         fields = dataclasses.fields(self._cls)
         init_f = {}
@@ -113,10 +126,6 @@ class CC(cs.Construct, metaclass=CMeta):
     @classmethod
     def _parse(cls: pt, stream, context, path) -> pt:
         obj = cls._get_subcon()._parse(stream, context, path)
-        if getattr(obj, "_post_parsed", None) is not None:
-            v = obj._post_parsed(stream, context, path)
-            if v is not None:
-                obj._post_value = v
         return obj
 
     def _post_parsed(self, stream, context, path):
@@ -159,8 +168,8 @@ class CC(cs.Construct, metaclass=CMeta):
         # obj = self._encode(obj, context, path)
         # print(obj)
         self.subcon._build(obj, stream, context, path)
-        if getattr(self, "_post_build", None) is not None:
-            self._post_build(obj, stream, context, path)
+        # if getattr(self, "_post_build", None) is not None:
+        #     self._post_build(obj, stream, context, path)
 
 
 def cstring(size):
