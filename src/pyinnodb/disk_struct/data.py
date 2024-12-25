@@ -78,8 +78,7 @@ class MPoint(CC):
     x: float = cfield(cs.Float64l)
     y: float = cfield(cs.Float64l)
 
-class MGeo(CC):
-    SRID: int = cfield(cs.Int32ub)
+class MGPoint(CC):
     byteorder: int = cfield(cs.Int8ul)
     point_type: int = cfield(cs.Int32ul)
 
@@ -92,6 +91,8 @@ class MGeo(CC):
             self.size = cs.Int32ul.parse_stream(stream)
             for i in range(self.size):
                 self.points.append(MPoint.parse_stream(stream))
+        elif self.point_type == 4: # MULTIPOINT
+            self.data = stream.read(25)
 
     def _post_build(self, obj, stream, context, path):
         if self.point_type == 1:
@@ -101,3 +102,10 @@ class MGeo(CC):
             stream.write(cs.Int32ul.build(self.size))
             for p in self.points:
                 stream.write(p.build())
+
+        elif self.point_type == 4:
+            stream.write(self.data)
+
+class MGeo(CC):
+    SRID: int = cfield(cs.Int32ub)
+    GP: MGPoint = cfield(MGPoint)
