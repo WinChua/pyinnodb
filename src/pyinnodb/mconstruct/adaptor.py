@@ -85,7 +85,9 @@ class CAdaptor(cs.Adapter):
     def _parse(self, stream, context, path):
         obj = super()._parse(stream, context, path)
         if getattr(obj, "_post_parsed", None) is not None:
-            obj._post_parsed(stream, context, path)
+            v = obj._post_parsed(stream, context, path)
+            if v is not None:
+                setattr(obj, "_post_value", v)
         return obj
 
     def _build(self, obj, stream, context, path):
