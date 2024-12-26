@@ -84,16 +84,16 @@ class MGPoint(CC):
 
     def _post_parsed(self, stream, context, path):
         if self.point_type == 1: # POINT
-            self.x = cs.Float64l.parse_stream(stream)
-            self.y = cs.Float64l.parse_stream(stream)
+            self._set_show_field("x", cs.Float64l.parse_stream(stream))
+            self._set_show_field("y", cs.Float64l.parse_stream(stream))
         elif self.point_type == 2: # LINESTRING
-            self.points = []
-            self.size = cs.Int32ul.parse_stream(stream)
+            self._set_show_field("size", cs.Int32ul.parse_stream(stream))
+            self._set_show_field("points", [])
             for i in range(self.size):
                 self.points.append(MPoint.parse_stream(stream))
         elif self.point_type == 3: # POLYGON
-            self.polygon = []
-            self.psize = cs.Int32ul.parse_stream(stream)
+            self._set_show_field("psize", cs.Int32ul.parse_stream(stream))
+            self._set_show_field("polygon", [])
             for i in range(self.psize):
                 size = cs.Int32ul.parse_stream(stream)
                 points = []
@@ -101,24 +101,24 @@ class MGPoint(CC):
                     points.append(MPoint.parse_stream(stream))
                 self.polygon.append(points)
         elif self.point_type == 4: # MULTIPOINT
-            self.size = cs.Int32ul.parse_stream(stream)
-            self.points = []
+            self._set_show_field("size", cs.Int32ul.parse_stream(stream))
+            self._set_show_field("points", [])
             for i in range(self.size):
                 self.points.append(MGPoint.parse_stream(stream))
         elif self.point_type == 5:
-            self.size = cs.Int32ul.parse_stream(stream)
-            self.lines = []
+            self._set_show_field("size", cs.Int32ul.parse_stream(stream))
+            self._set_show_field("lines", [])
             for i in range(self.size):
                 self.lines.append(MGPoint.parse_stream(stream))
         elif self.point_type == 6:
-            self.size = cs.Int32ul.parse_stream(stream)
-            self.polygons = []
+            self._set_show_field("size", cs.Int32ul.parse_stream(stream))
+            self._set_show_field("polygons", [])
             for i in range(self.size):
                 self.polygons.append(MGPoint.parse_stream(stream))
 
         elif self.point_type == 7:
-            self.size = cs.Int32ul.parse_stream(stream)
-            self.geos = []
+            self._set_show_field("size", cs.Int32ul.parse_stream(stream))
+            self._set_show_field("geos", [])
             for i in range(self.size):
                 self.geos.append(MGPoint.parse_stream(stream))
 

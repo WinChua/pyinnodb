@@ -1,10 +1,10 @@
-import os
 import dataclasses
 import construct as cs
 import typing as t
 from construct_typed import csfield
 
 METAKEY = "subcon"
+SHOW_FIELDS = "_show_fields"
 
 
 class CMeta(type):
@@ -38,10 +38,36 @@ class CMeta(type):
 
         klass.subcon = CAdaptor(klass, cs.Struct(**sub_fields))
 
+        repr = klass.__repr__
         def get_subcon():
             return klass.subcon
 
         klass._get_subcon = get_subcon
+
+        def __repr__(self):
+            orepr = repr(self)
+            other = []
+            for k in getattr(self, SHOW_FIELDS, []):
+                v = getattr(self, k, None)
+                if v:
+                    other.append(f"{k}={v}")
+            if len(other) > 0:
+                orepr = orepr[:-1] + ", " + ", ".join(other)+")"
+            return orepr
+
+        klass.__repr__ = __repr__
+
+        def _set_show_field(self, k, v):
+            if getattr(self,SHOW_FIELDS,None) is None:
+                setattr(self, SHOW_FIELDS, [])
+
+            setattr(self, k, v)
+            if k not in self._show_fields:
+                self._show_fields.append(k)
+
+        klass._set_show_field = _set_show_field
+
+
 
         return klass
 
@@ -229,6 +255,13 @@ class IntFromBytes(cs.Construct):
 
 
 if __name__ == "__main__":
+
+    @dataclasses.dataclass
+    class D:
+        age: int
+        name: str
+
+    D.__str__    
 
     class DD(CC):
         f: int = cfield(cs.Int16ub)
