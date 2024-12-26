@@ -91,6 +91,15 @@ class MGPoint(CC):
             self.size = cs.Int32ul.parse_stream(stream)
             for i in range(self.size):
                 self.points.append(MPoint.parse_stream(stream))
+        elif self.point_type == 3: # POLYGON
+            self.polygons = []
+            self.psize = cs.Int32ul.parse_stream(stream)
+            for i in range(self.psize):
+                size = cs.Int32ul.parse_stream(stream)
+                points = []
+                for j in range(size):
+                    points.append(MPoint.parse_stream(stream))
+                self.polygons.append(points)
         elif self.point_type == 4: # MULTIPOINT
             self.size = cs.Int32ul.parse_stream(stream)
             self.points = []
@@ -106,6 +115,14 @@ class MGPoint(CC):
             stream.write(cs.Int32ul.build(self.size))
             for p in self.points:
                 stream.write(p.build())
+        elif self.point_type == 3:
+            stream.write(cs.Int32ul.build(self.psize))
+            for polygon in self.polygons:
+                if len(polygon) == 0:
+                    continue
+                stream.write(cs.Int32ul.build(len(polygon)))
+                for p in polygon:
+                    stream.write(p.build())
 
         elif self.point_type == 4:
             stream.write(cs.Int32ul.build(self.size))
