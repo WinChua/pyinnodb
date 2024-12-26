@@ -18,7 +18,7 @@ from .. import const
 from ..const.dd_column_type import DDColumnType, DDColConf
 from ..disk_struct.varsize import VarSize, OffPagePointer
 
-from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp
+from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp, MGeo
 from ..disk_struct.json import MJson
 from ..disk_struct.rollback import MRollbackPointer
 from ..disk_struct.record import MRecordHeader
@@ -219,6 +219,10 @@ class Column:
             sql += f" /*!80003 SRID {self.srs_id} */"
         if self.is_hidden_from_user:
             sql += " /*!80023 INVISIBLE */"
+        if self.engine_attribute != "":
+            sql += " /*!80021 ENGINE_ATTRIBUTE */"
+        if self.secondary_engine_attribute != "":
+            sql += " /*!80021 SECONDARY_ENGINE_ATTRIBUTE */"
         return sql
 
     @property
@@ -463,6 +467,10 @@ class Column:
                 return v.get_json()
             except Exception as e:
                 return data
+        elif dtype == DDColumnType.GEOMETRY:
+            data = MGeo.parse_stream(stream)
+            logging.debug("geometry data is %s, size is %d", data, dsize)
+            return data
 
 
 decimal_leftover_part = {

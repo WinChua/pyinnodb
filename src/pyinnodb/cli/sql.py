@@ -2,6 +2,7 @@ from . import *
 from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.index import MSDIPage, MIndexPage
 from pyinnodb.sdi.table import Table
+from pyinnodb.disk_struct.data import MGeo
 
 import json
 
@@ -84,6 +85,9 @@ def tosql(ctx, mode, sdi_idx):
                         vs.append("NULL")
                     elif isinstance(field, date) or isinstance(field, timedelta) or isinstance(field, datetime):
                         vs.append(f"'{str(field)}'")
+                    elif isinstance(field, MGeo):
+                        d = field.build().hex()# .zfill(50)
+                        vs.append('0x'+d)
                     else:
                         vs.append(repr(field))
                 values.append(f"({','.join(vs)})")
