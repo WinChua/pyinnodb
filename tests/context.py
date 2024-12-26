@@ -31,14 +31,17 @@ Base = declarative_base()
 
 MysqlFile = namedtuple("MysqlFile", "mysql8ibd mysql5ibd mysql5frm mysql8instantibd")
 
+
 def download_test_file():
     import requests
     import tarfile
+
     testfile = "https://github.com/user-attachments/files/16426987/mysql_test.tgz"
     resp = requests.get(testfile)
     fileobj = BytesIO(resp.content)
     tar = tarfile.open(fileobj=fileobj)
     tar.extractall(test_mysql8_ibd.parent.parent)
+
 
 @pytest.fixture
 def mysqlfile():
@@ -56,5 +59,3 @@ def mysqlfile():
                         mysql5frm=ff5,
                         mysql8instantibd=f8ins,
                     )
-
-

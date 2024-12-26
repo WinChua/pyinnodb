@@ -18,12 +18,10 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--log-level", type=click.Choice(["DEBUG", "ERROR", "INFO"]), default="ERROR"
 )
-@click.option(
-    "--validate-first/--no-validate-first", type=click.BOOL, default=False
-)
+@click.option("--validate-first/--no-validate-first", type=click.BOOL, default=False)
 @click.pass_context
 def main(ctx, fn, log_level, validate_first):
-    '''A ibd file parser for MySQL 8.0 above, help you to know innodb better.
+    """A ibd file parser for MySQL 8.0 above, help you to know innodb better.
 
     It offer several function bellow:
     a) validate the checksum of your ibd file;
@@ -34,7 +32,7 @@ def main(ctx, fn, log_level, validate_first):
 
     many other function to explore your ibd file
 
-    '''
+    """
     # pid = os.getpid()
     # start_time = os.stat(f"/proc/{pid}").st_ctime
     # print("cost to startup:", time.time() - start_time)
@@ -56,10 +54,11 @@ def main(ctx, fn, log_level, validate_first):
                     continue
                 checksum = const.page_checksum_crc32c(page_data)
                 if checksum != fil.checksum:
-                    print(f"PAGE {pn}'s checksum is invalid, stored[{hex(fil.checksum)}] != calculate[{hex(checksum)}]")
+                    print(
+                        f"PAGE {pn}'s checksum is invalid, stored[{hex(fil.checksum)}] != calculate[{hex(checksum)}]"
+                    )
                     print("use validate to get a more detail output of the validation")
                     sys.exit(1)
     except Exception as e:
         print(e)
         print("the file parse faile")
-

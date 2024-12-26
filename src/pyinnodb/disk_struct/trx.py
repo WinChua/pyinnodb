@@ -3,9 +3,11 @@ from .fil import MFil
 from .list import MPointer
 import typing
 
+
 class MRSegEntry(CC):
     space: int = cfield(cs.Int32ub)
     page: int = cfield(cs.Int32ub)
+
 
 class MTrxSysPage(CC):
     fil: MFil = cfield(MFil)

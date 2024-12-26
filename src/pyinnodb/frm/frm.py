@@ -13,15 +13,16 @@ from base64 import b64encode
 
 
 class MFrmKeyParts(CC):
-    nr: int = cfield(cs.Int16ul) #  -1: column idx of primary
+    nr: int = cfield(cs.Int16ul)  #  -1: column idx of primary
     offset: int = cfield(cs.Int16ul)
     flags: int = cfield(cs.Int8ul)
     key_type: int = cfield(cs.Int16ul)
-    length: int = cfield(cs.Int16ul) # primary key length
+    length: int = cfield(cs.Int16ul)  # primary key length
 
     def _post_parsed(self, stream, context, path):
-        self.nr &= 0x3fff
+        self.nr &= 0x3FFF
         self.offset -= 1
+
 
 class FieldFlag(enum.Enum):
     DECIMAL = 1
@@ -44,12 +45,12 @@ class FieldFlag(enum.Enum):
     # defined, but not used in modern MySQL
     # SUM = 32768
     MAYBE_NULL = 32768
-    HEX_ESCAPE = 0X10000
+    HEX_ESCAPE = 0x10000
     PACK_SHIFT = 3
     DEC_SHIFT = 8
     MAX_DEC = 31
-    NUM_SCREEN_TYPE = 0X7F01
-    ALFA_SCREEN_TYPE = 0X7800
+    NUM_SCREEN_TYPE = 0x7F01
+    ALFA_SCREEN_TYPE = 0x7800
 
 
 class MFrmColumn(CC):  # 17
@@ -64,7 +65,9 @@ class MFrmColumn(CC):  # 17
     charset_id2: int = cfield(cs.Int8ul)
     comment_length: str = cfield(cs.Bytes(2))
 
-    def to_dd_column(self, name: str, pos: int, labels: typing.List[typing.List[str]]) -> Column:
+    def to_dd_column(
+        self, name: str, pos: int, labels: typing.List[typing.List[str]]
+    ) -> Column:
         c = Column()
         c.hidden = const.column_hidden_type.ColumnHiddenType.HT_VISIBLE.value
         c.ordinal_position = pos + 1
@@ -82,21 +85,23 @@ class MFrmColumn(CC):  # 17
                 c.numeric_precision -= 1
         elif c.type == const.dd_column_type.DDColumnType.BIT.value:
             c.numeric_precision = self.length
-        elif c.type in [const.dd_column_type.DDColumnType.ENUM.value, 
-                const.dd_column_type.DDColumnType.SET.value]:
+        elif c.type in [
+            const.dd_column_type.DDColumnType.ENUM.value,
+            const.dd_column_type.DDColumnType.SET.value,
+        ]:
             if self.label_id <= len(labels):
-                for i, name in enumerate(labels[self.label_id-1]):
-                    c.elements.append(ColumnElement(name=b64encode(name), index=i+1))
+                for i, name in enumerate(labels[self.label_id - 1]):
+                    c.elements.append(ColumnElement(name=b64encode(name), index=i + 1))
         elif c.type == const.dd_column_type.DDColumnType.STRING.value:
             c.column_type_utf8 = f"char({self.length})"
-
 
         c.is_nullable = bool(self.flags & FieldFlag.MAYBE_NULL.value)
 
         return c
 
+
 class MFrmKey(CC):
-    flags: int = cfield(cs.Int16ul) # & 1 => uniq
+    flags: int = cfield(cs.Int16ul)  # & 1 => uniq
     length: int = cfield(cs.Int16ul)
     parts_count: int = cfield(cs.Int8ul)
     algorithm: int = cfield(cs.Int8ul)
@@ -115,7 +120,7 @@ class MFrmKey(CC):
         for i in range(self.parts_count):
             self.key_parts.append(MFrmKeyParts.parse_stream(stream))
 
-    def to_dd_index(self, name:str, cols: typing.List[MFrmColumn]) -> Index:
+    def to_dd_index(self, name: str, cols: typing.List[MFrmColumn]) -> Index:
         idx = Index()
         idx.name = name
         idx.type = self.get_index_type()
@@ -129,21 +134,25 @@ class MFrmKey(CC):
             idx.elements.append(ie)
 
         if len(idx.elements) == 0:
-            pass # TODO: ROW_ID
+            pass  # TODO: ROW_ID
 
-        idx.elements.append(IndexElement(
-            length = 4294967295,
-            column_opx = len(cols),
-            hidden = True,
-            ordinal_position = len(cols) + 1,
-        ))
+        idx.elements.append(
+            IndexElement(
+                length=4294967295,
+                column_opx=len(cols),
+                hidden=True,
+                ordinal_position=len(cols) + 1,
+            )
+        )
 
-        idx.elements.append(IndexElement(
-            length = 4294967295,
-            column_opx = len(cols) + 1,
-            hidden = True,
-            ordinal_position = len(cols) + 2,
-        ))
+        idx.elements.append(
+            IndexElement(
+                length=4294967295,
+                column_opx=len(cols) + 1,
+                hidden=True,
+                ordinal_position=len(cols) + 2,
+            )
+        )
 
         for i, c in enumerate(cols):
             if i in kp:
@@ -189,10 +198,8 @@ class MFrm(CC):
         # table comment
         stream.seek(forminfo_offset + 46)
         table_comment_length = cs.Int8ub.parse_stream(stream)
-        if table_comment_length != 0xff:
+        if table_comment_length != 0xFF:
             table_comment = stream.read(table_comment_length)
-
-
 
         # other
         stream.seek(forminfo_offset + 258)
@@ -214,7 +221,6 @@ class MFrm(CC):
         names = stream.read(names_length)
         labels = stream.read(labels_length)
         comment = stream.read(comment_length)
-
 
         if self.keyinfo_length == 0xFFFF:
             stream.seek(0x02F)
@@ -239,8 +245,6 @@ class MFrm(CC):
         for i in range(key_count):
             keys.append(MFrmKey.parse_stream(key_stream))
 
-
-
         key_extra = key_stream.read(key_extra_length)
 
         key_name, key_comment = key_extra.split(b"\x00", 1)
@@ -251,7 +255,9 @@ class MFrm(CC):
         key_comments = []
         for key in keys:
             if key.flags ^ 4096:
-                key_comments.append(CLenString(2, "little").parse_stream(comment_stream))
+                key_comments.append(
+                    CLenString(2, "little").parse_stream(comment_stream)
+                )
             else:
                 key_comments.append("")
 
@@ -275,16 +281,13 @@ class MFrm(CC):
 
         column_names = names[1:-2].split(b"\xff")
         self.column_labels = [
-            [v for v in g.split(b'\xff') if v]
-            for g in labels.split(b'\x00') if g
+            [v for v in g.split(b"\xff") if v] for g in labels.split(b"\x00") if g
         ]
-
 
         _null_bytes = (null_fields + 1) // 8
 
         for i, c_name in enumerate(column_names):
             cols[i].name = c_name.decode()
-
 
 
 # <BBBBHHIHHIHHHHHBBIBBBBBIIIIBBBHH

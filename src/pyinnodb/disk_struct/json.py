@@ -19,7 +19,7 @@ class MJson(CC):
         cur = stream.tell()  # seek loc after type, offset in the key entry or value entry is relative to cur
         if self.type == 0x04:
             data = int.from_bytes(stream.read(1), "big")
-            return {1: True, 2: False, 0: 'null'}.get(data, None)
+            return {1: True, 2: False, 0: "null"}.get(data, None)
         elif self.type == 0x05:
             return cs.Int16sl.parse_stream(stream)
         elif self.type == 0x06:

@@ -1,9 +1,11 @@
 from ..mconstruct import *
 from datetime import timedelta, datetime, date
+
 try:
     from datetime import UTC
 except:
     from datetime import timezone
+
     UTC = timezone.utc
 import time
 
@@ -74,24 +76,26 @@ class MTimestamp(CC):
             UTC,
         )
 
+
 class MPoint(CC):
     x: float = cfield(cs.Float64l)
     y: float = cfield(cs.Float64l)
+
 
 class MGPoint(CC):
     byteorder: int = cfield(cs.Int8ul)
     point_type: int = cfield(cs.Int32ul)
 
     def _post_parsed(self, stream, context, path):
-        if self.point_type == 1: # POINT
+        if self.point_type == 1:  # POINT
             self._set_show_field("x", cs.Float64l.parse_stream(stream))
             self._set_show_field("y", cs.Float64l.parse_stream(stream))
-        elif self.point_type == 2: # LINESTRING
+        elif self.point_type == 2:  # LINESTRING
             self._set_show_field("size", cs.Int32ul.parse_stream(stream))
             self._set_show_field("points", [])
             for i in range(self.size):
                 self.points.append(MPoint.parse_stream(stream))
-        elif self.point_type == 3: # POLYGON
+        elif self.point_type == 3:  # POLYGON
             self._set_show_field("psize", cs.Int32ul.parse_stream(stream))
             self._set_show_field("polygon", [])
             for i in range(self.psize):
@@ -100,7 +104,7 @@ class MGPoint(CC):
                 for j in range(size):
                     points.append(MPoint.parse_stream(stream))
                 self.polygon.append(points)
-        elif self.point_type == 4: # MULTIPOINT
+        elif self.point_type == 4:  # MULTIPOINT
             self._set_show_field("size", cs.Int32ul.parse_stream(stream))
             self._set_show_field("points", [])
             for i in range(self.size):
@@ -121,7 +125,6 @@ class MGPoint(CC):
             self._set_show_field("geos", [])
             for i in range(self.size):
                 self.geos.append(MGPoint.parse_stream(stream))
-
 
     def _post_build(self, obj, stream, context, path):
         if self.point_type == 1:
@@ -158,6 +161,7 @@ class MGPoint(CC):
             stream.write(cs.Int32ul.build(self.size))
             for l in self.geos:
                 stream.write(l.build())
+
 
 class MGeo(CC):
     SRID: int = cfield(cs.Int32ub)

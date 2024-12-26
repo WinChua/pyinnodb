@@ -20,7 +20,9 @@ all_clob_type = [
 all_type = [
     t
     for t in dir(dmysql.types)
-    if t.isupper() and t not in ["ARRAY", "NULLTYPE", "STRINGTYPE", "DECIMAL"] and "CHAR" not in t
+    if t.isupper()
+    and t not in ["ARRAY", "NULLTYPE", "STRINGTYPE", "DECIMAL"]
+    and "CHAR" not in t
 ]
 Base = declarative_base()
 all_type_column = [
@@ -33,15 +35,9 @@ all_type_column.extend(
 )
 all_type_column.append("    ENUM = Column(dmysql.ENUM('hello', 'world', 'a'))")
 all_type_column.append("    SET = Column(dmysql.SET('a', 'b', 'c'))")
-all_type_column.append(
-    "    DECIMAL = Column(dmysql.types.DECIMAL(10, 2))"
-)
-all_type_column.append(
-    "    CHAR = Column(dmysql.types.CHAR(20), nullable=True)"
-)
-all_type_column.append(
-    "    VARBINARY = Column(dmysql.VARBINARY(203))"
-)
+all_type_column.append("    DECIMAL = Column(dmysql.types.DECIMAL(10, 2))")
+all_type_column.append("    CHAR = Column(dmysql.types.CHAR(20), nullable=True)")
+all_type_column.append("    VARBINARY = Column(dmysql.VARBINARY(203))")
 all_type_column.append(
     "    int_def_col = Column(dmysql.types.BIGINT, server_default=text('42'))"
 )
@@ -60,59 +56,61 @@ with engine.connect() as conn:
 Base.metadata.create_all(engine)
 
 with sessionmaker(bind=engine)() as session:
-    test_data = AllType(BIGINT=98283201,
-        BIT = 1,
-        DATETIME='2024-01-01 09:00:01',
-        DOUBLE = 3.1415926,
-        FLOAT = 6.189,
-        INTEGER = 8621,
+    test_data = AllType(
+        BIGINT=98283201,
+        BIT=1,
+        DATETIME="2024-01-01 09:00:01",
+        DOUBLE=3.1415926,
+        FLOAT=6.189,
+        INTEGER=8621,
         DECIMAL=910.79,
         LONGBLOB=text("repeat('x', 100)"),
-        LONGTEXT = text("repeat('g', 3)"),
-        MEDIUMBLOB = text("NULL"),
-        MEDIUMINT = 999999,
-        MEDIUMTEXT = text("NULL"),
-        NUMERIC = 10.9,
-        REAL = 1092.892,
-        SMALLINT = 981,
-        TEXT = "TEXT",
-        TIME = '03:04:00',
-        TIMESTAMP = "2024-07-24 09:05:28",
-        YEAR = 2024,
-        ENUM = "a",
-        SET  = "a,b,c",
-        TINYBLOB = b"TINYBLOB",
-        TINYINT = 99,
-        TINYTEXT = "TINYTEXT",
-        CHAR = "09283012",
-        VARBINARY = b"VARBINARY",
+        LONGTEXT=text("repeat('g', 3)"),
+        MEDIUMBLOB=text("NULL"),
+        MEDIUMINT=999999,
+        MEDIUMTEXT=text("NULL"),
+        NUMERIC=10.9,
+        REAL=1092.892,
+        SMALLINT=981,
+        TEXT="TEXT",
+        TIME="03:04:00",
+        TIMESTAMP="2024-07-24 09:05:28",
+        YEAR=2024,
+        ENUM="a",
+        SET="a,b,c",
+        TINYBLOB=b"TINYBLOB",
+        TINYINT=99,
+        TINYTEXT="TINYTEXT",
+        CHAR="09283012",
+        VARBINARY=b"VARBINARY",
     )
-    test_data2 = AllType(BIGINT=98283201,
-        BIT = 1,
-        DATETIME='2024-01-01 09:00:01',
-        DOUBLE = 3.1415926,
-        FLOAT = 6.189,
-        INTEGER = 8621,
+    test_data2 = AllType(
+        BIGINT=98283201,
+        BIT=1,
+        DATETIME="2024-01-01 09:00:01",
+        DOUBLE=3.1415926,
+        FLOAT=6.189,
+        INTEGER=8621,
         DECIMAL=910.79,
         LONGBLOB=text("repeat('x', 100)"),
-        LONGTEXT = text("repeat('g', 3)"),
-        MEDIUMBLOB = text("NULL"),
-        MEDIUMINT = 999999,
-        MEDIUMTEXT = text("NULL"),
-        NUMERIC = 10.9,
-        REAL = 1092.892,
-        SMALLINT = 981,
-        TEXT = "TEXT",
-        TIME = '03:04:00',
-        TIMESTAMP = "2024-07-24 09:05:28",
-        YEAR = 2024,
-        ENUM = "a",
-        SET  = "a,b,c",
-        TINYBLOB = b"TINYBLOB",
-        TINYINT = 99,
-        TINYTEXT = "TINYTEXT",
-        CHAR = text("NULL"),
-        VARBINARY = b"VARBINARY",
+        LONGTEXT=text("repeat('g', 3)"),
+        MEDIUMBLOB=text("NULL"),
+        MEDIUMINT=999999,
+        MEDIUMTEXT=text("NULL"),
+        NUMERIC=10.9,
+        REAL=1092.892,
+        SMALLINT=981,
+        TEXT="TEXT",
+        TIME="03:04:00",
+        TIMESTAMP="2024-07-24 09:05:28",
+        YEAR=2024,
+        ENUM="a",
+        SET="a,b,c",
+        TINYBLOB=b"TINYBLOB",
+        TINYINT=99,
+        TINYTEXT="TINYTEXT",
+        CHAR=text("NULL"),
+        VARBINARY=b"VARBINARY",
     )
     session.add(test_data)
     session.add(test_data2)

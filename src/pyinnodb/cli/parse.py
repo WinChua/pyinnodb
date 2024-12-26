@@ -1,15 +1,20 @@
 from . import *
 from pyinnodb import disk_struct
 
+
 @main.command()
 @click.pass_context
 @click.option("--pageno", type=click.INT, help="pageno number to parse")
-@click.option("--type", multiple=True, type=click.STRING, help="struct name to parse in sequence")
+@click.option(
+    "--type", multiple=True, type=click.STRING, help="struct name to parse in sequence"
+)
 @click.option("--offset", type=click.INT, default=0, help="page offset to start parse")
-@click.option("--remain", type=click.INT, default=0, help="the bytes number to read after parse")
+@click.option(
+    "--remain", type=click.INT, default=0, help="the bytes number to read after parse"
+)
 @click.option("--func", type=click.STRING, default="")
 def parse(ctx, pageno, type, offset, remain, func):
-    ''' explore the ibd file flexibly '''
+    """explore the ibd file flexibly"""
     f = ctx.obj["fn"]
     f.seek(pageno * const.PAGE_SIZE)
     if offset != 0:

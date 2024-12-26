@@ -9,14 +9,17 @@ from dataclasses import dataclass, asdict
 from testcontainers.mysql import MySqlContainer
 from docker.models.containers import Container
 
+
 @click.group()
 def main():
     pass
+
 
 @main.command()
 def list():
     data = load_deploy()
     pprint(data)
+
 
 @main.command()
 @click.option("--version", type=click.STRING)
@@ -38,12 +41,14 @@ def clean(version):
     with open(".deploy_mysqld", "w") as f:
         dump_deploy(data, f)
 
+
 @dataclass
 class Instance:
     url: str
     container_id: str
     cmd: str
     datadir: str
+
 
 def load_deploy():
     if os.path.exists(".deploy_mysqld"):
@@ -59,18 +64,21 @@ def load_deploy():
                 return {}
     return {}
 
+
 def dump_deploy(data, f):
     for k in data:
         data[k] = asdict(data[k])
 
     json.dump(data, f)
 
+
 def mDeploy(version):
     deploy_container = load_deploy()
     if version in deploy_container:
-        print(f"a container of mysqld[{version}] has been deploy at {deploy_container[version]}")
+        print(
+            f"a container of mysqld[{version}] has been deploy at {deploy_container[version]}"
+        )
         return
-
 
     os.environ["TESTCONTAINERS_RYUK_DISABLED"] = "true"
     mContainer = MySqlContainer(f"mysql:{version}")
@@ -81,10 +89,10 @@ def mDeploy(version):
     mysql = mContainer.start()
     with open(".deploy_mysqld", "w") as f:
         deploy_container[version] = Instance(
-                url=mysql.get_connection_url(),
-                container_id=f"{mysql._container.short_id}",
-                cmd=f"mysql -h 127.0.0.1 -P{mysql.get_exposed_port(mysql.port)} -u{mysql.username} -p{mysql.password}",
-                datadir=datadir,
+            url=mysql.get_connection_url(),
+            container_id=f"{mysql._container.short_id}",
+            cmd=f"mysql -h 127.0.0.1 -P{mysql.get_exposed_port(mysql.port)} -u{mysql.username} -p{mysql.password}",
+            datadir=datadir,
         )
         dump_deploy(deploy_container, f)
 
@@ -105,7 +113,6 @@ def connect(version):
 
     os.system(deploy_container.get(version).cmd)
 
+
 if __name__ == "__main__":
     main()
-
-

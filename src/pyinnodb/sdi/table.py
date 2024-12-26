@@ -6,6 +6,7 @@ import dataclasses
 import re
 
 import sys
+
 if sys.version_info.minor >= 9:
     from functools import cache
 else:
@@ -30,6 +31,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 column_type_size = re.compile("[^(]*[(]([^)]*)[)]")
+
 
 class Lob:
     def __init__(self, data, off_page):
@@ -147,7 +149,7 @@ class Column:
             return 0, False
 
     @cache
-    def version_valid(self, data_schema_version) -> bool :
+    def version_valid(self, data_schema_version) -> bool:
         va = int(self.private_data.get("version_added", 0))
         vd = int(self.private_data.get("version_dropped", 0))
         if data_schema_version < va:
@@ -155,7 +157,6 @@ class Column:
         if vd != 0 and data_schema_version >= vd:
             return False
         return True
-
 
     @property
     @cache
@@ -168,7 +169,10 @@ class Column:
     @property
     @cache
     def is_instant_col(self):
-        return "version_added" in self.private_data or "version_dropped" in self.private_data
+        return (
+            "version_added" in self.private_data
+            or "version_dropped" in self.private_data
+        )
 
     @property
     @cache
@@ -246,7 +250,7 @@ class Column:
         elif dtype == DDColumnType.SET:  # bit mask
             return int((len(self.elements) + 7) / 8)
 
-        elif dtype == DDColumnType.STRING: # if column don't have varsize 
+        elif dtype == DDColumnType.STRING:  # if column don't have varsize
             sizes = column_type_size.findall(self.column_type_utf8)
             if len(sizes) == 0:
                 return 0
@@ -414,13 +418,17 @@ class Column:
         elif dtype == DDColumnType.DECIMAL or dtype == DDColumnType.NEWDECIMAL:
             return self._read_new_decimal(stream)
         elif dtype == DDColumnType.STRING:
-            return self._read_varchar(stream, dsize).decode(errors='replace').strip()
+            return self._read_varchar(stream, dsize).decode(errors="replace").strip()
         elif dtype == DDColumnType.VARCHAR:
-            return self._read_varchar(stream, dsize).decode(errors='replace')
-        elif dtype in [DDColumnType.LONG_BLOB, DDColumnType.MEDIUM_BLOB, DDColumnType.BLOB]:
-            return self._read_varchar(stream, dsize).decode(errors='replace')
+            return self._read_varchar(stream, dsize).decode(errors="replace")
+        elif dtype in [
+            DDColumnType.LONG_BLOB,
+            DDColumnType.MEDIUM_BLOB,
+            DDColumnType.BLOB,
+        ]:
+            return self._read_varchar(stream, dsize).decode(errors="replace")
         elif dtype == DDColumnType.TINY_BLOB:
-            return self._read_varchar(stream, dsize).decode(errors='replace')
+            return self._read_varchar(stream, dsize).decode(errors="replace")
         elif dtype == DDColumnType.TIME2:
             time_data = MTime2.parse_stream(stream)
             time_data.parse_fsp(stream, dsize - 3)  # 3 = MTime2.sizeof()
@@ -452,9 +460,9 @@ class Column:
             mask = self._read_int(stream, dsize, False)
             r = []
             for m, v in self.element_map.items():
-                if mask & (1 << (m-1)):
-                    r.append(b64decode(v).decode(errors='replace'))
-            return ','.join(r)
+                if mask & (1 << (m - 1)):
+                    r.append(b64decode(v).decode(errors="replace"))
+            return ",".join(r)
         elif dtype == DDColumnType.JSON:
             # data = stream.read(dsize)
             data = self._read_varchar(stream, dsize)
@@ -462,7 +470,7 @@ class Column:
                 data = data.data
             try:
                 if len(data) == 0:
-                    return 'null'
+                    return "null"
                 v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data)))
                 return v.get_json()
             except Exception as e:
@@ -568,7 +576,9 @@ class ForeignKeys:
     elements: typing.List[ForeignElement] = None
 
     def __post_init__(self):
-        elements: typing.List[ForeignElement] = [ForeignElement(**c) for c in self.elements]
+        elements: typing.List[ForeignElement] = [
+            ForeignElement(**c) for c in self.elements
+        ]
         self.elements = elements
 
     def gen(self, column_name: typing.List[str]):
@@ -655,7 +665,6 @@ class Table:
     partitions: typing.List[Partition] = dataclasses.field(default_factory=list)
     collation_id: int = 0
     # tablespace_ref: ?
-
 
     @property
     @cache
@@ -761,7 +770,7 @@ class Table:
             data_layout_col = []
             for i, c in enumerate(self.columns):
                 data_layout_col.append((c, c_l.get(i, 4294967295)))
-            data_layout_col.sort(key = lambda c: c[0].private_data.get("physical_pos", 0))
+            data_layout_col.sort(key=lambda c: c[0].private_data.get("physical_pos", 0))
             return data_layout_col
 
         data_layout_col = []
@@ -774,7 +783,7 @@ class Table:
                 for ie in idx.elements:
                     col = self.columns[ie.column_opx]
                     prekey_len, ok = col.index_prefix(ie)
-                    if ok: # prefix
+                    if ok:  # prefix
                         data_layout_col.append((col, prekey_len))
                     else:
                         data_layout_col.append((col, ie.length))
@@ -784,7 +793,7 @@ class Table:
                 for ie in idx.elements:
                     col = self.columns[ie.column_opx]
                     prekey_len, ok = col.index_prefix(ie)
-                    if ok: # prefix
+                    if ok:  # prefix
                         data_layout_col.append((col, prekey_len))
                     else:
                         data_layout_col.append((col, ie.length))
@@ -794,7 +803,7 @@ class Table:
 
     def build_primary_key_bytes(self, values) -> bytes:
         cols = self.get_disk_data_layout()
-        cols = [c for c in cols if c[1] != ~0&0xffffffff]
+        cols = [c for c in cols if c[1] != ~0 & 0xFFFFFFFF]
         buf = io.BytesIO()
         for i, c in enumerate(cols):
             if DDColumnType(c[0].type).is_int_number():
@@ -829,40 +838,70 @@ class Table:
         root_page_no = int(self.indexes[0].private_data.get("root", 4))
         f.seek(root_page_no * const.PAGE_SIZE)
         root_index_page = MIndexPage.parse_stream(f)
-        first_leaf_page = root_index_page.get_first_leaf_page(f, self.get_primary_key_col())
+        first_leaf_page = root_index_page.get_first_leaf_page(
+            f, self.get_primary_key_col()
+        )
         if isinstance(primary_key, tuple):
-            primary_key = (self.build_primary_key_bytes(primary_key))
+            primary_key = self.build_primary_key_bytes(primary_key)
         else:
-            primary_key = (self.build_primary_key_bytes((primary_key,)))
-        value_parser = MIndexPage.default_value_parser(self, hidden_col=hidden_col, transfter=lambda id: id)
+            primary_key = self.build_primary_key_bytes((primary_key,))
+        value_parser = MIndexPage.default_value_parser(
+            self, hidden_col=hidden_col, transfter=lambda id: id
+        )
 
         while first_leaf_page != 4294967295:
             f.seek(first_leaf_page * const.PAGE_SIZE)
             index_page = MIndexPage.parse_stream(f)
             f.seek(first_leaf_page * const.PAGE_SIZE)
-            page_dir_idx, match = index_page.binary_search_with_page_directory(primary_key, f)
-            f.seek(first_leaf_page * const.PAGE_SIZE + index_page.page_directory[page_dir_idx] - 5)
+            page_dir_idx, match = index_page.binary_search_with_page_directory(
+                primary_key, f
+            )
+            f.seek(
+                first_leaf_page * const.PAGE_SIZE
+                + index_page.page_directory[page_dir_idx]
+                - 5
+            )
             end_rh = MRecordHeader.parse_stream(f)
-            if match and const.RecordType(end_rh.record_type) == const.RecordType.Conventional: # the key
+            logging.debug("end_rh is %s", end_rh)
+            if (
+                match
+                and const.RecordType(end_rh.record_type)
+                == const.RecordType.Conventional
+            ):  # the key
                 return value_parser(end_rh, f)
-            elif match and const.RecordType(end_rh.record_type) == const.RecordType.NodePointer:
+            elif (
+                match
+                and const.RecordType(end_rh.record_type) == const.RecordType.NodePointer
+            ):
                 record_key = f.read(len(primary_key))
                 page_num = f.read(4)
                 first_leaf_page = int.from_bytes(page_num, "big")
             else:
-                f.seek(first_leaf_page * const.PAGE_SIZE + index_page.page_directory[page_dir_idx+1] - 5)
+                f.seek(
+                    first_leaf_page * const.PAGE_SIZE
+                    + index_page.page_directory[page_dir_idx + 1]
+                    - 5
+                )
                 start_rh = MRecordHeader.parse_stream(f)
                 owned = end_rh.num_record_owned
-                first_leaf_page = 4294967295 # no match if cur page is leaf then break loop
-                for i in range(owned+1):
+                first_leaf_page = (
+                    4294967295  # no match if cur page is leaf then break loop
+                )
+                for i in range(owned + 1):
                     cur = f.tell()
-                    if const.RecordType(start_rh.record_type) == const.RecordType.Conventional:
+                    if (
+                        const.RecordType(start_rh.record_type)
+                        == const.RecordType.Conventional
+                    ):
                         record_primary_key = f.read(len(primary_key))
                         if record_primary_key == primary_key:
                             f.seek(-len(primary_key), 1)
                             v = value_parser(start_rh, f)
                             return v
-                    elif const.RecordType(start_rh.record_type) == const.RecordType.NodePointer:
+                    elif (
+                        const.RecordType(start_rh.record_type)
+                        == const.RecordType.NodePointer
+                    ):
                         record_key = f.read(len(primary_key))
                         if record_key > primary_key:
                             if i == 1:
@@ -878,27 +917,32 @@ class Table:
                     f.seek(start_rh.next_record_offset - 5, 1)
                     start_rh = MRecordHeader.parse_stream(f)
 
-
     def iter_record(self, f, hidden_col=False, garbage=False, transfter=None):
         root_page_no = int(self.indexes[0].private_data.get("root", 4))
         f.seek(root_page_no * const.PAGE_SIZE)
         root_index_page = MIndexPage.parse_stream(f)
-        first_leaf_page = root_index_page.get_first_leaf_page(f, self.get_primary_key_col())
+        first_leaf_page = root_index_page.get_first_leaf_page(
+            f, self.get_primary_key_col()
+        )
         if first_leaf_page is None:
             return
 
-        default_value_parser = MIndexPage.default_value_parser(self, hidden_col=hidden_col, transfter=transfter)
+        default_value_parser = MIndexPage.default_value_parser(
+            self, hidden_col=hidden_col, transfter=transfter
+        )
 
         result = []
         while first_leaf_page != 4294967295:
             f.seek(first_leaf_page * const.PAGE_SIZE)
             index_page = MIndexPage.parse_stream(f)
-            result.extend(index_page.iterate_record_header(f, value_parser = default_value_parser, garbage=garbage))
+            result.extend(
+                index_page.iterate_record_header(
+                    f, value_parser=default_value_parser, garbage=garbage
+                )
+            )
             first_leaf_page = index_page.fil.next_page
 
-
         return result
-
 
     def __post_init__(self):
         cols: typing.List[Column] = [Column(**c) for c in self.columns]
@@ -1064,35 +1108,39 @@ table_opts = [
 
 column_spec_size = {"DB_ROW_ID": 6, "DB_TRX_ID": 6, "DB_ROLL_PTR": 7}
 
+
 def get_sys_col(name, pos):
     if name == "DB_TRX_ID":
         return Column(
-            name = "DB_TRX_ID",
-            type = 10,
-            hidden = 2,
-            ordinal_position = pos,
-            char_length = 6,
-            has_no_default = False,
-            default_value = "",
-            default_value_utf8_null = True,
-            collation_id = 63,
-            is_explicit_collation = False)
+            name="DB_TRX_ID",
+            type=10,
+            hidden=2,
+            ordinal_position=pos,
+            char_length=6,
+            has_no_default=False,
+            default_value="",
+            default_value_utf8_null=True,
+            collation_id=63,
+            is_explicit_collation=False,
+        )
     elif name == "DB_ROLL_PTR":
         return Column(
-            name = name,
-            type = 9,
-            hidden = 2,
-            ordinal_position = pos,
-            char_length = 6,
-            has_no_default = False,
-            default_value = "",
-            default_value_utf8_null = True,
-            collation_id = 63,
-            is_explicit_collation = False)
+            name=name,
+            type=9,
+            hidden=2,
+            ordinal_position=pos,
+            char_length=6,
+            has_no_default=False,
+            default_value="",
+            default_value_utf8_null=True,
+            collation_id=63,
+            is_explicit_collation=False,
+        )
         pass
     elif name == "DB_ROW_ID":
         pass
     return
+
 
 if __name__ == "__main__":
     import json

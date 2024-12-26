@@ -24,6 +24,7 @@ def list_first_page(ctx, pageno):
     f.seek(first_entry.seek_loc())
     # print(MIndexEntryNode.parse_stream(f))
 
+
 @main.command()
 @click.pass_context
 @click.option("--primary-key", type=click.STRING, default="")
@@ -32,9 +33,9 @@ def list_first_page(ctx, pageno):
 @click.option("--with-hist/--no-with-hist", type=click.BOOL, default=False)
 @click.option("--datadir", type=click.Path(exists=False), default=None)
 def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
-    ''' search the primary-key(int support only now) '''
+    """search the primary-key(int support only now)"""
     f = ctx.obj["fn"]
-    #print("search start cost:", time.time() - ctx.obj["start_time"])
+    # print("search start cost:", time.time() - ctx.obj["start_time"])
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
@@ -72,7 +73,9 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
     history = []
     while rptr is not None:
         hist, rptr = rptr.last_version(
-            undo_map, primary_key_col, disk_data_layout,
+            undo_map,
+            primary_key_col,
+            disk_data_layout,
         )
         history.append(hist)
     for h in history:
@@ -80,16 +83,23 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
 
     return
 
+
 def primary_key_only(key_len: int):
     def value_parser(rh: MRecordHeader, f):
         print(rh, f.read(key_len))
+
     return value_parser
 
 
 @main.command()
 @click.pass_context
 @click.option("--garbage/--no-garbage", default=False, help="include garbage mark data")
-@click.option("--hidden-col/--no-hidden-col", type=click.BOOL, default=False, help="show the DB_ROLL_PTR and DB_TRX_ID")
+@click.option(
+    "--hidden-col/--no-hidden-col",
+    type=click.BOOL,
+    default=False,
+    help="show the DB_ROLL_PTR and DB_TRX_ID",
+)
 @click.option("--pageno", default=None, type=click.INT, help="iterate on pageno only")
 # @click.option("--primary-key-len", type=click.INT, help="primary key only if not 0", default=0)
 @click.option("--sdi-idx", type=click.INT, default=0, help="idx of sdi")
@@ -98,7 +108,7 @@ def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx):
 
     by default, iter_record will iterate from the first leaf page
     output every record as a namedtuple whose filed is all the column
-    name of the ibd file. 
+    name of the ibd file.
 
     """
     f = ctx.obj["fn"]
@@ -110,4 +120,3 @@ def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx):
     dd_object.iter_record(f, hidden_col=hidden_col, garbage=garbage)
 
     return
-
