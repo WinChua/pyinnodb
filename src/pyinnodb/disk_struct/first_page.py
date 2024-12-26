@@ -7,18 +7,20 @@ from pyinnodb import const
 
 blob_hdr_size = 8
 
-class MBlobHdr(CC): # only used in MySQL 5
+
+class MBlobHdr(CC):  # only used in MySQL 5
     part_len: int = cfield(cs.Int32ub)
-    next_page_no: int = cfield(cs.Int32ub) # FIL_NULL if none 0xffffffff
+    next_page_no: int = cfield(cs.Int32ub)  # FIL_NULL if none 0xffffffff
 
     def get_data(self, stream):
         data = stream.read(self.part_len)
-        if self.next_page_no == 0xffffffff:
+        if self.next_page_no == 0xFFFFFFFF:
             return data
         else:
             stream.seek(self.next_page_no * const.PAGE_SIZE + 38)
             blob_header = MBlobHdr.parse_stream(stream)
             return data + blob_header.get_data(stream)
+
 
 def btr_blob_get_next_page_no():
     return 0
@@ -73,8 +75,6 @@ class MFirstPage(CC):  ## first_page_t
 
         return data
 
-
-        
         stream.seek(self.index_entry[0].page_no * const.PAGE_SIZE + self.sizeof())
         first_page_data = stream.read(self.data_len)
         for i in range(1, self.index_list.length):

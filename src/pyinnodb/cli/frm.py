@@ -5,6 +5,7 @@ from pyinnodb.frm import frm as mfrm
 from pyinnodb.sdi import table
 from pyinnodb.disk_struct.index import MIndexPage
 
+
 @main.command()
 @click.pass_context
 @click.argument("frmfile")
@@ -17,8 +18,7 @@ def frm(ctx, frmfile):
     for i, col in enumerate(frm_header.cols):
         cols.append(col.to_dd_column(col.name, i, frm_header.column_labels))
 
-
-    #print(frm_header.keys[0][0].key_parts)
+    # print(frm_header.keys[0][0].key_parts)
     keys, key_name, key_comment = frm_header.keys[0]
 
     idx = keys.to_dd_index(key_name.decode(), frm_header.cols)

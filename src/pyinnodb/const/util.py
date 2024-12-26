@@ -5,8 +5,10 @@ from pyinnodb import const
 
 from os import path
 
+
 def is_id_undo_tablespace(id):
     return id >= 4244167280 and id <= 4294967279
+
 
 def get_undo_tablespacefile(fn: str):
     result = {}
@@ -25,13 +27,13 @@ def get_undo_tablespacefile(fn: str):
             if dd_object.name != "tablespace_files":
                 continue
 
-            for r in dd_object.iter_record(f, transfter=lambda x:x):
+            for r in dd_object.iter_record(f, transfter=lambda x: x):
                 if r.se_private_data is None:
                     continue
                 private_data = const.line_to_dict(r.se_private_data, ";", "=")
                 space_id = int(private_data.get("id", 0))
                 if is_id_undo_tablespace(space_id):
                     fname = path.dirname(fn) + "/" + path.basename(r.file_name)
-                    result[0xfffffff0-space_id] = open(fname, "rb")
+                    result[0xFFFFFFF0 - space_id] = open(fname, "rb")
 
     return result

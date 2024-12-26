@@ -1,10 +1,10 @@
-import os
 import dataclasses
 import construct as cs
 import typing as t
 from construct_typed import csfield
 
 METAKEY = "subcon"
+SHOW_FIELDS = "_show_fields"
 
 
 class CMeta(type):
@@ -38,10 +38,35 @@ class CMeta(type):
 
         klass.subcon = CAdaptor(klass, cs.Struct(**sub_fields))
 
+        repr = klass.__repr__
+
         def get_subcon():
             return klass.subcon
 
         klass._get_subcon = get_subcon
+
+        def __repr__(self):
+            orepr = repr(self)
+            other = []
+            for k in getattr(self, SHOW_FIELDS, []):
+                v = getattr(self, k, None)
+                if v:
+                    other.append(f"{k}={v}")
+            if len(other) > 0:
+                orepr = orepr[:-1] + ", " + ", ".join(other) + ")"
+            return orepr
+
+        klass.__repr__ = __repr__
+
+        def _set_show_field(self, k, v):
+            if getattr(self, SHOW_FIELDS, None) is None:
+                setattr(self, SHOW_FIELDS, [])
+
+            setattr(self, k, v)
+            if k not in self._show_fields:
+                self._show_fields.append(k)
+
+        klass._set_show_field = _set_show_field
 
         return klass
 
@@ -59,7 +84,9 @@ class CAdaptor(cs.Adapter):
     def _parse(self, stream, context, path):
         obj = super()._parse(stream, context, path)
         if getattr(obj, "_post_parsed", None) is not None:
-            obj._post_parsed(stream, context, path)
+            v = obj._post_parsed(stream, context, path)
+            if v is not None:
+                setattr(obj, "_post_value", v)
         return obj
 
     def _build(self, obj, stream, context, path):
@@ -195,6 +222,7 @@ def cfield(subcon, default=None):
         )
     return csfield(subcon)
 
+
 class CLenString(cs.Construct):
     def __init__(self, len_size, byte_order="big"):
         super().__init__()
@@ -206,10 +234,12 @@ class CLenString(cs.Construct):
         data_size = int.from_bytes(len_bytes, self._byte_order)
         data = stream.read(data_size)
         return data
+
     def _build(self, obj, stream, context, path):
         data_size = len(obj)
         stream.write(int.to_bytes(data_size, self._len_size, self._byte_order))
         stream.write(obj)
+
 
 class IntFromBytes(cs.Construct):
     def __init__(self, length, byte_order="big"):
@@ -229,6 +259,13 @@ class IntFromBytes(cs.Construct):
 
 
 if __name__ == "__main__":
+
+    @dataclasses.dataclass
+    class D:
+        age: int
+        name: str
+
+    D.__str__
 
     class DD(CC):
         f: int = cfield(cs.Int16ub)

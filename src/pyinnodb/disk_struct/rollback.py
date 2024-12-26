@@ -2,12 +2,15 @@ from .. import const
 from ..mconstruct import *
 from .undo_log import MUndoRecordInsert, TRX_UNDO_DEL_MARK_REC
 
-UNIV_SQL_NULL  = ~0
+UNIV_SQL_NULL = ~0
 UNIV_PAGE_SIZE_SHIFT_DEF = 14
 UNIV_PAGE_SIZE_DEF = 1 << UNIV_PAGE_SIZE_SHIFT_DEF
-UNIV_EXTERN_STORAGE_FIELD = int.from_bytes((UNIV_SQL_NULL - UNIV_PAGE_SIZE_DEF).to_bytes(4, "big", signed=True), "big")
+UNIV_EXTERN_STORAGE_FIELD = int.from_bytes(
+    (UNIV_SQL_NULL - UNIV_PAGE_SIZE_DEF).to_bytes(4, "big", signed=True), "big"
+)
 SPATIAL_STATUS_SHIFT = 12
 SPATIAL_STATUS_MASK = 3 << SPATIAL_STATUS_SHIFT
+
 
 class HistoryVersion:
     def __init__(self, trx_id, rollptr, upd):
@@ -26,6 +29,7 @@ class HistoryVersion:
             return f"<Insert>"
 
     __repr__ = __str__
+
 
 class MRollbackPointer(CC):
     insert_flag: int = cfield(cs.BitsInteger(1))
@@ -50,10 +54,12 @@ class MRollbackPointer(CC):
             for c in primary_col:
                 col_len = const.read_compressed_mysql_int(f)
                 col_data_skip = f.read(col_len)
-                logger.debug(f"skip primary key: {c.name}, len: {col_len}, data: {col_data_skip}")
+                logger.debug(
+                    f"skip primary key: {c.name}, len: {col_len}, data: {col_data_skip}"
+                )
 
             # trx_undo_update_rec_get_update
-            type = undo_record_header.flag & 0xf
+            type = undo_record_header.flag & 0xF
             if type != TRX_UNDO_DEL_MARK_REC:
                 n_fields = const.read_compressed_mysql_int(f)
             else:
@@ -62,10 +68,10 @@ class MRollbackPointer(CC):
             for i in range(n_fields):
                 col_no = const.read_compressed_mysql_int(f)
                 len = const.read_compressed_mysql_int(f)
-                #if len > UNIV_EXTERN_STORAGE_FIELD:
+                # if len > UNIV_EXTERN_STORAGE_FIELD:
                 #    len = ((len - UNIV_EXTERN_STORAGE_FIELD) & (~SPATIAL_STATUS_MASK))
                 col = disk_data_layout[col_no][0]
-                if len == 4294967295: # UNIV_SQL_NULL & 0xffffffff
+                if len == 4294967295:  # UNIV_SQL_NULL & 0xffffffff
                     orig_data = None
                 else:
                     orig_data = col.read_data(f, len)
@@ -74,4 +80,3 @@ class MRollbackPointer(CC):
             return hist, ptr
         else:
             return HistoryVersion(None, None, 0), None
-        

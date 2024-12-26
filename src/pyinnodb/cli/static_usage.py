@@ -14,7 +14,7 @@ from typing import Callable
 @click.pass_context
 @click.option("--kind", type=click.Choice(["type", "lsn", "ratio"]), default="type")
 def list_page(ctx, kind):
-    ''' show page type of every page '''
+    """show page type of every page"""
     f = ctx.obj["fn"]
     fsp_page = ctx.obj["fsp_page"]
     lsns = []
@@ -38,12 +38,15 @@ def list_page(ctx, kind):
     if len(lsns) > 0:
         color.heatmap_matrix_width_high(lsns, 64, int((len(lsns) / 64) + 1), "Page NO.")
     if len(ratios) > 0:
-        color.ratio_matrix_width_high(ratios, 64, int((len(ratios)/64) + 1), "Page NO.")
+        color.ratio_matrix_width_high(
+            ratios, 64, int((len(ratios) / 64) + 1), "Page NO."
+        )
+
 
 @main.command()
 @click.pass_context
 def static_page_usage(ctx):
-    ''' show the page usage of every inode '''
+    """show the page usage of every inode"""
     f = ctx.obj["fn"]
     f.seek(0)
     fsp_page = MFspPage.parse_stream(f)

@@ -3,6 +3,7 @@ from ..mconstruct import *
 from .. import const
 
 import sys
+
 if sys.version_info.minor >= 9:
     from functools import cache
 else:

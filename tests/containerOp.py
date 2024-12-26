@@ -10,7 +10,6 @@ from testcontainers.mysql import MySqlContainer
 from .context import *
 
 
-
 class ContainerOp(object):
     def __init__(
         self,
@@ -54,7 +53,9 @@ def containerOp():
 
     try:
         mContainer = MySqlContainer("mysql:8.0.35")
-        mContainer.with_volume_mapping(os.getcwd() + "/" + "datadir_test", "/var/lib/mysql", "rw")
+        mContainer.with_volume_mapping(
+            os.getcwd() + "/" + "datadir_test", "/var/lib/mysql", "rw"
+        )
         mysql = mContainer.__enter__()
         # with MySqlContainer("mysql:8.0.35") as mysql:
         engine = sqlalchemy.create_engine(mysql.get_connection_url())

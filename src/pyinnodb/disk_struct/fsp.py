@@ -11,6 +11,7 @@ FSP_FLAGS_WIDTH_SDI = 1
 FSP_FLAGS_POS_SDI = 8
 FSP_FLAGS_MASK_SDI = 0x4000
 
+
 class MFspHeader(CC):
     space_id: int = cfield(cs.Int32ub)
     unused: int = cfield(cs.Int32ub)
@@ -29,7 +30,6 @@ class MFspHeader(CC):
 
     def has_sdi_page(self):
         return ((self.flags & FSP_FLAGS_MASK_SDI) >> FSP_FLAGS_POS_SDI) > 0
-
 
 
 class MFspPage(CC):

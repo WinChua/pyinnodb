@@ -62,6 +62,7 @@ class MFsegHeader(CC):
     #     inode_entry = MInodeEntry.parse_stream(f)
     #     return inode_entry.first_page()
 
+
 class MSystemRecord(CC):
     info_flags: int = cfield(cs.BitsInteger(4))
     record_owned_num: int = cfield(cs.BitsInteger(4))
@@ -81,8 +82,9 @@ class MIndexSystemRecord(CC):
     infimum: MSystemRecord = cfield(MSystemRecord)
     supremum: MSystemRecord = cfield(MSystemRecord)
 
+
 def get_rec_insert_state(rh: MRecordHeader, dd_object: Table):
-    if rh.instant_version != 0: ## is_versioned
+    if rh.instant_version != 0:  ## is_versioned
         # if version == 0:
         #     return INSERTED_AFTER_UPGRADE_BEFORE_INSTANT_ADD_NEW_IMPLEMENTATION
         # else:
@@ -107,11 +109,18 @@ class MIndexPage(CC):
     system_records: MIndexSystemRecord = cfield(MIndexSystemRecord)
 
     @classmethod
-    def default_value_parser(cls, dd_object: Table, transfter = None, hidden_col=False):
+    def default_value_parser(cls, dd_object: Table, transfter=None, hidden_col=False):
         primary_data_layout_col = dd_object.get_disk_data_layout()
+
         def value_parser(rh: MRecordHeader, f):
             cur = f.tell()
-            logger.debug("-------start parse-----------rh: %s, @cur: %d/(%d, %d)", rh, cur, int(cur / const.PAGE_SIZE), cur % const.PAGE_SIZE)
+            logger.debug(
+                "-------start parse-----------rh: %s, @cur: %d/(%d, %d)",
+                rh,
+                cur,
+                int(cur / const.PAGE_SIZE),
+                cur % const.PAGE_SIZE,
+            )
             if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
                 next_page_no = const.parse_mysql_int(f.read(4))
                 return
@@ -123,28 +132,51 @@ class MIndexPage(CC):
                 f.seek(-1, 1)
                 data_schema_version = int.from_bytes(f.read(1), "big")
 
-                logger.debug("record header is instant, with data version: %d", data_schema_version)
+                logger.debug(
+                    "record header is instant, with data version: %d",
+                    data_schema_version,
+                )
 
-            cols_disk_layout = [d for d in primary_data_layout_col if d[0].version_valid(data_schema_version)]
-            logger.debug("primary data layout is %s", ",".join(f"{c[0].name}({c[0].ordinal_position})" for c in primary_data_layout_col))
-
+            cols_disk_layout = [
+                d
+                for d in primary_data_layout_col
+                if d[0].version_valid(data_schema_version)
+            ]
+            logger.debug(
+                "primary data layout is %s",
+                ",".join(
+                    f"{c[0].name}({c[0].ordinal_position})"
+                    for c in primary_data_layout_col
+                ),
+            )
 
             if rh.instant == 1:
                 f.seek(-1, 1)
                 extra_byte = int.from_bytes(f.read(1), "big")
                 cols_disk_layout = cols_disk_layout[:extra_byte]
-                logger.debug("instant col extra byte is %s, &0x80 is %s, len(cols) is %d", hex(extra_byte), extra_byte & 0x80, 
-                        len(cols_disk_layout))
+                logger.debug(
+                    "instant col extra byte is %s, &0x80 is %s, len(cols) is %d",
+                    hex(extra_byte),
+                    extra_byte & 0x80,
+                    len(cols_disk_layout),
+                )
 
-            nullable_cols = [d[0] for d in cols_disk_layout if d[1] == 4294967295 and d[0].is_nullable]
+            nullable_cols = [
+                d[0]
+                for d in cols_disk_layout
+                if d[1] == 4294967295 and d[0].is_nullable
+            ]
 
-            logger.debug("cols_disk_layout is %s", ",".join(c[0].name for c in cols_disk_layout))
+            logger.debug(
+                "cols_disk_layout is %s", ",".join(c[0].name for c in cols_disk_layout)
+            )
             logger.debug("nullable_cols is %s", ",".join(c.name for c in nullable_cols))
-
 
             if rh.instant == 0 and rh.instant_version == 0:
                 nullable_cols = [c for c in nullable_cols if not c.is_instant_col_80017]
-                cols_disk_layout = [d for d in cols_disk_layout if not d[0].is_instant_col_80017]
+                cols_disk_layout = [
+                    d for d in cols_disk_layout if not d[0].is_instant_col_80017
+                ]
 
             nullcol_bitmask_size = int((len(nullable_cols) + 7) / 8)
             f.seek(-nullcol_bitmask_size - rh.instant_version - rh.instant, 1)
@@ -154,14 +186,26 @@ class MIndexPage(CC):
             for i, c in enumerate(nullable_cols):
                 if null_mask & (1 << i):
                     null_col_data[c.ordinal_position] = 1
-            logger.debug("null_col_data is %s, null_col size is %s, null_mask is %s", null_col_data, len(nullable_cols), null_bitmask)
+            logger.debug(
+                "null_col_data is %s, null_col size is %s, null_mask is %s",
+                null_col_data,
+                len(nullable_cols),
+                null_bitmask,
+            )
             may_var_col = [
                 (i, c[0])
                 for i, c in enumerate(cols_disk_layout)
-                if DDColumnType.is_big(c[0].type) or DDColumnType.is_var(c[0].type, mysqld_version=dd_object.mysql_version_id)
+                if DDColumnType.is_big(c[0].type)
+                or DDColumnType.is_var(
+                    c[0].type, mysqld_version=dd_object.mysql_version_id
+                )
             ]
-            logger.debug("may_var_col is %s", ",".join(f"({i})({c.ordinal_position}){c.name}" for i, c in may_var_col))
-
+            logger.debug(
+                "may_var_col is %s",
+                ",".join(
+                    f"({i})({c.ordinal_position}){c.name}" for i, c in may_var_col
+                ),
+            )
 
             ## read var
             f.seek(-nullcol_bitmask_size, 1)
@@ -196,17 +240,26 @@ class MIndexPage(CC):
                         if len(p_value) > 100:
                             p_value = p_value[:10] + "..." + p_value[-10:]
 
-                    logger.debug("read_data: col[%s], col.type[%s], value[%s], i[%d], op[%d], vs[%s], from[%s],to[%s]",
-                            col.name, col.type, p_value, i, col.ordinal_position, vs, cur_before%const.PAGE_SIZE, f.tell()%const.PAGE_SIZE)
+                    logger.debug(
+                        "read_data: col[%s], col.type[%s], value[%s], i[%d], op[%d], vs[%s], from[%s],to[%s]",
+                        col.name,
+                        col.type,
+                        p_value,
+                        i,
+                        col.ordinal_position,
+                        vs,
+                        cur_before % const.PAGE_SIZE,
+                        f.tell() % const.PAGE_SIZE,
+                    )
                 if col.generation_expression_utf8 != "":
                     continue
                 disk_data_parsed[col.name] = col_value
 
             for col in dd_object.columns:
                 if (
-                    (col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"] and not hidden_col)
-                    or col.private_data.get("version_dropped", 0) != 0
-                ):
+                    col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]
+                    and not hidden_col
+                ) or col.private_data.get("version_dropped", 0) != 0:
                     if col.name in disk_data_parsed:
                         disk_data_parsed.pop(col.name)
                     continue
@@ -221,6 +274,7 @@ class MIndexPage(CC):
             else:
                 return transfter(klass(**disk_data_parsed))
             return
+
         return value_parser
 
     def _post_parsed(self, stream, context, path):
@@ -232,7 +286,11 @@ class MIndexPage(CC):
     def get_first_leaf_page(self, stream, primary_cols):
         infimum_offset = self.system_records.infimum.get_current_offset()
         next_page = self.fil.offset
-        stream.seek(next_page * const.PAGE_SIZE + infimum_offset + self.system_records.infimum.next_record_offset)
+        stream.seek(
+            next_page * const.PAGE_SIZE
+            + infimum_offset
+            + self.system_records.infimum.next_record_offset
+        )
         stream.seek(-MRecordHeader.sizeof(), 1)
         rh = MRecordHeader.parse_stream(stream)
         rht = const.RecordType(rh.record_type)
@@ -241,7 +299,7 @@ class MIndexPage(CC):
         elif rht == const.RecordType.NodePointer:
             for c in primary_cols:
                 c.read_data(stream)
-            
+
             next_page = int.from_bytes(stream.read(4), "big")
             stream.seek(next_page * const.PAGE_SIZE)
             next_index_page = MIndexPage.parse_stream(stream)
@@ -282,12 +340,25 @@ class MIndexPage(CC):
         key_len = len(key)
         low, high = 0, len(self.page_directory) - 1
         cnt = 0
-        logger.debug("page dir is %s", ",".join(map(str, self.page_directory)))
+        logger.debug(
+            "page dir is %s, low: %d, high: %d",
+            ",".join(map(str, self.page_directory)),
+            low,
+            high,
+        )
         while high > low + 1:
-            target = int((high + low)/2)
+            target = int((high + low) / 2)
             stream.seek(cur_post + self.page_directory[target])
             record_key = stream.read(key_len)
-            logger.debug("low: %d, high: %d, target: %d, record_key: %s, key: %s, dir: %s", low, high, target, record_key, key, self.page_directory[target])
+            logger.debug(
+                "low: %d, high: %d, target: %d, record_key: %s, key: %s, dir: %s",
+                low,
+                high,
+                target,
+                record_key,
+                key,
+                self.page_directory[target],
+            )
             if record_key == key:
                 return target, True
             elif key > record_key:
@@ -317,7 +388,7 @@ class MSDIPage(CC):
         size = self.sizeof()
         stream.seek(const.PAGE_SIZE - size - 8, 1)
         self.fil_tailer = MFilTrailer.parse_stream(stream)
-        #self.ddl = next(self.iterate_sdi_record(stream))
+        # self.ddl = next(self.iterate_sdi_record(stream))
 
     def ddl(self, stream, idx):
         return list(self.iterate_sdi_record(stream))[idx]
@@ -333,17 +404,20 @@ class MSDIPage(CC):
                 break
             fseg_header = MFsegHeader.parse_stream(stream)
             infimum = MSystemRecord.parse_stream(stream)
-            stream.seek(-8+infimum.next_record_offset+12, 1)
+            stream.seek(-8 + infimum.next_record_offset + 12, 1)
             cur_page_num = int.from_bytes(stream.read(4), byteorder="big")
 
         while cur_page_num != 4294967295:
             stream.seek(cur_page_num * const.PAGE_SIZE)
             sdi_page = MSDIPage.parse_stream(stream)
-            stream.seek(cur_page_num * const.PAGE_SIZE + sdi_page.system_records.infimum.get_current_offset())
+            stream.seek(
+                cur_page_num * const.PAGE_SIZE
+                + sdi_page.system_records.infimum.get_current_offset()
+            )
 
             next_offset = sdi_page.system_records.infimum.next_record_offset
             while next_offset != 0:
-                stream.seek(next_offset-MRecordHeader.sizeof(), 1)
+                stream.seek(next_offset - MRecordHeader.sizeof(), 1)
                 rh = MRecordHeader.parse_stream(stream)
                 if const.RecordType(rh.record_type) == const.RecordType.Supremum:
                     break

@@ -54,7 +54,8 @@ ansi_heatmap_color = [
 
 block_char_v = ["░", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
 block_char_h = ["░", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"]
-char = ["╭", "╮","│","╰","╯","─"]
+char = ["╭", "╮", "│", "╰", "╯", "─"]
+
 
 def ratio_matrix_width_high(data, w, h, prefix=""):
     idxs = [0 if v == -1 else int(v * 8) for v in data]
@@ -67,9 +68,10 @@ def ratio_matrix_width_high(data, w, h, prefix=""):
     for i in range(h):
         l = f"{char[2]}{''.join([next(ic) for i in range(w)])}{char[2]}"
         if prefix != "":
-            l = str(i*w).rjust(len(prefix)) + l
+            l = str(i * w).rjust(len(prefix)) + l
         print(l)
     print(bottom)
+
 
 def heatmap_matrix_width_high(data, w, h, prefix=""):
     max_data, min_data = max(data), min(data)
@@ -82,7 +84,7 @@ def heatmap_matrix_width_high(data, w, h, prefix=""):
     colors = [ansi_color(ansi_heatmap_color[f(v)], block_char_h[-1]) for v in data]
 
     ic = itertools.chain(iter(colors), itertools.repeat(" "))
-    line = w*char[-1]
+    line = w * char[-1]
     # top_legend = " " * 2 + "0" + " " * (w - 1) + str(w)
     # print(top_legend)
     top = prefix + f"{char[0]}{line}{char[1]}"
@@ -91,14 +93,14 @@ def heatmap_matrix_width_high(data, w, h, prefix=""):
     for i in range(h):
         l = f"{char[2]}{''.join([next(ic) for i in range(w)])}{char[2]}"
         if prefix != "":
-            l = str(i*w).rjust(len(prefix)) + l
+            l = str(i * w).rjust(len(prefix)) + l
         print(l)
     print(bottom)
 
 
 def heatmap_matrix_data(lines):
     high, width = len(lines), len(lines[0])
-    line = width*char[-1]
+    line = width * char[-1]
     top = f"{char[0]}{line}{char[1]}"
     bottom = f"{char[3]}{line}{char[4]}"
     print(top)
@@ -106,9 +108,10 @@ def heatmap_matrix_data(lines):
         print(f"{char[2]}{''.join(l)}{char[2]}")
     print(bottom)
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     import itertools
+
     data = []
     gen = itertools.cycle(ansi_heatmap_color)
     for i in range(14):

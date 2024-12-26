@@ -9,6 +9,7 @@ from pyinnodb.sdi.table import Column, Table
 from pyinnodb.const import util
 from pyinnodb import const
 
+
 @main.command()
 @click.pass_context
 def sys_tablespace(ctx):
@@ -32,7 +33,7 @@ def sys_tablespace(ctx):
         if sdi["dd_object_type"] == "Table":
             dd_object = Table(**sdi["dd_object"])
             if dd_object.name in ["tablespace_files"]:
-                records = dd_object.iter_record(f, transfter=lambda x:x)
+                records = dd_object.iter_record(f, transfter=lambda x: x)
                 for r in records:
                     if r.se_private_data is not None:
                         private_data = const.line_to_dict(r.se_private_data, ";", "=")

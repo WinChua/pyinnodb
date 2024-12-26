@@ -1,5 +1,6 @@
 from ..mconstruct import *
 
+
 class MCfgCol(CC):
     prtype: int = cfield(cs.Int32ub)
     mtype: int = cfield(cs.Int32ub)
@@ -9,6 +10,7 @@ class MCfgCol(CC):
     ord_part: int = cfield(cs.Int32ub)
     max_prefix: int = cfield(cs.Int32ub)
     name: str = cfield(CLenString(4))
+
     def _post_parsed(self, stream, context, path):
         version = context.get("version", None)
         if version is None:
@@ -50,6 +52,7 @@ class MCfgCol(CC):
 class MCfgIndexField(CC):
     prefix_len: int = cfield(cs.Int32ub)
     fixed_len: int = cfield(cs.Int32ub)
+
     def _post_parsed(self, stream, context, path):
         version = context.get("version", None)
         if version is None:
@@ -114,18 +117,19 @@ class MCfg(CC):
         if self.version >= 2:
             self.space_flags = cs.Int32ub.parse_stream(stream)
             if self.version >= 6:
-                self.compression_type = cs.Int8ub.parse_stream(stream) # 0: NONE, 1: ZLIB, 2: LZ4
+                self.compression_type = cs.Int8ub.parse_stream(
+                    stream
+                )  # 0: NONE, 1: ZLIB, 2: LZ4
 
         self.cols = []
         for i in range(self.n_cols):
-            col = MCfgCol.parse_stream(stream, version = self.version)
+            col = MCfgCol.parse_stream(stream, version=self.version)
             self.cols.append(col)
 
         self.n_indexes = cs.Int32ub.parse_stream(stream)
         self.indexes = []
         for i in range(self.n_indexes):
             self.indexes.append(MCfgIndex.parse_stream(stream, version=self.version))
-
 
     def _post_build(self, obj, stream, context, path):
         if obj.version >= 5:
@@ -148,4 +152,3 @@ class MCfg(CC):
         stream.write(cs.Int32ub.build(self.n_indexes))
         for idx in self.indexes:
             stream.write(idx.build(version=obj.version))
-
