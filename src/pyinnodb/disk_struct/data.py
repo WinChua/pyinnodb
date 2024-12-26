@@ -92,19 +92,35 @@ class MGPoint(CC):
             for i in range(self.size):
                 self.points.append(MPoint.parse_stream(stream))
         elif self.point_type == 3: # POLYGON
-            self.polygons = []
+            self.polygon = []
             self.psize = cs.Int32ul.parse_stream(stream)
             for i in range(self.psize):
                 size = cs.Int32ul.parse_stream(stream)
                 points = []
                 for j in range(size):
                     points.append(MPoint.parse_stream(stream))
-                self.polygons.append(points)
+                self.polygon.append(points)
         elif self.point_type == 4: # MULTIPOINT
             self.size = cs.Int32ul.parse_stream(stream)
             self.points = []
             for i in range(self.size):
                 self.points.append(MGPoint.parse_stream(stream))
+        elif self.point_type == 5:
+            self.size = cs.Int32ul.parse_stream(stream)
+            self.lines = []
+            for i in range(self.size):
+                self.lines.append(MGPoint.parse_stream(stream))
+        elif self.point_type == 6:
+            self.size = cs.Int32ul.parse_stream(stream)
+            self.polygons = []
+            for i in range(self.size):
+                self.polygons.append(MGPoint.parse_stream(stream))
+
+        elif self.point_type == 7:
+            self.size = cs.Int32ul.parse_stream(stream)
+            self.geos = []
+            for i in range(self.size):
+                self.geos.append(MGPoint.parse_stream(stream))
 
 
     def _post_build(self, obj, stream, context, path):
@@ -117,7 +133,7 @@ class MGPoint(CC):
                 stream.write(p.build())
         elif self.point_type == 3:
             stream.write(cs.Int32ul.build(self.psize))
-            for polygon in self.polygons:
+            for polygon in self.polygon:
                 if len(polygon) == 0:
                     continue
                 stream.write(cs.Int32ul.build(len(polygon)))
@@ -128,6 +144,20 @@ class MGPoint(CC):
             stream.write(cs.Int32ul.build(self.size))
             for p in self.points:
                 stream.write(p.build())
+        elif self.point_type == 5:
+            stream.write(cs.Int32ul.build(self.size))
+            for l in self.lines:
+                stream.write(l.build())
+
+        elif self.point_type == 6:
+            stream.write(cs.Int32ul.build(self.size))
+            for l in self.polygons:
+                stream.write(l.build())
+
+        elif self.point_type == 7:
+            stream.write(cs.Int32ul.build(self.size))
+            for l in self.geos:
+                stream.write(l.build())
 
 class MGeo(CC):
     SRID: int = cfield(cs.Int32ub)
