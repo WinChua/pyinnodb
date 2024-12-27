@@ -8,6 +8,9 @@ from pprint import pprint
 from dataclasses import dataclass, asdict
 from testcontainers.mysql import MySqlContainer
 from docker.models.containers import Container
+from testcontainers.core.config import testcontainers_config as c
+
+c.ryuk_disabled = True
 
 
 @click.group()
@@ -80,7 +83,6 @@ def mDeploy(version):
         )
         return
 
-    os.environ["TESTCONTAINERS_RYUK_DISABLED"] = "true"
     mContainer = MySqlContainer(f"mysql:{version}")
     datadir = os.getcwd() + f"/datadir/{version}"
     mContainer.with_volume_mapping(datadir, "/var/lib/mysql", "rw")
