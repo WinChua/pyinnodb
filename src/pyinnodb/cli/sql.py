@@ -96,6 +96,8 @@ def tosql(ctx, mode, sdi_idx):
                     elif isinstance(field, MGeo):
                         d = field.build().hex()  # .zfill(50)
                         vs.append("0x" + d)
+                    elif isinstance(field, bytes):
+                        vs.append("0x"+field.hex())
                     else:
                         vs.append(repr(field))
                 values.append(f"({','.join(vs)})")

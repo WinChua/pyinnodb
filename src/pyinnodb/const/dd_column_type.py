@@ -36,6 +36,7 @@ class DDColumnType(Enum):
     STRING = 29
     GEOMETRY = 30
     JSON = 31
+    VECTOR = 32
 
     def is_int_number(self):
         return self in _int_number_type
@@ -88,6 +89,7 @@ _var_type = [
     DDColumnType.JSON,
     DDColumnType.TINY_BLOB,
     DDColumnType.GEOMETRY,
+    DDColumnType.VECTOR,
 ]
 
 _big_type = [
@@ -95,6 +97,8 @@ _big_type = [
     DDColumnType.LONG_BLOB,
     DDColumnType.BLOB,
     DDColumnType.JSON,
+    DDColumnType.GEOMETRY,
+    DDColumnType.VECTOR,
 ]
 
 DDColConf = namedtuple("DDColConf", "type size")
@@ -132,6 +136,7 @@ class DDColConf(DDColConf, Enum):
     STRING = DDColumnType.STRING, 0
     GEOMETRY = DDColumnType.GEOMETRY, 0
     JSON = DDColumnType.JSON, 0
+    VECTOR = DDColumnType.VECTOR, 0
 
     @classmethod
     def get_col_type_conf(cls, type) -> DDColConf:
