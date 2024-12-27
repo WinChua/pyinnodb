@@ -395,7 +395,7 @@ class Column:
             else:
                 return data
 
-    def read_data(self, stream, size=None):
+    def read_data(self, stream, size=None, quick=True):
         if self.name == "DB_ROLL_PTR":
             return MRollbackPointer.parse_stream(stream)
         dtype = DDColumnType(self.type)
@@ -405,6 +405,15 @@ class Column:
             dsize = self.size
         if dtype.is_int_number():
             return self._read_int(stream, dsize)
+        elif dtype == DDColumnType.VECTOR:
+            if quick:
+                return stream.read(dsize)
+            else:
+                vec = []
+                for i in range(int(dsize / 4)):
+                    byte_data = stream.read(4)
+                    vec.append(struct.unpack("f", byte_data)[0])
+                return vec
         elif dtype == DDColumnType.FLOAT:
             byte_data = stream.read(dsize)
             if dsize == 4:
@@ -476,9 +485,12 @@ class Column:
             except Exception as e:
                 return data
         elif dtype == DDColumnType.GEOMETRY:
-            data = MGeo.parse_stream(stream)
-            logging.debug("geometry data is %s, size is %d", data, dsize)
-            return data
+            if quick:
+                return stream.read(dsize)
+            else:
+                data = MGeo.parse_stream(stream)
+                logging.debug("geometry data is %s, size is %d", data, dsize)
+                return data
 
 
 decimal_leftover_part = {
@@ -846,7 +858,8 @@ class Table:
         else:
             primary_key = self.build_primary_key_bytes((primary_key,))
         value_parser = MIndexPage.default_value_parser(
-            self, hidden_col=hidden_col, transfter=lambda id: id
+            self, hidden_col=hidden_col, transfter=lambda id: id,
+            quick=False,
         )
 
         while first_leaf_page != 4294967295:

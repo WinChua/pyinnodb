@@ -109,7 +109,7 @@ class MIndexPage(CC):
     system_records: MIndexSystemRecord = cfield(MIndexSystemRecord)
 
     @classmethod
-    def default_value_parser(cls, dd_object: Table, transfter=None, hidden_col=False):
+    def default_value_parser(cls, dd_object: Table, transfter=None, hidden_col=False, quick=True):
         primary_data_layout_col = dd_object.get_disk_data_layout()
 
         def value_parser(rh: MRecordHeader, f):
@@ -227,7 +227,7 @@ class MIndexPage(CC):
                     if col.ordinal_position in null_col_data:
                         col_value = None
                     else:
-                        col_value = col.read_data(f, vs)
+                        col_value = col.read_data(f, vs, quick=quick)
                 except Exception as e:
                     print("cur before is ", cur_before, vs, col)
                     raise e
