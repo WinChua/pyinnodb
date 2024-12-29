@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 @click.pass_context
 @click.option("--mode", type=click.Choice(["sdi", "ddl", "dump"]), default="ddl")
 @click.option("--sdi-idx", type=click.INT, default=0)
-def tosql(ctx, mode, sdi_idx):
+@click.option("--schema/--no-schema", default=True)
+def tosql(ctx, mode, sdi_idx, schema):
     """dump the ddl/dml/sdi of the ibd table
 
     ddl) output the create table ddl;
@@ -35,7 +36,10 @@ def tosql(ctx, mode, sdi_idx):
         elif mode == "ddl":
             table_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
 
-            table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
+            if schema:
+                table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
+            else:
+                table_name = f"`{table_object.name}`"
             columns_dec = []
             for c in table_object.columns:
                 if (
@@ -55,7 +59,7 @@ def tosql(ctx, mode, sdi_idx):
             columns_dec.extend(constraints)
             foreign_keys = table_object.gen_foreign_key()
             columns_dec.extend(foreign_keys)
-            columns_dec = "\n    " + ",\n    ".join(columns_dec) + "\n"
+            columns_dec = "\n  " + ",\n  ".join(columns_dec) + "\n"
             table_collation = const.get_collation_by_id(table_object.collation_id)
             parts = table_object.gen_sql_for_partition()
             desc = f"ENGINE={table_object.engine} DEFAULT CHARSET={table_collation.CHARACTER_SET_NAME} COLLATE={table_collation.COLLATION_NAME}"
@@ -65,7 +69,7 @@ def tosql(ctx, mode, sdi_idx):
                 else ""
             )
             print(
-                f"CREATE TABLE {table_name} ({columns_dec}) {desc} {chr(10)+parts if parts else ''}{comment}"
+                f"CREATE TABLE {table_name} ({columns_dec}) {desc}{parts}{comment}"
             )
         else:
             table_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])

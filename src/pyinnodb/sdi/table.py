@@ -205,7 +205,12 @@ class Column:
         return coll
 
     def gen_sql(self):
-        sql = f"`{self.name}` {self.column_type_utf8}{'' if self.is_nullable or self.is_virtual else ' NOT NULL'}"
+        sql = f"`{self.name}` {self.column_type_utf8}"
+        if self.collation_id != 255 and self.collation_id != 63:
+            collation = const.get_collation_by_id(self.collation_id)
+            if DDColumnType.is_string(self.type):
+                pass
+        sql += f"{'' if self.is_nullable or self.is_virtual else ' NOT NULL'}"
         sql += f"{' AUTO_INCREMENT' if self.is_auto_increment else ''}"
         if self.default_option != "":
             sql += f" DEFAULT ({self.default_option})"
@@ -1024,18 +1029,20 @@ class Table:
                     f"PARTITION {par.name} VALUES LESS THAN ({par.description_utf8})"
                 )
             parts = ",\n    ".join(parts) + "\n"
-            return f"{p}{parts})*/"
+            return "\n" + f"{p}{parts})*/"
         elif pt == const.partition.PartitionType.PT_HASH:
-            return f"/*!50100 PARTITION BY HASH ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            return "\n" + f"/*!50100 PARTITION BY HASH ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
         elif pt == const.partition.PartitionType.PT_KEY_55:
-            return f"/*!50100 PARTITION BY KEY ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            return "\n" + f"/*!50100 PARTITION BY KEY ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
         elif pt == const.partition.PartitionType.PT_LIST:
             p = f"/*!50100 PARTITION BY LIST ({self.partition_expression_utf8}) (\n    "
             parts = []
             for par in self.partitions:
                 parts.append(f"PARTITION {par.name} VALUES IN ({par.description_utf8})")
             parts = ",\n    ".join(parts) + "\n"
-            return f"{p}{parts})*/"
+            return "\n" + f"{p}{parts})*/"
+        else:
+            return ""
 
 
 def should_ext():
