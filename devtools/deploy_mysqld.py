@@ -8,6 +8,11 @@ from pprint import pprint
 from dataclasses import dataclass, asdict
 from testcontainers.mysql import MySqlContainer
 from docker.models.containers import Container
+from testcontainers.core.config import testcontainers_config as c
+
+from sqlalchemy import create_engine
+
+c.ryuk_disabled = True
 
 
 @click.group()
@@ -80,7 +85,6 @@ def mDeploy(version):
         )
         return
 
-    os.environ["TESTCONTAINERS_RYUK_DISABLED"] = "true"
     mContainer = MySqlContainer(f"mysql:{version}")
     datadir = os.getcwd() + f"/datadir/{version}"
     mContainer.with_volume_mapping(datadir, "/var/lib/mysql", "rw")
@@ -105,14 +109,34 @@ def deploy(version):
 
 @main.command()
 @click.option("--version", type=click.STRING, default="8.0.17")
-def connect(version):
+@click.option("--sql", type=click.STRING, default="")
+def connect(version, sql):
     deploy_container = load_deploy()
     if version not in deploy_container:
         mDeploy(version)
         deploy_container = load_deploy()
 
-    os.system(deploy_container.get(version).cmd)
+    if sql == "":
+        os.system(deploy_container.get(version).cmd)
+    else:
+        os.system(deploy_container.get(version).cmd + f" -e '{sql}'")
 
+@main.command()
+@click.option("--version", type=click.STRING, default="")
+@click.option("--sql", type=click.STRING, default="")
+@click.option("--file", type=click.STRING, default="")
+def exec(version, sql, file):
+    deploy_container = load_deploy()
+    if version not in deploy_container:
+        mDeploy(version)
+        deploy_container = load_deploy()
+    engine = create_engine(deploy_container.get(version).url)
+    if file != "":
+        with open(file, "r") as f:
+            sql = f.read()
+    with engine.connect() as conn:
+        result = conn.exec_driver_sql(sql)
+        print(result.all()[0][1])
 
 if __name__ == "__main__":
     main()

@@ -59,6 +59,11 @@ class DDColumnType(Enum):
                 return True
 
     @classmethod
+    def is_string(cls, t):
+        tt = cls(t)
+        return tt in _string_type
+
+    @classmethod
     def is_big(cls, t):
         return cls(t) in _big_type
 
@@ -90,6 +95,16 @@ _var_type = [
     DDColumnType.TINY_BLOB,
     DDColumnType.GEOMETRY,
     DDColumnType.VECTOR,
+]
+
+_string_type = [
+    DDColumnType.VARCHAR,
+    DDColumnType.STRING,
+    DDColumnType.VAR_STRING,
+    DDColumnType.BLOB,
+    DDColumnType.MEDIUM_BLOB,
+    DDColumnType.LONG_BLOB,
+    DDColumnType.TINY_BLOB,
 ]
 
 _big_type = [
