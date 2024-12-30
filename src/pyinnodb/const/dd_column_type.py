@@ -1,5 +1,6 @@
 from enum import Enum
 from collections import namedtuple
+from datetime import datetime, date, timedelta
 
 
 class DDColumnType(Enum):
@@ -116,42 +117,43 @@ _big_type = [
     DDColumnType.VECTOR,
 ]
 
-DDColConf = namedtuple("DDColConf", "type size")
+DDColConf = namedtuple("DDColConf", "type size pytype")
 
+nop = namedtuple("nop", "")
 
 class DDColConf(DDColConf, Enum):
-    DECIMAL = DDColumnType.DECIMAL, 0
-    TINY = DDColumnType.TINY, 1
-    SHORT = DDColumnType.SHORT, 2
-    LONG = DDColumnType.LONG, 4
-    FLOAT = DDColumnType.FLOAT, 4
-    DOUBLE = DDColumnType.DOUBLE, 8
-    TYPE_NULL = DDColumnType.TYPE_NULL, 0
-    TIMESTAMP = DDColumnType.TIMESTAMP, 0
-    LONGLONG = DDColumnType.LONGLONG, 8
-    INT24 = DDColumnType.INT24, 3
-    DATE = DDColumnType.DATE, 0
-    TIME = DDColumnType.TIME, 0
-    DATETIME = DDColumnType.DATETIME, 0
-    YEAR = DDColumnType.YEAR, 1
-    NEWDATE = DDColumnType.NEWDATE, 3
-    VARCHAR = DDColumnType.VARCHAR, 0
-    BIT = DDColumnType.BIT, 0
-    TIMESTAMP2 = DDColumnType.TIMESTAMP2, 0
-    DATETIME2 = DDColumnType.DATETIME2, 0
-    TIME2 = DDColumnType.TIME2, 0
-    NEWDECIMAL = DDColumnType.NEWDECIMAL, 0
-    ENUM = DDColumnType.ENUM, 0
-    SET = DDColumnType.SET, 0
-    TINY_BLOB = DDColumnType.TINY_BLOB, 0
-    MEDIUM_BLOB = DDColumnType.MEDIUM_BLOB, 0
-    LONG_BLOB = DDColumnType.LONG_BLOB, 0
-    BLOB = DDColumnType.BLOB, 0
-    VAR_STRING = DDColumnType.VAR_STRING, 0
-    STRING = DDColumnType.STRING, 0
-    GEOMETRY = DDColumnType.GEOMETRY, 0
-    JSON = DDColumnType.JSON, 0
-    VECTOR = DDColumnType.VECTOR, 0
+    DECIMAL = DDColumnType.DECIMAL, 0, float
+    TINY = DDColumnType.TINY, 1, int
+    SHORT = DDColumnType.SHORT, 2, int
+    LONG = DDColumnType.LONG, 4, int
+    FLOAT = DDColumnType.FLOAT, 4, float
+    DOUBLE = DDColumnType.DOUBLE, 8, float
+    TYPE_NULL = DDColumnType.TYPE_NULL, 0, int
+    TIMESTAMP = DDColumnType.TIMESTAMP, 0, int
+    LONGLONG = DDColumnType.LONGLONG, 8, int
+    INT24 = DDColumnType.INT24, 3, int
+    DATE = DDColumnType.DATE, 0, date
+    TIME = DDColumnType.TIME, 0, timedelta
+    DATETIME = DDColumnType.DATETIME, 0, datetime
+    YEAR = DDColumnType.YEAR, 1, int
+    NEWDATE = DDColumnType.NEWDATE, 3, date
+    VARCHAR = DDColumnType.VARCHAR, 0, str
+    BIT = DDColumnType.BIT, 0, int
+    TIMESTAMP2 = DDColumnType.TIMESTAMP2, 0, int
+    DATETIME2 = DDColumnType.DATETIME2, 0, datetime
+    TIME2 = DDColumnType.TIME2, 0, timedelta
+    NEWDECIMAL = DDColumnType.NEWDECIMAL, 0, float
+    ENUM = DDColumnType.ENUM, 0, str
+    SET = DDColumnType.SET, 0, set
+    TINY_BLOB = DDColumnType.TINY_BLOB, 0, str
+    MEDIUM_BLOB = DDColumnType.MEDIUM_BLOB, 0, str
+    LONG_BLOB = DDColumnType.LONG_BLOB, 0, str
+    BLOB = DDColumnType.BLOB, 0, str
+    VAR_STRING = DDColumnType.VAR_STRING, 0, str
+    STRING = DDColumnType.STRING, 0, str
+    GEOMETRY = DDColumnType.GEOMETRY, 0, nop
+    JSON = DDColumnType.JSON, 0, str
+    VECTOR = DDColumnType.VECTOR, 0, list
 
     @classmethod
     def get_col_type_conf(cls, type) -> DDColConf:

@@ -5,12 +5,18 @@ import click
 import json
 from pprint import pprint
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, fields
 from testcontainers.mysql import MySqlContainer
 from docker.models.containers import Container
 from testcontainers.core.config import testcontainers_config as c
 
 from sqlalchemy import create_engine
+
+
+from pyinnodb import const
+from pyinnodb import disk_struct
+from pyinnodb.disk_struct.index import MIndexHeader, MSDIPage, MSystemRecord
+from pyinnodb.sdi.table import Column, Table
 
 c.ryuk_disabled = True
 
@@ -20,8 +26,8 @@ def main():
     pass
 
 
-@main.command()
-def list():
+@main.command(name="list")
+def tlist():
     data = load_deploy()
     pprint(data)
 
@@ -137,6 +143,46 @@ def exec(version, sql, file):
     with engine.connect() as conn:
         result = conn.exec_driver_sql(sql)
         print(result.all()[0][1])
+
+@main.command()
+@click.option("--version", type=click.STRING, default="")
+@click.option("--table", type=click.STRING, default="")
+@click.option("--size", type=click.INT, default=100)
+@click.option("--idx", type=click.INT, default=-1)
+@click.option("--int-range", type=click.INT, default=256)
+@click.option("--str-size", type=click.INT, default=20)
+def rand_data(version, table, size, idx, int_range, str_size):
+    deploy_container = load_deploy()
+    if version not in deploy_container:
+        mDeploy(version)
+        deploy_container = load_deploy()
+
+    table_ibd = deploy_container.get(version).datadir + f"/test/{table}.ibd"
+    if not os.path.exists(table_ibd):
+        print(f"\n\n\n{table} is not exists now, please create first\n\n\n")
+        os.system(deploy_container.get(version).cmd)
+    else:
+        f = open(table_ibd, "rb")
+        fsp = disk_struct.MFspPage.parse_stream(f)
+        if fsp.sdi_version == 0:
+            print("version of mysql is not support")
+            return
+        f.seek(fsp.sdi_page_no * const.PAGE_SIZE)
+        sdi_page = MSDIPage.parse_stream(f)
+        all_tables = [d for d in sdi_page.iterate_sdi_record(f) if d["dd_object_type"] == "Table"]
+        if len(all_tables) > 1 and idx == -1:
+            print("these is more than one table, please use --idx to specify one")
+            return
+        elif len(all_tables) == 1:
+            idx = 0
+        dd_object = Table(**all_tables[idx]["dd_object"])
+        sql = dd_object.gen_rand_data_sql(size, int_range, str_size)
+        engine = create_engine(deploy_container.get(version).url)
+        with engine.connect() as conn:
+            conn.exec_driver_sql(sql)
+            conn.commit()
+        print(f"insert {size} record randomly into {dd_object.schema_ref}.{dd_object.name}")
+                
 
 if __name__ == "__main__":
     main()
