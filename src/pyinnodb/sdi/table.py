@@ -3,6 +3,7 @@ import typing
 import struct
 import decimal
 import dataclasses
+import random
 import re
 
 import sys
@@ -11,14 +12,15 @@ if sys.version_info.minor >= 9:
     from functools import cache
 else:
     cache = lambda x: x
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from collections import namedtuple
 from base64 import b64decode
+from datetime import timedelta, datetime, date
+
 
 from .. import const
-from ..const.dd_column_type import DDColumnType, DDColConf
+from ..const.dd_column_type import DDColumnType, DDColConf, nop
 from ..disk_struct.varsize import VarSize, OffPagePointer
-
 from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp, MGeo
 from ..disk_struct.json import MJson
 from ..disk_struct.rollback import MRollbackPointer
@@ -123,6 +125,25 @@ class Column:
     elements: typing.List[ColumnElement] = dataclasses.field(default_factory=list)
     collation_id: int = 0
     is_explicit_collation: bool = False
+
+    @property
+    @cache
+    def pytype(self):
+        return DDColConf.get_col_type_conf(self.type).pytype
+
+    @property
+    @cache
+    def dfield(self):
+        kw_only = False
+        default = dataclasses.MISSING
+        if self.pytype == nop:
+            kw_only  = True
+            default = None
+        return field(
+            default=default,
+            kw_only=kw_only,
+            metadata={"col": self},
+        )
 
     def index_prefix(self, ie: IndexElement):
         if ie.length == 4294967295:
@@ -702,6 +723,70 @@ class Table:
 
         return namedtuple(self.name, " ".join(cols))
 
+    def keys(self, no_primary=False, for_rand=False):
+        v =  [f.name for f in dataclasses.fields(self.DataClass)] 
+        if not no_primary and not for_rand:
+            return  v
+        primary_key_name = [f.name for f in self.get_primary_key_col()]
+        v = [f for f in v if f not in primary_key_name]
+        if not for_rand:
+            return v
+        target = [f.name for f in dataclasses.fields(self.DataClass) if f.type in [int, str]]
+
+        return [f for f in v if f in target]
+
+    def gen_rand_data_sql(self, size, int_range=256, str_size=20):
+        rand_key = self.keys(for_rand=True)
+        values = []
+        for dc in self.gen_rand_data(size, int_range, str_size):
+            values.append("(" + ",".join(self.transfer(dc, rand_key)) + ")")
+
+        return f"INSERT INTO `{self.schema_ref}`.`{self.name}`({','.join(rand_key)}) values {', '.join(values)}"
+
+    def gen_rand_data(self, size, int_range=256, str_size=20):
+        keys = self.keys(for_rand=True)
+        vs = []
+        for i in range(size):
+            v = []
+            for f in dataclasses.fields(self.DataClass):
+                if f.name not in keys:
+                    continue
+                if f.type == int:
+                    v.append(random.randint(0, int_range))
+                elif f.type == str:
+                    v.append(random.randbytes(str_size).hex())
+            vs.append(v)
+        return vs
+
+    def transfer(self, dc, keys=None):
+        vs = []
+        if keys is None:
+            value = dataclasses.astuple(dc)
+        elif isinstance(dc, self.DataClass):
+            value = [getattr(dc, k) for k in keys]
+        elif isinstance(dc, list):
+            value = dc
+        for f in value:
+            if isinstance(f, dict) or isinstance(f, list):
+                vs.append(repr(json.dumps(f)))
+            elif f is None:
+                vs.append("NULL")
+            elif (
+                isinstance(f, date)
+                or isinstance(f, timedelta)
+                or isinstance(f, datetime)
+            ):
+                vs.append(f"'{str(f)}'")
+            elif isinstance(f, MGeo):
+                d = f.build().hex()  # .zfill(50)
+                vs.append("0x" + d)
+            elif isinstance(f, bytes):
+                vs.append("0x"+f.hex())
+            else:
+                vs.append(repr(f))
+        return vs
+        
+
     @property
     @cache
     def DataClass(self):
@@ -715,9 +800,9 @@ class Table:
                 continue
             if c.is_virtual or c.generation_expression_utf8 != "":
                 continue
-            cols.append(c.name)
+            cols.append([c.name, c.pytype, c.dfield])
 
-        return namedtuple(self.name, " ".join(cols))
+        return dataclasses.make_dataclass(self.name, cols)
 
     @property
     @cache

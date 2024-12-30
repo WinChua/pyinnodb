@@ -3,6 +3,7 @@ from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.index import MSDIPage, MIndexPage
 from pyinnodb.sdi.table import Table
 from pyinnodb.disk_struct.data import MGeo
+import dataclasses
 
 import json
 
@@ -68,9 +69,7 @@ def tosql(ctx, mode, sdi_idx, schema):
                 if table_object.comment
                 else ""
             )
-            print(
-                f"CREATE TABLE {table_name} ({columns_dec}) {desc}{parts}{comment}"
-            )
+            print(f"CREATE TABLE {table_name} ({columns_dec}) {desc}{parts}{comment}")
         else:
             table_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
             root_page_no = int(table_object.indexes[0].private_data.get("root", 4))
@@ -82,28 +81,11 @@ def tosql(ctx, mode, sdi_idx, schema):
             if first_leaf_page_no is None:
                 print("no data")
                 return
+
             values = []
 
             def transfter(nd):
-                vs = []
-                for field in nd:
-                    if isinstance(field, dict) or isinstance(field, list):
-                        vs.append(repr(json.dumps(field)))
-                    elif field is None:
-                        vs.append("NULL")
-                    elif (
-                        isinstance(field, date)
-                        or isinstance(field, timedelta)
-                        or isinstance(field, datetime)
-                    ):
-                        vs.append(f"'{str(field)}'")
-                    elif isinstance(field, MGeo):
-                        d = field.build().hex()  # .zfill(50)
-                        vs.append("0x" + d)
-                    elif isinstance(field, bytes):
-                        vs.append("0x"+field.hex())
-                    else:
-                        vs.append(repr(field))
+                vs = table_object.transfer(nd)
                 values.append(f"({','.join(vs)})")
 
             default_value_parser = MIndexPage.default_value_parser(
@@ -117,7 +99,9 @@ def tosql(ctx, mode, sdi_idx, schema):
 
             table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
             print(
-                f"INSERT INTO {table_name}({','.join(table_object.DataClass._fields)}) values {', '.join(values)}"
+                f"INSERT INTO {table_name}({','.join(
+                    table_object.keys()
+                )}) values {', '.join(values)}"
             )
 
         return
