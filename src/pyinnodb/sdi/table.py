@@ -965,7 +965,7 @@ class Table:
                 - 5
             )
             end_rh = MRecordHeader.parse_stream(f)
-            logging.debug("end_rh is %s", end_rh)
+            logging.debug("end_rh is %s, match is %s", end_rh, match)
             if (
                 match
                 and const.RecordType(end_rh.record_type)
@@ -1019,6 +1019,10 @@ class Table:
                     f.seek(cur)
                     f.seek(start_rh.next_record_offset - 5, 1)
                     start_rh = MRecordHeader.parse_stream(f)
+
+            logging.debug("index_page.fil.next_page is %s", index_page.fil.next_page)
+            if first_leaf_page == 4294967295 and index_page.fil.next_page != 4294967295:
+                first_leaf_page = index_page.fil.next_page
 
     def iter_record(self, f, hidden_col=False, garbage=False, transfter=None):
         root_page_no = int(self.indexes[0].private_data.get("root", 4))
