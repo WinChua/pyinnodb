@@ -355,8 +355,8 @@ class MIndexPage(CC):
                 low,
                 high,
                 target,
-                record_key,
-                key,
+                const.parse_mysql_int(record_key),
+                const.parse_mysql_int(key),
                 self.page_directory[target],
             )
             if record_key == key:
