@@ -121,6 +121,7 @@ DDColConf = namedtuple("DDColConf", "type size pytype")
 
 nop = namedtuple("nop", "")
 
+
 class DDColConf(DDColConf, Enum):
     DECIMAL = DDColumnType.DECIMAL, 0, float
     TINY = DDColumnType.TINY, 1, int

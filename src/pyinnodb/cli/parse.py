@@ -1,5 +1,6 @@
-from . import *
 from pyinnodb import disk_struct
+
+from . import *
 
 
 @main.command()
@@ -19,7 +20,7 @@ def parse(ctx, pageno, type, offset, remain, func):
     f.seek(pageno * const.PAGE_SIZE)
     if offset != 0:
         f.seek(offset, 1)
-    possible_names = [i for i in dir(disk_struct) if i.startswith("M")]
+    [i for i in dir(disk_struct) if i.startswith("M")]
     for t in type:
         obj = getattr(disk_struct, t).parse_stream(f)
         print(t, obj)

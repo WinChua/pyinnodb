@@ -1,13 +1,10 @@
-from . import *
-
-from pyinnodb.disk_struct.inode import MInodePage, MInodeEntry
-from pyinnodb.disk_struct.index import MIndexHeader
-from pyinnodb.disk_struct.fsp import MFspPage
+from pyinnodb import color, const
 from pyinnodb.disk_struct.fil import MFil
-from pyinnodb import const
-from pyinnodb import color
+from pyinnodb.disk_struct.fsp import MFspPage
+from pyinnodb.disk_struct.index import MIndexHeader
+from pyinnodb.disk_struct.inode import MInodeEntry, MInodePage
 
-from typing import Callable
+from . import *
 
 
 @main.command()

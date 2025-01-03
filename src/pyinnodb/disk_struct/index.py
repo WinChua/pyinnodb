@@ -109,7 +109,9 @@ class MIndexPage(CC):
     system_records: MIndexSystemRecord = cfield(MIndexSystemRecord)
 
     @classmethod
-    def default_value_parser(cls, dd_object: Table, transfter=None, hidden_col=False, quick=True):
+    def default_value_parser(
+        cls, dd_object: Table, transfter=None, hidden_col=False, quick=True
+    ):
         primary_data_layout_col = dd_object.get_disk_data_layout()
 
         def value_parser(rh: MRecordHeader, f):

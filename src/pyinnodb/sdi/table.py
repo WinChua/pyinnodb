@@ -1,34 +1,34 @@
-import io
-import typing
-import struct
-import decimal
 import dataclasses
+import decimal
+import io
 import random
 import re
-
+import struct
 import sys
+import typing
 
 if sys.version_info.minor >= 9:
     from functools import cache
 else:
-    cache = lambda x: x
-from dataclasses import dataclass, field
-from collections import namedtuple
-from base64 import b64decode
-from datetime import timedelta, datetime, date
 
+    def cache(x):
+        return x
 
-from .. import const
-from ..const.dd_column_type import DDColumnType, DDColConf, nop
-from ..disk_struct.varsize import VarSize, OffPagePointer
-from ..disk_struct.data import MTime2, MDatetime, MDate, MTimestamp, MGeo
-from ..disk_struct.json import MJson
-from ..disk_struct.rollback import MRollbackPointer
-from ..disk_struct.record import MRecordHeader
-
-from ..disk_struct.index import MIndexPage
 
 import logging
+from base64 import b64decode
+from collections import namedtuple
+from dataclasses import dataclass, field
+from datetime import date, datetime, timedelta
+
+from .. import const
+from ..const.dd_column_type import DDColConf, DDColumnType, nop
+from ..disk_struct.data import MDate, MDatetime, MGeo, MTime2, MTimestamp
+from ..disk_struct.index import MIndexPage
+from ..disk_struct.json import MJson
+from ..disk_struct.record import MRecordHeader
+from ..disk_struct.rollback import MRollbackPointer
+from ..disk_struct.varsize import OffPagePointer
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +137,7 @@ class Column:
         kw_only = False
         default = dataclasses.MISSING
         if self.pytype == nop:
-            kw_only  = True
+            kw_only = True
             default = None
         return field(
             default=default,
@@ -228,7 +228,7 @@ class Column:
     def gen_sql(self):
         sql = f"`{self.name}` {self.column_type_utf8}"
         if self.collation_id != 255 and self.collation_id != 63:
-            collation = const.get_collation_by_id(self.collation_id)
+            const.get_collation_by_id(self.collation_id)
             if DDColumnType.is_string(self.type):
                 pass
         sql += f"{'' if self.is_nullable or self.is_virtual else ' NOT NULL'}"
@@ -240,7 +240,7 @@ class Column:
         elif len(self.generation_expression) != 0:
             sql += f" GENERATED ALWAYS AS ({self.generation_expression}) {'VIRTUAL' if self.is_virtual else 'STORED'}"
         elif self.default_value_utf8_null and self.is_nullable:
-            sql += f" DEFAULT NULL"
+            sql += " DEFAULT NULL"
         if self.update_option != "":
             sql += f" ON UPDATE {self.update_option}"
         sql += " COMMENT '" + self.comment + "'" if self.comment else ""
@@ -473,7 +473,7 @@ class Column:
             datetime_data.parse_fsp(stream, dsize - 5)  # 5 is MDatetime.sizeof()
             try:
                 return datetime_data.to_datetime()
-            except:
+            except Exception:
                 return datetime_data
         elif dtype == DDColumnType.NEWDATE:
             return MDate.parse_stream(stream).to_date()
@@ -508,7 +508,7 @@ class Column:
                     return "null"
                 v = MJson.parse_stream(io.BufferedReader(io.BytesIO(data)))
                 return v.get_json()
-            except Exception as e:
+            except Exception:
                 return data
         elif dtype == DDColumnType.GEOMETRY:
             if quick:
@@ -724,14 +724,16 @@ class Table:
         return namedtuple(self.name, " ".join(cols))
 
     def keys(self, no_primary=False, for_rand=False):
-        v =  [f.name for f in dataclasses.fields(self.DataClass)] 
+        v = [f.name for f in dataclasses.fields(self.DataClass)]
         if not no_primary and not for_rand:
-            return  v
+            return v
         primary_key_name = [f.name for f in self.get_primary_key_col()]
         v = [f for f in v if f not in primary_key_name]
         if not for_rand:
             return v
-        target = [f.name for f in dataclasses.fields(self.DataClass) if f.type in [int, str]]
+        target = [
+            f.name for f in dataclasses.fields(self.DataClass) if f.type in [int, str]
+        ]
 
         return [f for f in v if f in target]
 
@@ -751,9 +753,9 @@ class Table:
             for f in dataclasses.fields(self.DataClass):
                 if f.name not in keys:
                     continue
-                if f.type == int:
+                if f.type is int:
                     v.append(random.randint(0, int_range))
-                elif f.type == str:
+                elif f.type is str:
                     v.append(random.randbytes(str_size).hex())
             vs.append(v)
         return vs
@@ -781,11 +783,10 @@ class Table:
                 d = f.build().hex()  # .zfill(50)
                 vs.append("0x" + d)
             elif isinstance(f, bytes):
-                vs.append("0x"+f.hex())
+                vs.append("0x" + f.hex())
             else:
                 vs.append(repr(f))
         return vs
-        
 
     @property
     @cache
@@ -948,7 +949,9 @@ class Table:
         else:
             primary_key = self.build_primary_key_bytes((primary_key,))
         value_parser = MIndexPage.default_value_parser(
-            self, hidden_col=hidden_col, transfter=lambda id: id,
+            self,
+            hidden_col=hidden_col,
+            transfter=lambda id: id,
             quick=False,
         )
 
@@ -1120,9 +1123,15 @@ class Table:
             parts = ",\n    ".join(parts) + "\n"
             return "\n" + f"{p}{parts})*/"
         elif pt == const.partition.PartitionType.PT_HASH:
-            return "\n" + f"/*!50100 PARTITION BY HASH ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            return (
+                "\n"
+                + f"/*!50100 PARTITION BY HASH ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            )
         elif pt == const.partition.PartitionType.PT_KEY_55:
-            return "\n" + f"/*!50100 PARTITION BY KEY ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            return (
+                "\n"
+                + f"/*!50100 PARTITION BY KEY ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            )
         elif pt == const.partition.PartitionType.PT_LIST:
             p = f"/*!50100 PARTITION BY LIST ({self.partition_expression_utf8}) (\n    "
             parts = []

@@ -1,9 +1,8 @@
-from . import *
-import dataclasses
-
+from pyinnodb.disk_struct.index import MIndexPage
 from pyinnodb.frm import frm as mfrm
 from pyinnodb.sdi import table
-from pyinnodb.disk_struct.index import MIndexPage
+
+from . import *
 
 
 @main.command()
