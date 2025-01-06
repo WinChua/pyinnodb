@@ -1,6 +1,6 @@
 from ..mconstruct import *
 from io import BytesIO
-from pyinnodb.sdi.table import Column, Index, IndexElement, ColumnElement
+from pyinnodb.sdi.column import Column, Index, IndexElement, ColumnElement
 import typing
 from pyinnodb.const.index_type import IndexType
 from pyinnodb import const
