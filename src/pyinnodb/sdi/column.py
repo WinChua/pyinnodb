@@ -21,6 +21,18 @@ from ..disk_struct.rollback import MRollbackPointer
 from ..disk_struct.varsize import OffPagePointer
 from .util import modify_init
 
+decimal_leftover_part = {
+    0: 0,
+    1: 1,
+    2: 1,
+    3: 2,
+    4: 2,
+    5: 3,
+    6: 3,
+    7: 4,
+    8: 4,
+    9: 4,
+}
 
 @modify_init
 @dataclass(eq=False)
