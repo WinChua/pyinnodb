@@ -11,28 +11,9 @@ from pyinnodb.disk_struct.index import MIndexPage
 @click.argument("frmfile")
 def frm(ctx, frmfile):
     ibd = ctx.obj["fn"]
-    f = open(frmfile, "rb")
-    frm_header = mfrm.MFrm.parse_stream(f)
-
-    cols = []
-    for i, col in enumerate(frm_header.cols):
-        cols.append(col.to_dd_column(col.name, i, frm_header.column_labels))
-
-    # print(frm_header.keys[0][0].key_parts)
-    keys, key_name, key_comment = frm_header.keys[0]
-
-    idx = keys.to_dd_index(key_name.decode(), frm_header.cols)
-
-    cols.append(table.get_sys_col("DB_TRX_ID", len(cols)))
-    cols.append(table.get_sys_col("DB_ROLL_PTR", len(cols)))
 
     t = table.Table(name="HELLO")
-    t.columns = cols
-    t.indexes.append(idx)
-    # print(idx.elements)
-    # print(idx.get_effect_element())
-    # print(keys.key_parts)
-    # return
+    t.update_with_frm(frmfile)
     root_page_no = 3
 
     ibd.seek(root_page_no * const.PAGE_SIZE)

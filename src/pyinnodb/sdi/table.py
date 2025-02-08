@@ -21,6 +21,7 @@ from ..disk_struct.index import MIndexPage
 from ..disk_struct.record import MRecordHeader
 from .column import Column, Index
 from .util import modify_init
+from ..frm import frm as mfrm
 
 logger = logging.getLogger(__name__)
 
@@ -179,6 +180,25 @@ class Table:
     collation_id: int = 0
     # tablespace_ref: ?
 
+    def update_with_frm(self, frm):
+        with open(frm, "rb") as f:
+            frm_header = mfrm.MFrm.parse_stream(f)
+            self.columns = []
+            for i, col in enumerate(frm_header.cols):
+                self.columns.append(col.to_dd_column(col.name, i, frm_header.column_labels))
+
+            keys, key_name, key_comment = frm_header.keys[0]
+
+            idx = keys.to_dd_index(key_name.decode(), frm_header.cols)
+
+            idx.se_private_data = "root=3"
+
+            self.columns.append(get_sys_col("DB_TRX_ID", len(self.columns)))
+            self.columns.append(get_sys_col("DB_ROLL_PTR", len(self.columns)))
+
+            self.indexes = [idx]
+
+    
     @property
     @cache
     def private_data(self):
