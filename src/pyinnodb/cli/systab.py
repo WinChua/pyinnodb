@@ -1,10 +1,9 @@
-from . import *
-
+from pyinnodb import const
+from pyinnodb.const import util
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.sdi.table import Table
 
-from pyinnodb.const import util
-from pyinnodb import const
+from . import *
 
 
 @main.command()

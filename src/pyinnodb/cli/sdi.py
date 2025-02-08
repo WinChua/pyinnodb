@@ -1,8 +1,9 @@
-from . import *
+import json
 
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.sdi.table import Table
-import json
+
+from . import *
 
 
 @main.command()

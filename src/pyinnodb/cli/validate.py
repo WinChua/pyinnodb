@@ -1,6 +1,7 @@
-from . import *
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.fsp import MFspHeader
+
+from . import *
 
 
 @main.command()

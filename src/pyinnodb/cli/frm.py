@@ -1,7 +1,7 @@
-from . import *
-
-from pyinnodb.sdi import table
 from pyinnodb.disk_struct.index import MIndexPage
+from pyinnodb.sdi import table
+
+from . import *
 
 
 @main.command()
