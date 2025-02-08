@@ -7,7 +7,6 @@ from pyinnodb.disk_struct.fil import MFil
 from pyinnodb import const
 from pyinnodb import color
 
-from typing import Callable
 
 
 @main.command()

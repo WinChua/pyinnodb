@@ -1,14 +1,11 @@
-import click
 import logging
-from pyinnodb.disk_struct.fsp import MFspPage
-from pyinnodb.disk_struct.fil import MFil
-from pyinnodb import const
-from io import BytesIO
 import sys
-import os
-import time
 
-import dataclasses
+import click
+
+from pyinnodb import const
+from pyinnodb.disk_struct.fil import MFil
+from pyinnodb.disk_struct.fsp import MFspPage
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,4 @@
 from . import *
-from pyinnodb.const import page_checksum_crc32c
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.fsp import MFspHeader
 
