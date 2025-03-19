@@ -1,9 +1,7 @@
 import sqlalchemy
 from sqlalchemy.dialects import mysql as dmysql
 from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy import Column
-from sqlalchemy import text, insert
-import time
+from sqlalchemy import text
 
 
 with open(".deploy_mysqld") as f:

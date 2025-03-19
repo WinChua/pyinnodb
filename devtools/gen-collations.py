@@ -9,7 +9,7 @@ lines = [
     "",
     "from collections import namedtuple",
     f'collation = namedtuple("collation", {repr(fields)})',
-    f"""def get_collation_by_id(colid):
+    """def get_collation_by_id(colid):
     return collations_mapper.get(colid, None)""",
 ]
 

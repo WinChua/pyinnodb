@@ -1,5 +1,5 @@
 from ..mconstruct import *
-from .list import MListBaseNode, MListNode
+from .list import MListBaseNode
 from .fil import MFil
 from .xdes import MXdesEntry
 

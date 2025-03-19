@@ -1,6 +1,6 @@
 import typing
 from ..mconstruct import *
-from .list import MListBaseNode, MPointer, MListNode
+from .list import MListBaseNode, MListNode
 from .fil import MFil
 
 from pyinnodb import const
