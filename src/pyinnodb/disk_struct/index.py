@@ -2,7 +2,6 @@ from .list import MPointer
 from .fil import MFil, MFilTrailer
 from .record import MRecordHeader
 from ..mconstruct import *
-from .inode import MInodeEntry
 
 
 from .. import const
@@ -270,7 +269,7 @@ class MIndexPage(CC):
 
             klass = dd_object.DataClassHiddenCol if hidden_col else dd_object.DataClass
             if transfter is None:
-                print(klass(**disk_data_parsed))
+                return klass(**disk_data_parsed)
             else:
                 return transfter(klass(**disk_data_parsed))
             return

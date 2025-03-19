@@ -1,12 +1,10 @@
-from . import *
-from pyinnodb.disk_struct.index import MIndexPage, MSDIPage
+from pyinnodb.disk_struct.first_page import MFirstPage
 from pyinnodb.disk_struct.fsp import MFspPage
-from pyinnodb.disk_struct.fil import MFil
+from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.disk_struct.record import MRecordHeader
-from pyinnodb.disk_struct.inode import MInodePage
-from pyinnodb.sdi.table import Column, Table
-from pyinnodb.const.dd_column_type import DDColumnType
-from pyinnodb.disk_struct.first_page import MFirstPage, MIndexEntryNode
+from pyinnodb.sdi.table import Table
+
+from . import *
 
 
 @main.command()

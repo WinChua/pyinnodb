@@ -1,13 +1,11 @@
 import os
-import sys
 import shutil
 import click
 import json
 from pprint import pprint
 
-from dataclasses import dataclass, asdict, fields
+from dataclasses import dataclass, asdict
 from testcontainers.mysql import MySqlContainer
-from docker.models.containers import Container
 from testcontainers.core.config import testcontainers_config as c
 
 from sqlalchemy import create_engine
@@ -15,8 +13,8 @@ from sqlalchemy import create_engine
 
 from pyinnodb import const
 from pyinnodb import disk_struct
-from pyinnodb.disk_struct.index import MIndexHeader, MSDIPage, MSystemRecord
-from pyinnodb.sdi.table import Column, Table
+from pyinnodb.disk_struct.index import MSDIPage
+from pyinnodb.sdi.table import Table
 
 c.ryuk_disabled = True
 

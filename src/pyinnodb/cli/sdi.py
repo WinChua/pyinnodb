@@ -1,12 +1,9 @@
-from . import *
-
-from pyinnodb.disk_struct.index import MIndexHeader, MSDIPage, MSystemRecord
-from pyinnodb.disk_struct.index import MFsegHeader, MIndexSystemRecord, MDDL
-from pyinnodb.disk_struct.fil import MFil
-from pyinnodb.disk_struct.record import MRecordHeader
-from pyinnodb.sdi.table import Column, Table
-import zlib
 import json
+
+from pyinnodb.disk_struct.index import MSDIPage
+from pyinnodb.sdi.table import Table
+
+from . import *
 
 
 @main.command()

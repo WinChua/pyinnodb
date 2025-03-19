@@ -1,11 +1,10 @@
-from . import *
-
-from pyinnodb.disk_struct.undo_log import *
-from pyinnodb.disk_struct.fil import MFil
-from pyinnodb.disk_struct.trx import *
-from pyinnodb.disk_struct.rollback import MRollbackPointer
 from pyinnodb.disk_struct.index import MSDIPage
-from pyinnodb.sdi.table import Column, Table
+from pyinnodb.disk_struct.rollback import MRollbackPointer
+from pyinnodb.disk_struct.trx import *
+from pyinnodb.disk_struct.undo_log import *
+from pyinnodb.sdi.table import Table
+
+from . import *
 
 
 @main.command()

@@ -1,10 +1,9 @@
 import sys
 import random
-import sqlalchemy
 
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy import create_engine, insert
+from sqlalchemy import create_engine
 
 Base = declarative_base()
 test_table_name = "test_users"

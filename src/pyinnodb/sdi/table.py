@@ -164,6 +164,31 @@ class Table:
     partitions: typing.List[Partition] = dataclasses.field(default_factory=list)
     collation_id: int = 0
     # tablespace_ref: ?
+    #
+
+    def gen_ddl(self, schema):
+        table_name = f"`{self.schema_ref}`.`{self.name}`" if schema else f"`{self.name}`"
+        column_desc = []
+        for c in self.columns:
+            if c.hidden == const.column_hidden_type.ColumnHiddenType.HT_HIDDEN_SE.value:
+                continue
+            column_desc.append(c.gen_sql())
+        for idx in self.indexes:
+            if idx.hidden:
+                continue
+            column_desc.append(self.gen_sql_for_index(idx))
+        column_desc.extend(self.gen_check_constraints())
+        column_desc.extend(self.gen_foreign_key())
+        column_desc = "\n  " + ",\n  ".join(column_desc) + "\n"
+        parts = self.gen_sql_for_partition()
+        collation = const.get_collation_by_id(self.collation_id)
+        desc = f"ENGINE={self.engine} DEFAULT CHARSET={collation.CHARACTER_SET_NAME} COLLATE={collation.COLLATION_NAME}"
+        comment = (
+            "\nCOMMENT '" + self.comment + "'"
+            if self.comment
+            else ""
+        )
+        return f"CREATE TABLE {table_name} ({column_desc}) {desc}{parts}{comment}"
 
     def update_with_frm(self, frm):
         with open(frm, "rb") as f:

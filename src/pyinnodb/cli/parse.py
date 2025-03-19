@@ -1,5 +1,6 @@
-from . import *
 from pyinnodb import disk_struct
+
+from . import *
 
 
 @main.command()

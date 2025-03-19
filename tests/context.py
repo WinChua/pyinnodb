@@ -1,13 +1,11 @@
-import os
-import sys
 import logging
 from io import BytesIO
 from sqlalchemy.orm import declarative_base
-from pyinnodb import const
-import sqlalchemy
 import pathlib
 import pytest
 from collections import namedtuple
+#ruff: noqa
+from pyinnodb import const
 
 cur_file = pathlib.Path(__file__)
 

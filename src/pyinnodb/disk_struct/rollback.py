@@ -26,7 +26,7 @@ class HistoryVersion:
         if self.upd == 1:
             return f"<Update by trx[{self.trx_id}]: {'; '.join('`' + c.name + '` updated original value: ' + str(v) for c, v in self.field)}>"
         else:
-            return f"<Insert>"
+            return "<Insert>"
 
     __repr__ = __str__
 

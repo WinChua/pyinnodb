@@ -7,7 +7,6 @@ except:
     from datetime import timezone
 
     UTC = timezone.utc
-import time
 
 
 class MTime2(CC):
