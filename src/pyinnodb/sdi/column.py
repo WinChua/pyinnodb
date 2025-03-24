@@ -3,6 +3,7 @@ import io
 import struct
 import sys
 import typing
+import re
 
 if sys.version_info.minor >= 9:
     from functools import cache
@@ -33,6 +34,8 @@ decimal_leftover_part = {
     8: 4,
     9: 4,
 }
+
+column_type_size = re.compile("[^(]*[(]([^)]*)[)]")
 
 @modify_init
 @dataclass(eq=False)
@@ -186,6 +189,14 @@ class Column:
     def private_data(self):
         data = const.line_to_dict(self.se_private_data, ";", "=")
         return data
+
+    @property
+    @cache
+    def varchar_size(self):
+        s = column_type_size.match(self.column_type_utf8)
+        if s is not None:
+            return int(int(s.group(1))/2 - 1)
+        return int(self.char_length/2) - 1
 
     def __post_init__(self):
         ce: typing.List[ColumnElement] = [ColumnElement(**e) for e in self.elements]
