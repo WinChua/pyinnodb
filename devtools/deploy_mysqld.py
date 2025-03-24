@@ -147,9 +147,7 @@ def exec(version, sql, file):
 @click.option("--table", type=click.STRING, default="")
 @click.option("--size", type=click.INT, default=100)
 @click.option("--idx", type=click.INT, default=-1)
-@click.option("--int-range", type=click.INT, default=256)
-@click.option("--str-size", type=click.INT, default=20)
-def rand_data(version, table, size, idx, int_range, str_size):
+def rand_data(version, table, size, idx):
     deploy_container = load_deploy()
     if version not in deploy_container:
         mDeploy(version)
@@ -174,7 +172,7 @@ def rand_data(version, table, size, idx, int_range, str_size):
         elif len(all_tables) == 1:
             idx = 0
         dd_object = Table(**all_tables[idx]["dd_object"])
-        sql = dd_object.gen_rand_data_sql(size, int_range, str_size)
+        sql = dd_object.gen_rand_data_sql(size)
         engine = create_engine(deploy_container.get(version).url)
         with engine.connect() as conn:
             conn.exec_driver_sql(sql)

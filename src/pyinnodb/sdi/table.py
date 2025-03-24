@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
 from .. import const
-from ..const.dd_column_type import DDColumnType
+from ..const.dd_column_type import DDColumnType, DDColConf, rand_none
 from ..disk_struct.data import MGeo
 from ..disk_struct.index import MIndexPage
 from ..disk_struct.record import MRecordHeader
@@ -236,19 +236,19 @@ class Table:
         v = [f for f in v if f not in primary_key_name]
         if not for_rand:
             return v
-        target = [f.name for f in dataclasses.fields(self.DataClass) if f.type in [int, str]]
+        target = [f.name for f in dataclasses.fields(self.DataClass) if DDColConf.get_col_type_conf(f.metadata['col'].type).rand_func != rand_none]
 
         return [f for f in v if f in target]
 
-    def gen_rand_data_sql(self, size, int_range=256, str_size=20):
+    def gen_rand_data_sql(self, size):
         rand_key = self.keys(for_rand=True)
         values = []
-        for dc in self.gen_rand_data(size, int_range, str_size):
+        for dc in self.gen_rand_data(size):
             values.append("(" + ",".join(self.transfer(dc, rand_key)) + ")")
 
         return f"INSERT INTO `{self.schema_ref}`.`{self.name}`({','.join(rand_key)}) values {', '.join(values)}"
 
-    def gen_rand_data(self, size, int_range=256, str_size=20):
+    def gen_rand_data(self, size):
         keys = self.keys(for_rand=True)
         vs = []
         for i in range(size):
@@ -256,10 +256,9 @@ class Table:
             for f in dataclasses.fields(self.DataClass):
                 if f.name not in keys:
                     continue
-                if f.type == int:
-                    v.append(random.randint(0, int_range))
-                elif f.type == str:
-                    v.append(random.randbytes(str_size).hex())
+                func = DDColConf.get_col_type_conf(f.metadata['col'].type).rand_func
+                if func:
+                    v.append(func(f.metadata['col']))
             vs.append(v)
         return vs
 
