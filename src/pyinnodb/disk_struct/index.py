@@ -194,10 +194,11 @@ class MIndexPage(CC):
             may_var_col = [
                 (i, c[0])
                 for i, c in enumerate(cols_disk_layout)
-                if DDColumnType.is_big(c[0].type)
+                if (not c[0].column_type_utf8.startswith("binary"))
+                and (DDColumnType.is_big(c[0].type)
                 or DDColumnType.is_var(
                     c[0].type, mysqld_version=dd_object.mysql_version_id
-                )
+                ))
             ]
             logger.debug(
                 "may_var_col is %s",
@@ -258,7 +259,7 @@ class MIndexPage(CC):
                 if (
                     col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]
                     and not hidden_col
-                ) or col.private_data.get("version_dropped", 0) != 0:
+                ) or col.private_data.get("version_dropped", 0) != 0 or col.is_hidden_from_user:
                     if col.name in disk_data_parsed:
                         disk_data_parsed.pop(col.name)
                     continue
