@@ -290,7 +290,8 @@ class Table:
                 vs.append(str(f))
             elif  isinstance(f, timedelta):
                 total_seconds = int(f.total_seconds())
-                vs.append(f"'{total_seconds // 86400}:{(total_seconds%86400)//60}:{total_seconds%60}'")
+                vvv = f'{total_seconds // 3600}:{(total_seconds%3600)//60}:{total_seconds%60}'
+                vs.append(f"'{vvv}'")
             else:
                 vs.append(repr(f))
         return vs

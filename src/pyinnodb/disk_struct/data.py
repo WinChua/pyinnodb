@@ -1,5 +1,5 @@
-from ..mconstruct import *
 from datetime import timedelta, datetime, date
+from ..mconstruct import cs, cfield, CC
 
 try:
     from datetime import UTC
@@ -19,13 +19,20 @@ class MTime2(CC):
         self.fsp = stream.read(fsp)
 
     def to_timedelta(self) -> timedelta:
+        if self.signed == 0: # 负数
+            h = (~self.hour)& 0x07ff
+            m = (~self.minute) & 0x3f
+            s = (~self.second) & 0x3f
+            v = timedelta(hours=-h,minutes=m,seconds=s+1,microseconds=int.from_bytes(self.fsp, "big"))
+            return v
+            
         v = timedelta(
             hours=self.hour,
             minutes=self.minute,
             seconds=self.second,
             microseconds=int.from_bytes(self.fsp, "big"),
         )
-        return v if self.signed == 1 else -v
+        return v
 
 
 class MDatetime(CC):
