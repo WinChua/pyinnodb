@@ -1,8 +1,9 @@
 import dataclasses
 import io
-import random
+import decimal
 import re
 import sys
+import json
 import typing
 
 if sys.version_info.minor >= 9:
@@ -277,7 +278,6 @@ class Table:
                 vs.append("NULL")
             elif (
                 isinstance(f, date)
-                or isinstance(f, timedelta)
                 or isinstance(f, datetime)
             ):
                 vs.append(f"'{str(f)}'")
@@ -286,6 +286,12 @@ class Table:
                 vs.append("0x" + d)
             elif isinstance(f, bytes):
                 vs.append("0x"+f.hex())
+            elif isinstance(f, decimal.Decimal):
+                vs.append(str(f))
+            elif  isinstance(f, timedelta):
+                total_seconds = int(f.total_seconds())
+                vvv = f'{total_seconds // 3600}:{(total_seconds%3600)//60}:{total_seconds%60}'
+                vs.append(f"'{vvv}'")
             else:
                 vs.append(repr(f))
         return vs

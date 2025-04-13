@@ -97,7 +97,7 @@ def mDeploy(version):
     mysql = mContainer.start()
     with open(".deploy_mysqld", "w") as f:
         deploy_container[version] = Instance(
-            url=mysql.get_connection_url(),
+            url=mysql.get_connection_url().replace("localhost", "127.0.0.1"),
             container_id=f"{mysql._container.short_id}",
             cmd=f"mysql -h 127.0.0.1 -P{mysql.get_exposed_port(mysql.port)} -u{mysql.username} -p{mysql.password}",
             datadir=datadir,
@@ -134,13 +134,19 @@ def exec(version, sql, file):
     if version not in deploy_container:
         mDeploy(version)
         deploy_container = load_deploy()
-    engine = create_engine(deploy_container.get(version).url)
+    url = deploy_container.get(version).url
+    engine = create_engine(url)
     if file != "":
         with open(file, "r") as f:
             sql = f.read()
     with engine.connect() as conn:
         result = conn.exec_driver_sql(sql)
-        print(result.all()[0][1])
+        if result.rowcount == 0:
+            print("无结果返回")
+        else:
+            for r in result.fetchall():
+                print(r)
+            
 
 @main.command()
 @click.option("--version", type=click.STRING, default="")

@@ -17,7 +17,7 @@ pyinnodb是一个mysql数据文件的解析工具, 同时支持mysql5.7,8.0以�
   * 结合表结构文件(.frm)从数据文件(.ibd)中导出数据;
   * 结合表结构文件(.frm)从数据文件(.ibd)中搜索数据;
 
-# 如何使用
+# 快速使用
 
 ## 获取最新版本的pyinnodb
 ```bash
@@ -55,7 +55,7 @@ $ ./pyinnodb.sh datadir/test/all_type.ibd tosql --mode ddl
 ```bash
 $ ./pyinnodb.sh datadir/test/all_type.ibd tosql --mode sdi
 ```
-SDI页中每一条记录都是一个JSON串, 可以通过 ` | jnv ` 实时查看json数据
+SDI页中每一条记录都是一个JSON串, 可以通过 ` | jnv ` 交互式查看json数据
 
 #### 4. 导出ibd文件中的数据
 ```bash

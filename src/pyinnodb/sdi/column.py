@@ -397,10 +397,6 @@ class Column:
         else:
             data = stream.read(size)
             return data
-            if len(data) > 200:
-                return Lob(data, False)
-            else:
-                return data
 
     def read_data(self, stream, size=None, quick=True):
         if self.name == "DB_ROLL_PTR":
@@ -482,8 +478,6 @@ class Column:
         elif dtype == DDColumnType.JSON:
             # data = stream.read(dsize)
             data = self._read_varchar(stream, dsize)
-            if isinstance(data, Lob):
-                data = data.data
             try:
                 if len(data) == 0:
                     return "null"
