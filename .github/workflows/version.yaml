@@ -15,10 +15,9 @@ jobs:
     steps:
     - name: checkout code
       uses: actions/checkout@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.MY_PAT }}
       with:
         ref: ${{ github.ref }}
+        token: ${{ secrets.MY_PAT }}
     - name: version-check
       run: |
         curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION=-y bash
