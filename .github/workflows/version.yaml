@@ -21,9 +21,9 @@ jobs:
       run: |
         curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION=-y bash
         source ~/.rye/env
-        git branch
-        git show HEAD^..HEAD pyproject.toml
-        git show HEAD^..HEAD pyproject.toml | grep version
+        git version
+        git show -- HEAD^..HEAD pyproject.toml
+        git show -- HEAD^..HEAD pyproject.toml | grep version
         if [ $? == 0 ]
         then
           echo "should_tag=true"
