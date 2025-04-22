@@ -2,6 +2,7 @@ from context import *
 from pyinnodb.sdi.table import Table
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.disk_struct.fsp import MFspPage
+from pyinnodb.disk_struct.data import MTime2
 import datetime
 from decimal import Decimal
 
@@ -34,7 +35,7 @@ def test_parse_mysql8(mysqlfile: MysqlFile):
         REAL=1092.892,
         SMALLINT=981,
         TEXT="TEXT",
-        TIME=datetime.timedelta(seconds=11040),
+        TIME=MTime2(bin_data=b'\x801\x00'),
         TIMESTAMP=datetime.datetime.strptime("2024-07-24 09:05:28", timeformat).replace(
             tzinfo=datetime.timezone.utc
         ),
