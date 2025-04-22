@@ -3,6 +3,8 @@ on:
   pull_request:
     branches: [ main ]
     types: [ closed ]
+  push:
+    branches: [ feature/version ]
 
 
 jobs:
@@ -19,6 +21,7 @@ jobs:
       run: |
         curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION=-y bash
         source ~/.rye/env
+        git config --list --local
         git show HEAD pyproject.toml | grep version
         if [ $? == 0 ]
         then
