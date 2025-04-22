@@ -17,7 +17,7 @@ from datetime import date, datetime, timedelta
 
 from .. import const
 from ..const.dd_column_type import DDColumnType, DDColConf, rand_none
-from ..disk_struct.data import MGeo
+from ..disk_struct.data import MGeo, MTime2
 from ..disk_struct.index import MIndexPage
 from ..disk_struct.record import MRecordHeader
 from .column import Column, Index
@@ -266,7 +266,9 @@ class Table:
     def transfer(self, dc, keys=None):
         vs = []
         if keys is None:
-            value = dataclasses.astuple(dc)
+            value = []
+            for f in dataclasses.fields(dc):
+                value.append(getattr(dc, f.name))
         elif isinstance(dc, self.DataClass):
             value = [getattr(dc, k) for k in keys]
         elif isinstance(dc, list):
@@ -276,6 +278,8 @@ class Table:
                 vs.append(repr(json.dumps(f)))
             elif f is None:
                 vs.append("NULL")
+            elif isinstance(f, MTime2):
+                vs.append(f.to_str())
             elif (
                 isinstance(f, date)
                 or isinstance(f, datetime)
@@ -288,10 +292,6 @@ class Table:
                 vs.append("0x"+f.hex())
             elif isinstance(f, decimal.Decimal):
                 vs.append(str(f))
-            elif  isinstance(f, timedelta):
-                total_seconds = int(f.total_seconds())
-                vvv = f'{total_seconds // 3600}:{(total_seconds%3600)//60}:{total_seconds%60}'
-                vs.append(f"'{vvv}'")
             else:
                 vs.append(repr(f))
         return vs

@@ -39,7 +39,7 @@ def tosql(ctx, mode, sdi_idx, schema):
             dump_ibd(table_object, f)
         return
 
-def dump_ibd(table_object, f):
+def dump_ibd(table_object, f, oneline=True):
     root_page_no = int(table_object.indexes[0].private_data.get("root", 4))
     f.seek(root_page_no * const.PAGE_SIZE)
     root_index_page = MIndexPage.parse_stream(f)
@@ -68,11 +68,16 @@ def dump_ibd(table_object, f):
     values = [f"({','.join(v)})" for v in values]
 
     table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
-    print(
-        f"INSERT INTO {table_name}({','.join(
-            table_object.keys()
-        )}) values {', '.join(values)}"
-    )
+    if not oneline:
+        print(
+            f"INSERT INTO {table_name}({','.join(
+                table_object.keys()
+            )}) values {', '.join(values)}"
+        )
+    else:
+        for v in values:
+            print(f"INSERT INTO {table_name}({','.join(table_object.keys())}) values {v};")
+        
 
     return
 # 

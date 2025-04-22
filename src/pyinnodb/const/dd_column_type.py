@@ -147,7 +147,7 @@ class DDColConf(DDColConf, Enum):
     BIT = DDColumnType.BIT, 0, int, lambda col: random.randint(0,1)
     TIMESTAMP2 = DDColumnType.TIMESTAMP2, 0, int, lambda col: datetime.fromtimestamp(int(time.time()) + random.randint(-100, 100)).strftime("%Y-%m-%d %H:%M:%S")
     DATETIME2 = DDColumnType.DATETIME2, 0, datetime, lambda col: datetime(random.randint(1, 10), random.randint(1, 10), random.randint(1, 10))
-    TIME2 = DDColumnType.TIME2, 0, timedelta, lambda col: f"{random.randint(-838, 838)}:{random.randint(0,59):02}:{random.randint(0,59):02}"
+    TIME2 = DDColumnType.TIME2, 0, timedelta, lambda col: f"{random.randint(-838, 838)}:{random.randint(0,59):02}:{random.randint(0,59):02}.{random.randint(0,30000)}"
     NEWDECIMAL = DDColumnType.NEWDECIMAL, 0, float, lambda col: random.random()
     ENUM = DDColumnType.ENUM, 0, str, lambda col : b64decode(random.choice(col.elements).name).decode(errors="replace")
     SET = DDColumnType.SET, 0, set, lambda col : b64decode(random.choice(col.elements).name).decode(errors="replace")
