@@ -1,0 +1,33 @@
+name: version
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ closed ]
+
+
+jobs:
+  bump_version_and_tags:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+    - name: version-check
+      run: |
+        curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION=-y bash
+        source ~/.rye/env
+        git show HEAD pyproject.toml | grep version
+        if [ $? == 0 ]
+        then
+          echo "should_tag=true"
+          echo "should_tag=true" >> $GITHUB_OUTPUT
+          NEW_VERSION=`rye version`
+          echo "new_version=$NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          git tag v$NEW_VERSION && git push --tags
+        else
+          echo "should_tag=false" >> $GITHUB_OUTPUT
+        fi
