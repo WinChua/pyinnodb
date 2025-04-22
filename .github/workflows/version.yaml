@@ -15,6 +15,8 @@ jobs:
     steps:
     - name: checkout code
       uses: actions/checkout@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         ref: ${{ github.ref }}
     - name: version-check
