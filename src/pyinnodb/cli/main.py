@@ -1,5 +1,6 @@
 import logging
 import sys
+from importlib_metadata import version as meta_version
 
 import click
 
@@ -16,8 +17,9 @@ logger = logging.getLogger(__name__)
     "--log-level", type=click.Choice(["DEBUG", "ERROR", "INFO"]), default="ERROR"
 )
 @click.option("--validate-first/--no-validate-first", type=click.BOOL, default=False)
+@click.option("--version/--no-version", type=click.BOOL, default=False)
 @click.pass_context
-def main(ctx, fn, log_level, validate_first):
+def main(ctx, fn, log_level, validate_first, version):
     """A ibd file parser for MySQL 8.0 above, help you to know innodb better.
 
     It offer several function bellow:
@@ -30,6 +32,9 @@ def main(ctx, fn, log_level, validate_first):
     many other function to explore your ibd file
 
     """
+    if version:
+        print(meta_version("pyinnodb"))
+        sys.exit(0)
     # pid = os.getpid()
     # start_time = os.stat(f"/proc/{pid}").st_ctime
     # print("cost to startup:", time.time() - start_time)
