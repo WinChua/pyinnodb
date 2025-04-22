@@ -444,7 +444,8 @@ class Column:
         elif dtype == DDColumnType.TIME2:
             time_data = MTime2.parse_stream(stream)
             time_data.parse_fsp(stream, dsize - 3)  # 3 = MTime2.sizeof()
-            return time_data.to_timedelta()
+            time_data.set_precision(self.datetime_precision)
+            return time_data
         elif dtype == DDColumnType.DATETIME2:
             datetime_data = MDatetime.parse_stream(stream)
             datetime_data.parse_fsp(stream, dsize - 5)  # 5 is MDatetime.sizeof()

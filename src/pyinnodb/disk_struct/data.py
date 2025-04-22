@@ -8,31 +8,67 @@ except:
 
     UTC = timezone.utc
 
+TIMEF_INT_OFS = 0x800000
+TIMEF_OFS = 0x800000000000
+
+def long2time(hms, dec):
+    neg = ""
+    if hms < 0:
+        neg = "-"
+        hms = -hms
+    tmp = hms >> 24
+    hour = (tmp >> 12) % (1<<10)
+    minute = (tmp>> 6) % (1<<6)
+    second = (tmp) % (1<<6)
+    frac = (hms) % (1<<24)
+    if dec == 5:
+        frac //= 10
+    if dec != 0:
+        return f"'{neg}{hour:02}:{minute:02}:{second:02}.{frac:0{dec}}'"
+    else:
+        return f"'{neg}{hour:02}:{minute:02}:{second:02}'"
 
 class MTime2(CC):
-    signed: int = cfield(cs.BitsInteger(1))
-    hour: int = cfield(cs.BitsInteger(11))
-    minute: int = cfield(cs.BitsInteger(6))
-    second: int = cfield(cs.BitsInteger(6))
+    bin_data: int = cfield(cs.Bytes(3))
 
+    def set_precision(self, dec):
+        self.dec = dec
+        
+    def to_str(self):
+        if self.dec in [5, 6]:
+            int_part = self.bin_data
+            total = int.from_bytes(int_part + self.fsp, "big") - TIMEF_OFS
+            return long2time(total, self.dec)
+        if self.dec == 0:
+            int_part = cs.Int24ub.parse(self.bin_data) - TIMEF_INT_OFS
+            if int_part > (1<<23):
+                int_part -= (1<<24)
+            return long2time(int_part<<24, self.dec)
+        elif self.dec in [1, 2]:
+            int_part = cs.Int24ub.parse(self.bin_data) - TIMEF_INT_OFS
+            frac_part = cs.Int8ub.parse(self.fsp)
+            if int_part < 0 and frac_part != 0:
+                int_part += 1
+                frac_part -= 0x100
+            if int_part > (1<<23):
+                int_part -= (1<<24)
+            if self.dec == 1:
+                frac_part //= 10
+            return long2time((int_part << 24) + frac_part, self.dec)
+        elif self.dec in [3, 4]:
+            int_part = cs.Int24ub.parse(self.bin_data) - TIMEF_INT_OFS
+            frac_part = cs.Int16ub.parse(self.fsp)
+            if int_part < 0 and frac_part != 0:
+                int_part += 1
+                frac_part -= 0x10000
+            if int_part > (1<<23):
+                int_part -= (1<<24)
+            if self.dec == 3:
+                frac_part //= 10
+            return long2time((int_part << 24) + frac_part, self.dec)
+    
     def parse_fsp(self, stream, fsp):
         self.fsp = stream.read(fsp)
-
-    def to_timedelta(self) -> timedelta:
-        if self.signed == 0: # 负数
-            h = (~self.hour)& 0x07ff
-            m = (~self.minute) & 0x3f
-            s = (~self.second) & 0x3f
-            v = timedelta(hours=-h,minutes=m,seconds=s+1,microseconds=int.from_bytes(self.fsp, "big"))
-            return v
-            
-        v = timedelta(
-            hours=self.hour,
-            minutes=self.minute,
-            seconds=self.second,
-            microseconds=int.from_bytes(self.fsp, "big"),
-        )
-        return v
 
 
 class MDatetime(CC):
