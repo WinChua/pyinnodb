@@ -21,6 +21,7 @@ jobs:
       run: |
         curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION=-y bash
         source ~/.rye/env
+        git branch
         git show HEAD pyproject.toml
         git show HEAD pyproject.toml | grep version
         if [ $? == 0 ]
