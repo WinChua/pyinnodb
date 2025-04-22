@@ -70,7 +70,6 @@ class MTime2(CC):
     def parse_fsp(self, stream, fsp):
         self.fsp = stream.read(fsp)
 
-
 class MDatetime(CC):
     signed: int = cfield(cs.BitsInteger(1))
     year_month: int = cfield(cs.BitsInteger(17))

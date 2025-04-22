@@ -292,10 +292,6 @@ class Table:
                 vs.append("0x"+f.hex())
             elif isinstance(f, decimal.Decimal):
                 vs.append(str(f))
-            elif  isinstance(f, timedelta):
-                total_seconds = int(f.total_seconds())
-                vvv = f'{total_seconds // 3600}:{(total_seconds%3600)//60}:{total_seconds%60}'
-                vs.append(f"'{vvv}.{f.microseconds}'")
             else:
                 vs.append(repr(f))
         return vs
