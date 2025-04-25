@@ -4,7 +4,9 @@ from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.disk_struct.record import MRecordHeader
 from pyinnodb.sdi.table import Table
 from pyinnodb.disk_struct.rollback import History
+from pathlib import Path
 import os
+import typing as t
 
 from . import *
 
@@ -34,7 +36,7 @@ def list_first_page(ctx, pageno):
 @click.option("--datadir", type=click.Path(exists=False), default=None)
 def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
     """search the primary-key(int support only now)"""
-    f = ctx.obj["fn"]
+    f: t.IO[t.Any] = ctx.obj["fn"]
     # print("search start cost:", time.time() - ctx.obj["start_time"])
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
@@ -60,8 +62,12 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
         return
 
     if datadir is None:
-        print("--datadir should be specified to view the history")
-        return
+        fpath = Path(f.name)
+        if not (fpath.parent.parent/"mysql.ibd").exists():
+            print("--datadir should be specified to view the history")
+            return
+        datadir = fpath.parent.parent
+
     if not os.path.exists(datadir):
         print(f"--datadir {datadir} not exists")
         return
