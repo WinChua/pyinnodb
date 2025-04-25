@@ -8,7 +8,7 @@ from pathlib import Path
 import os
 import typing as t
 
-from . import *
+from . import *  # noqa: F403
 
 
 @main.command()
