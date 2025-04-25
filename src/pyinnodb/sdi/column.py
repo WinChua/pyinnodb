@@ -451,7 +451,7 @@ class Column:
             datetime_data.parse_fsp(stream, dsize - 5)  # 5 is MDatetime.sizeof()
             try:
                 return datetime_data.to_datetime()
-            except:
+            except Exception:
                 return datetime_data
         elif dtype == DDColumnType.NEWDATE:
             return MDate.parse_stream(stream).to_date()

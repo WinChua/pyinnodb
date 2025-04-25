@@ -266,13 +266,12 @@ class Table:
     def transfer(self, dc, keys=None):
         vs = []
         if keys is None:
-            value = []
-            for f in dataclasses.fields(dc):
-                value.append(getattr(dc, f.name))
+            value = [getattr(dc, f.name) for f in dataclasses.fields(dc)]
         elif isinstance(dc, self.DataClass):
             value = [getattr(dc, k) for k in keys]
         elif isinstance(dc, list):
             value = dc
+
         for f in value:
             if isinstance(f, dict) or isinstance(f, list):
                 vs.append(repr(json.dumps(f)))

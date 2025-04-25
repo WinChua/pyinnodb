@@ -22,12 +22,13 @@ logger = logging.getLogger(__name__)
 def main(ctx, fn, log_level, validate_first, version):
     """A ibd file parser for MySQL 8.0 above, help you to know innodb better.
 
+    \b
     It offer several function bellow:
-    a) validate the checksum of your ibd file;
-    b) output the DDL of table;
-    c) dump the data in ibd file as INSERT statments;
-    d) search record by primary key;
-    e) show the undo log history
+        a) validate the checksum of your ibd file;
+        b) output the DDL of table;
+        c) dump the data in ibd file as INSERT statments;
+        d) search record by primary key;
+        e) show the undo log history
 
     many other function to explore your ibd file
 

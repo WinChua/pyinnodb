@@ -1,11 +1,10 @@
-from datetime import timedelta, datetime, date
+from datetime import datetime, date
 from ..mconstruct import cs, cfield, CC
 
 try:
     from datetime import UTC
-except:
+except ImportError:
     from datetime import timezone
-
     UTC = timezone.utc
 
 TIMEF_INT_OFS = 0x800000
