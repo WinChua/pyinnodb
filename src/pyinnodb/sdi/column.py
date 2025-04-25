@@ -1,4 +1,4 @@
-const.FFFFFFFFmport decimal
+import decimal
 import io
 import struct
 import sys

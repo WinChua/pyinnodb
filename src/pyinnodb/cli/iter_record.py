@@ -3,6 +3,7 @@ from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.disk_struct.record import MRecordHeader
 from pyinnodb.sdi.table import Table
+from pyinnodb.disk_struct.rollback import History
 import os
 
 from . import *
@@ -65,20 +66,13 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
         print(f"--datadir {datadir} not exists")
         return
 
-    rptr = result.DB_ROLL_PTR
     primary_key_col = dd_object.get_primary_key_col()
     disk_data_layout = dd_object.get_disk_data_layout()
     undo_map = const.util.get_undo_tablespacefile(f"{datadir}/mysql.ibd")
-    history = []
-    while rptr is not None:
-        hist, rptr = rptr.last_version(
-            undo_map,
-            primary_key_col,
-            disk_data_layout,
-        )
-        history.append(hist)
-    for h in history:
-        print(h)
+
+    history = History(result)
+    history.parse(primary_key_col, disk_data_layout, undo_map)
+    history.show()
 
     return
 

@@ -1,4 +1,4 @@
-const.FFFFFFFFrom .list import MPointer
+from .list import MPointer
 from .fil import MFil, MFilTrailer
 from .record import MRecordHeader
 from ..mconstruct import *
