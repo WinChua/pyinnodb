@@ -84,6 +84,6 @@ def rseg_array(ctx, pageno):
     for pageno in page.header.pagenos:
         f.seek(pageno * const.PAGE_SIZE)
         rseg_page = MRSEGPage.parse_stream(f)
-        pages = [f for f in rseg_page.slots if f != 4294967295]
+        pages = [f for f in rseg_page.slots if f != const.FFFFFFFF]
         if 150 in pages:
             print(rseg_page, pageno)

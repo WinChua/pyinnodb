@@ -71,7 +71,7 @@ class MRollbackPointer(CC):
                 # if len > UNIV_EXTERN_STORAGE_FIELD:
                 #    len = ((len - UNIV_EXTERN_STORAGE_FIELD) & (~SPATIAL_STATUS_MASK))
                 col = disk_data_layout[col_no][0]
-                if len == 4294967295:  # UNIV_SQL_NULL & 0xffffffff
+                if len == const.FFFFFFFF:  # UNIV_SQL_NULL & 0xffffffff
                     orig_data = None
                 else:
                     orig_data = col.read_data(f, len)

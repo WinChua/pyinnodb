@@ -3,6 +3,7 @@ from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.disk_struct.record import MRecordHeader
 from pyinnodb.sdi.table import Table
+import os
 
 from . import *
 
