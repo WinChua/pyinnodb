@@ -266,13 +266,12 @@ class Table:
     def transfer(self, dc, keys=None):
         vs = []
         if keys is None:
-            value = []
-            for f in dataclasses.fields(dc):
-                value.append(getattr(dc, f.name))
+            value = [getattr(dc, f.name) for f in dataclasses.fields(dc)]
         elif isinstance(dc, self.DataClass):
             value = [getattr(dc, k) for k in keys]
         elif isinstance(dc, list):
             value = dc
+
         for f in value:
             if isinstance(f, dict) or isinstance(f, list):
                 vs.append(repr(json.dumps(f)))
@@ -381,7 +380,7 @@ class Table:
                         c_l[ie.column_opx] = ie.length
             data_layout_col = []
             for i, c in enumerate(self.columns):
-                data_layout_col.append((c, c_l.get(i, 4294967295)))
+                data_layout_col.append((c, c_l.get(i, const.FFFFFFFF)))
             data_layout_col.sort(key=lambda c: c[0].private_data.get("physical_pos", 0))
             return data_layout_col
 
@@ -462,7 +461,7 @@ class Table:
             quick=False,
         )
 
-        while first_leaf_page != 4294967295:
+        while first_leaf_page != const.FFFFFFFF:
             f.seek(first_leaf_page * const.PAGE_SIZE)
             index_page = MIndexPage.parse_stream(f)
             f.seek(first_leaf_page * const.PAGE_SIZE)
@@ -498,7 +497,7 @@ class Table:
                 start_rh = MRecordHeader.parse_stream(f)
                 owned = end_rh.num_record_owned
                 first_leaf_page = (
-                    4294967295  # no match if cur page is leaf then break loop
+                    const.FFFFFFFF  # no match if cur page is leaf then break loop
                 )
                 for i in range(owned + 1):
                     cur = f.tell()
@@ -531,7 +530,7 @@ class Table:
                     start_rh = MRecordHeader.parse_stream(f)
 
             logging.debug("index_page.fil.next_page is %s", index_page.fil.next_page)
-            if first_leaf_page == 4294967295 and index_page.fil.next_page != 4294967295:
+            if first_leaf_page == const.FFFFFFFF and index_page.fil.next_page != const.FFFFFFFF:
                 first_leaf_page = index_page.fil.next_page
 
     def iter_record(self, f, hidden_col=False, garbage=False, transfter=None):
@@ -549,7 +548,7 @@ class Table:
         )
 
         result = []
-        while first_leaf_page != 4294967295:
+        while first_leaf_page != const.FFFFFFFF:
             f.seek(first_leaf_page * const.PAGE_SIZE)
             index_page = MIndexPage.parse_stream(f)
             result.extend(

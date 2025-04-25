@@ -68,7 +68,7 @@ class MFirstPage(CC):  ## first_page_t
             stream.seek(ie.page_no * const.PAGE_SIZE)
             dp = MDataPage.parse_stream(stream)
             data += stream.read(dp.data_len)
-            if ie.node.next.page_number == 4294967295:
+            if ie.node.next.page_number == const.FFFFFFFF:
                 break
             stream.seek(ie.node.next.seek_loc())
             ie = MIndexEntryNode.parse_stream(stream)

@@ -11,8 +11,39 @@ UNIV_EXTERN_STORAGE_FIELD = int.from_bytes(
 SPATIAL_STATUS_SHIFT = 12
 SPATIAL_STATUS_MASK = 3 << SPATIAL_STATUS_SHIFT
 
+class History:
+    def __init__(self, final):
+        self.final = final
+        self.history: list[HistoryVersion] = []
+
+    def parse(self, primary_key_col, disk_data_layout, undo_map):
+        rptr: MRollbackPointer = self.final.DB_ROLL_PTR
+
+        while rptr is not None:
+            hist, rptr = rptr.last_version(
+                undo_map,
+                primary_key_col,
+                disk_data_layout,
+            )
+            self.history.append(hist)
+
+    def show(self):
+        last = self.final
+        for h in self.history:
+            if h.upd == 1:
+                print(f"update by trx_id[{h.trx_id}]:")
+                for col, before in h.field:
+                    after = getattr(last, col.name, None)
+                    if after is None:
+                        after = getattr(self.final, col.name, None)
+                    print(f"\tmodify field[{col.name}]: {before} --> {after}")
+            else:
+                print("insert record")
+            last = h
+        
 
 class HistoryVersion:
+
     def __init__(self, trx_id, rollptr, upd):
         self.trx_id = trx_id
         self.field = []
@@ -21,6 +52,7 @@ class HistoryVersion:
 
     def add_field(self, col, value):
         self.field.append((col, value))
+        setattr(self, col.name, value)
 
     def __str__(self):
         if self.upd == 1:
@@ -71,7 +103,7 @@ class MRollbackPointer(CC):
                 # if len > UNIV_EXTERN_STORAGE_FIELD:
                 #    len = ((len - UNIV_EXTERN_STORAGE_FIELD) & (~SPATIAL_STATUS_MASK))
                 col = disk_data_layout[col_no][0]
-                if len == 4294967295:  # UNIV_SQL_NULL & 0xffffffff
+                if len == const.FFFFFFFF:  # UNIV_SQL_NULL & 0xffffffff
                     orig_data = None
                 else:
                     orig_data = col.read_data(f, len)

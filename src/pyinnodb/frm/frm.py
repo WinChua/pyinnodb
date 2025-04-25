@@ -138,7 +138,7 @@ class MFrmKey(CC):
 
         idx.elements.append(
             IndexElement(
-                length=4294967295,
+                length=const.FFFFFFFF,
                 column_opx=len(cols),
                 hidden=True,
                 ordinal_position=len(cols) + 1,
@@ -147,7 +147,7 @@ class MFrmKey(CC):
 
         idx.elements.append(
             IndexElement(
-                length=4294967295,
+                length=const.FFFFFFFF,
                 column_opx=len(cols) + 1,
                 hidden=True,
                 ordinal_position=len(cols) + 2,
@@ -161,7 +161,7 @@ class MFrmKey(CC):
             ie.column_opx = i
             ie.ordinal_position = len(idx.elements) + 1
             ie.hidden = False
-            ie.length = 4294967295
+            ie.length = const.FFFFFFFF
             idx.elements.append(ie)
 
         return idx

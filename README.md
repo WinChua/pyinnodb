@@ -24,19 +24,19 @@ $ ./pyinnodb.sh --help
 ### dump the ddl from ibd file
 
 ```bash
-./pyinnodb.sh ${your_ibd_path} tosql --mode ddl
+./pyinnodb.sh --fn ${your_ibd_path} tosql --mode ddl
 ```
 
 ### dump sql script to insert data
 
 ```bash
-./pyinnodb.sh ${your_ibd_path} tosql --mode sql
+./pyinnodb.sh --fn ${your_ibd_path} tosql --mode sql
 ```
 
 ### search data with primary key(only support for int primary key now)
 
 ```bash
-./pyinnodb.sh ${your_ibd_path} search --primary-key 42
+./pyinnodb.sh --fn ${your_ibd_path} search --primary-key 42
 ```
 
 ## Mysql 5.7
@@ -44,6 +44,6 @@ $ ./pyinnodb.sh --help
 ### view data in ibd file, require .frm as well
 
 ```bash
-./pyinnodb.sh ${your_ibd_path} frm ${your_frm_path}
+./pyinnodb.sh --fn ${your_ibd_path} frm ${your_frm_path}
 ```
 

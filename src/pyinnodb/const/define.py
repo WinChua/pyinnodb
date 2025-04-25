@@ -1,4 +1,5 @@
 PAGE_SIZE = 16 * 1024
+FFFFFFFF = 0xFFFFFFFF
 
 FIL_PAGE_INDEX = 17855  # B-tree node */
 FIL_PAGE_RTREE = 17854  # R-tree node */

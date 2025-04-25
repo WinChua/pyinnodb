@@ -55,7 +55,7 @@ def dump_ibd(table_object, f, oneline=True):
     )
 
     values = []
-    while first_leaf_page_no != 4294967295:
+    while first_leaf_page_no != const.FFFFFFFF:
         f.seek(first_leaf_page_no * const.PAGE_SIZE)
         index_page = MIndexPage.parse_stream(f)
         values.extend(

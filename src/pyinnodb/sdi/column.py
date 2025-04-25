@@ -119,7 +119,7 @@ class Column:
         )
 
     def index_prefix(self, ie: IndexElement):
-        if ie.length == 4294967295:
+        if ie.length == const.FFFFFFFF:
             return 0, False
         varlen, prekey_len = 1, 0
         if DDColumnType.is_var(
@@ -451,7 +451,7 @@ class Column:
             datetime_data.parse_fsp(stream, dsize - 5)  # 5 is MDatetime.sizeof()
             try:
                 return datetime_data.to_datetime()
-            except:
+            except Exception:
                 return datetime_data
         elif dtype == DDColumnType.NEWDATE:
             return MDate.parse_stream(stream).to_date()
@@ -524,7 +524,7 @@ class Index:
         self.elements = c
 
     def get_effect_element(self) -> typing.List[IndexElement]:
-        return [e for e in self.elements if e.length != 4294967295 and not e.hidden]
+        return [e for e in self.elements if e.length != const.FFFFFFFF and not e.hidden]
 
     def get_index_type(self):
         it = const.index_type.IndexType(self.type)

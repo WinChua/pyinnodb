@@ -34,7 +34,7 @@ python 3.8 以上
 
 #### 1. 验证.ibd文件
 ```bash
-$ ./pyinnodb.sh datadir/test/all_type.ibd validate
+$ ./pyinnodb.sh --fn datadir/test/all_type.ibd validate
 
 page[1], fil.checksum[0x20fa5081], calculate checksum[0x20fa5081], eq[True]
 page[2], fil.checksum[0x18395c50], calculate checksum[0x18395c50], eq[True]
@@ -45,7 +45,7 @@ page[3], fil.checksum[0x1493810c], calculate checksum[0x1493810c], eq[True]
 
 #### 2. 输出表结构DDL语句
 ```bash
-$ ./pyinnodb.sh datadir/test/all_type.ibd tosql --mode ddl
+$ ./pyinnodb.sh --fn datadir/test/all_type.ibd tosql --mode ddl
 ```
 
 #### 3. 查看sdi
@@ -53,19 +53,19 @@ $ ./pyinnodb.sh datadir/test/all_type.ibd tosql --mode ddl
 称为SDI,通过以下命令查看表结构的sdi数据
 
 ```bash
-$ ./pyinnodb.sh datadir/test/all_type.ibd tosql --mode sdi
+$ ./pyinnodb.sh --fn datadir/test/all_type.ibd tosql --mode sdi
 ```
 SDI页中每一条记录都是一个JSON串, 可以通过 ` | jnv ` 交互式查看json数据
 
 #### 4. 导出ibd文件中的数据
 ```bash
-$ ./pyinnodb.sh datadir/test/all_type.ibd tosql --mode dump
+$ ./pyinnodb.sh --fn datadir/test/all_type.ibd tosql --mode dump
 ```
 命令会将ibd文件中每一条记录导出成SQL语句, 通过 ` > data.sql`
 
 #### 5. 搜索指定主键的记录
 ```bash
-$ ./pyinnodb.sh datadir/test/all_type.ibd search --primary-key 1
+$ ./pyinnodb.sh --fn datadir/test/all_type.ibd search --primary-key 1
 ```
 <details>
 <summary>展开输出以及解释</summary>
@@ -77,7 +77,7 @@ search命令通过--primary-key选项指定主键的值, 将会在ibd文件中�
 
 此外,search命令还包括--hidden-col, 指定后将会解析,记录的隐藏字段, 如:
 ```bash
-$ ./pyinnodb.sh datadir/test/all_type.ibd search --primary-key 2 --hidden-col
+$ ./pyinnodb.sh --fn datadir/test/all_type.ibd search --primary-key 2 --hidden-col
 ```
 
 <details>
@@ -88,7 +88,7 @@ $ ./pyinnodb.sh datadir/test/all_type.ibd search --primary-key 2 --hidden-col
 
 如果进一步查看数据的修改记录, 可以指定 --with-hist 以及--datadir指定mysql的数据目录来查看, 如:
 ```bash
-$ ./pyinnodb.sh datadir/test/all_type.ibd search --primary-key 2 --hidden-col --with-hist --datadir datadir
+$ ./pyinnodb.sh --fn datadir/test/all_type.ibd search --primary-key 2 --hidden-col --with-hist --datadir datadir
 ```
 
 <details>
@@ -110,5 +110,5 @@ $ ./pyinnodb.sh datadir/test/all_type.ibd search --primary-key 2 --hidden-col --
 mysql 5.7的文件组织方式与mysql8.0不同,表结构存储在.frm文件,而数据存储在.ibd,对ibd文件的解析需要使用:
 
 ```
-./pyinnodb.sh datadir/test/all_type.ibd frm datadir/test/all_type.frm
+./pyinnodb.sh --fn datadir/test/all_type.ibd frm datadir/test/all_type.frm
 ```

@@ -50,7 +50,7 @@ class MFsegHeader(CC):
     # should not use this way to determine the first leaf page number
     # as off-page may allocate first
     # def get_first_leaf_page(self, f):
-    #     if self.leaf_pointer.page_number != 4294967295:
+const.FFFFFFFF   #     if self.leaf_pointer.page_number != const.FFFFFFFF:
     #         f.seek(self.leaf_pointer.seek_loc())
     #         inode_entry = MInodeEntry.parse_stream(f)
     #         fp = inode_entry.first_page()
@@ -163,7 +163,7 @@ class MIndexPage(CC):
             nullable_cols = [
                 d[0]
                 for d in cols_disk_layout
-                if d[1] == 4294967295 and d[0].is_nullable
+                if d[1] == const.FFFFFFFF and d[0].is_nullable
             ]
 
             logger.debug(
@@ -256,16 +256,15 @@ class MIndexPage(CC):
                 disk_data_parsed[col.name] = col_value
 
             for col in dd_object.columns:
-                if (
-                    col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]
-                    and not hidden_col
-                ) or col.private_data.get("version_dropped", 0) != 0 or col.is_hidden_from_user:
+                if col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]:
+                    if not hidden_col and col.name in disk_data_parsed:
+                        disk_data_parsed.pop(col.name)
+                elif col.private_data.get("version_dropped", 0) != 0 or col.is_hidden_from_user:
                     if col.name in disk_data_parsed:
                         disk_data_parsed.pop(col.name)
+                elif col.is_virtual or col.generation_expression_utf8 != "":
                     continue
-                if col.is_virtual or col.generation_expression_utf8 != "":
-                    continue
-                if col.name not in disk_data_parsed:
+                elif col.name not in disk_data_parsed:
                     disk_data_parsed[col.name] = col.get_instant_default()
 
             klass = dd_object.DataClassHiddenCol if hidden_col else dd_object.DataClass
@@ -407,7 +406,7 @@ class MSDIPage(CC):
             stream.seek(-8 + infimum.next_record_offset + 12, 1)
             cur_page_num = int.from_bytes(stream.read(4), byteorder="big")
 
-        while cur_page_num != 4294967295:
+        while cur_page_num != const.FFFFFFFF:
             stream.seek(cur_page_num * const.PAGE_SIZE)
             sdi_page = MSDIPage.parse_stream(stream)
             stream.seek(
