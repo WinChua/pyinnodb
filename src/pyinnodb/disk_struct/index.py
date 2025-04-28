@@ -1,26 +1,22 @@
-from .list import MPointer
-from .fil import MFil, MFilTrailer
-from .record import MRecordHeader
-from ..mconstruct import *
-
+import json
+import logging
+import typing
+import zlib
+from typing import TYPE_CHECKING
 
 from .. import const
 from ..const.dd_column_type import DDColumnType
-
-from typing import TYPE_CHECKING
-import typing
+from ..mconstruct import CC, IntFromBytes, carray, cfield, cs, cstring
+from .fil import MFil, MFilTrailer
+from .list import MPointer
+from .record import MRecordHeader
 
 Table = typing.Type["Table"]
+
 if TYPE_CHECKING:
     from ..sdi.table import Table
 
-
-import logging
-import json
-import zlib
-
 logger = logging.getLogger(__name__)
-
 
 class MIndexHeader(CC):  # page0types.h call page header page_header_t
     dir_slot_number: int = cfield(cs.Int16ub)
@@ -50,7 +46,7 @@ class MFsegHeader(CC):
     # should not use this way to determine the first leaf page number
     # as off-page may allocate first
     # def get_first_leaf_page(self, f):
-const.FFFFFFFF   #     if self.leaf_pointer.page_number != const.FFFFFFFF:
+    #     if self.leaf_pointer.page_number != const.FFFFFFFF:
     #         f.seek(self.leaf_pointer.seek_loc())
     #         inode_entry = MInodeEntry.parse_stream(f)
     #         fp = inode_entry.first_page()
@@ -121,7 +117,7 @@ class MIndexPage(CC):
                 cur % const.PAGE_SIZE,
             )
             if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
-                next_page_no = const.parse_mysql_int(f.read(4))
+                next_page_no = const.parse_mysql_int(f.read(4))  # noqa: F841
                 return
 
             # data scheme version
@@ -397,11 +393,11 @@ class MSDIPage(CC):
         cur_page_num = self.fil.offset
         while True:
             stream.seek(const.PAGE_SIZE * cur_page_num)
-            fil = MFil.parse_stream(stream)
+            fil = MFil.parse_stream(stream)  # noqa: F841
             index_header = MIndexHeader.parse_stream(stream)
             if index_header.page_level == 0:
                 break
-            fseg_header = MFsegHeader.parse_stream(stream)
+            fseg_header = MFsegHeader.parse_stream(stream) # noqa: F841
             infimum = MSystemRecord.parse_stream(stream)
             stream.seek(-8 + infimum.next_record_offset + 12, 1)
             cur_page_num = int.from_bytes(stream.read(4), byteorder="big")
