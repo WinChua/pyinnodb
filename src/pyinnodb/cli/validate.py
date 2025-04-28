@@ -1,7 +1,12 @@
+from io import BytesIO
+
+import click
+
+from pyinnodb import const
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.fsp import MFspHeader
 
-from . import *
+from . import main
 
 
 @main.command()
@@ -9,7 +14,7 @@ from . import *
 def validate(ctx):
     """output the calculated checksum and the checksum stored in page"""
     f = ctx.obj["fn"]
-    fsp_page = ctx.obj["fsp_page"]
+    # fsp_page = ctx.obj["fsp_page"]
     f.seek(0)
     first_page = f.read(const.PAGE_SIZE)
     cal_checksum = const.page_checksum_crc32c(first_page)

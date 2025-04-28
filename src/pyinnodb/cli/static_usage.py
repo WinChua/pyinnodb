@@ -1,10 +1,12 @@
+import click
+
 from pyinnodb import color, const
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.index import MIndexHeader
 from pyinnodb.disk_struct.inode import MInodeEntry, MInodePage
 
-from . import *
+from . import main
 
 
 @main.command()

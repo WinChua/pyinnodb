@@ -1,6 +1,8 @@
+import click
+
 from pyinnodb import disk_struct
 
-from . import *
+from . import main
 
 
 @main.command()

@@ -1,7 +1,10 @@
+import click
+
+from pyinnodb import const
 from pyinnodb.disk_struct.index import MIndexPage
 from pyinnodb.sdi import table
 
-from . import *
+from . import main
 
 
 @main.command()

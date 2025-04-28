@@ -1,10 +1,13 @@
+import click
+
+from pyinnodb import const
+from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.disk_struct.rollback import MRollbackPointer
-from pyinnodb.disk_struct.trx import *
-from pyinnodb.disk_struct.undo_log import *
+from pyinnodb.disk_struct.undo_log import MRSEGArrayPage, MRSEGPage, MUndoPage
 from pyinnodb.sdi.table import Table
 
-from . import *
+from . import main
 
 
 @main.command()
@@ -20,7 +23,7 @@ def undo_tablespaces(ctx, datadir):
 def undo_list(ctx, pageno):
     """dump the undo page"""
     f = ctx.obj["fn"]
-    fsp_page = ctx.obj["fsp_page"]
+    # fsp_page = ctx.obj["fsp_page"]
     f.seek(pageno * const.PAGE_SIZE)
     undo_page = MUndoPage.parse_stream(f)
     print(undo_page)

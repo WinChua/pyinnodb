@@ -8,7 +8,9 @@ from pathlib import Path
 import os
 import typing as t
 
-from . import *  # noqa: F403
+from . import main, click, const
+
+import dataclasses
 
 
 @main.command()
@@ -16,7 +18,7 @@ from . import *  # noqa: F403
 @click.option("--pageno", type=click.INT, default=5)
 def list_first_page(ctx, pageno):
     f = ctx.obj["fn"]
-    fsp_page = ctx.obj["fsp_page"]
+    #fsp_page = ctx.obj["fsp_page"]
     f.seek(pageno * const.PAGE_SIZE)
     first_page = MFirstPage.parse_stream(f)
     import json
@@ -100,7 +102,6 @@ def primary_key_only(key_len: int):
     help="show the DB_ROLL_PTR and DB_TRX_ID",
 )
 @click.option("--pageno", default=None, type=click.INT, help="iterate on pageno only")
-# @click.option("--primary-key-len", type=click.INT, help="primary key only if not 0", default=0)
 @click.option("--sdi-idx", type=click.INT, default=0, help="idx of sdi")
 def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx):
     """iterate on the leaf pages

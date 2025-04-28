@@ -1,9 +1,13 @@
+import os
+
+import click
+
 from pyinnodb import const
 from pyinnodb.const import util
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.sdi.table import Table
 
-from . import *
+from . import main
 
 
 @main.command()
