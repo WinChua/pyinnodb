@@ -1,18 +1,15 @@
+import json
 import os
 import shutil
-import click
-import json
+from dataclasses import asdict, dataclass
 from pprint import pprint
 
-from dataclasses import dataclass, asdict
-from testcontainers.mysql import MySqlContainer
-from testcontainers.core.config import testcontainers_config as c
-
+import click
 from sqlalchemy import create_engine
+from testcontainers.core.config import testcontainers_config as c
+from testcontainers.mysql import MySqlContainer
 
-
-from pyinnodb import const
-from pyinnodb import disk_struct
+from pyinnodb import const, disk_struct
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.sdi.table import Table
 
@@ -125,6 +122,7 @@ def connect(version, sql):
     else:
         os.system(deploy_container.get(version).cmd + f" -e '{sql}'")
 
+
 @main.command()
 @click.option("--version", type=click.STRING, default="")
 @click.option("--sql", type=click.STRING, default="")
@@ -146,7 +144,7 @@ def exec(version, sql, file):
         else:
             for r in result.fetchall():
                 print(r)
-            
+
 
 @main.command()
 @click.option("--version", type=click.STRING, default="")
@@ -171,7 +169,9 @@ def rand_data(version, table, size, idx):
             return
         f.seek(fsp.sdi_page_no * const.PAGE_SIZE)
         sdi_page = MSDIPage.parse_stream(f)
-        all_tables = [d for d in sdi_page.iterate_sdi_record(f) if d["dd_object_type"] == "Table"]
+        all_tables = [
+            d for d in sdi_page.iterate_sdi_record(f) if d["dd_object_type"] == "Table"
+        ]
         if len(all_tables) > 1 and idx == -1:
             print("these is more than one table, please use --idx to specify one")
             return
@@ -183,8 +183,10 @@ def rand_data(version, table, size, idx):
         with engine.connect() as conn:
             conn.exec_driver_sql(sql)
             conn.commit()
-        print(f"insert {size} record randomly into {dd_object.schema_ref}.{dd_object.name}")
-                
+        print(
+            f"insert {size} record randomly into {dd_object.schema_ref}.{dd_object.name}"
+        )
+
 
 if __name__ == "__main__":
     main()

@@ -1,8 +1,7 @@
 import sqlalchemy
+from sqlalchemy import text
 from sqlalchemy.dialects import mysql as dmysql
 from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy import text
-
 
 with open(".deploy_mysqld") as f:
     url = f.readline().strip()

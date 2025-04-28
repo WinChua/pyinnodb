@@ -15,6 +15,8 @@ with engine.connect() as conn:
     for i in range(100):
         values = []
         for j in range(col):
-            values.append(f"({i*col+j},\"{''.join(random.choices(alphabet,k=10))}\")")
+            values.append(
+                f'({i * col + j},"{"".join(random.choices(alphabet, k=10))}")'
+            )
         conn.exec_driver_sql(f"insert into test.t1 value{','.join(values)}")
     conn.commit()

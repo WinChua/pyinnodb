@@ -4,7 +4,8 @@ from sqlalchemy.orm import declarative_base
 import pathlib
 import pytest
 from collections import namedtuple
-#ruff: noqa
+
+# ruff: noqa
 from pyinnodb import const
 
 cur_file = pathlib.Path(__file__)
