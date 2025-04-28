@@ -9,8 +9,6 @@ from pyinnodb import const
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.fsp import MFspPage
 
-logger = logging.getLogger(__name__)
-
 
 def validate_ibd(fsp_page: MFspPage, fn: t.IO[t.Any]):
     for pn in range(fsp_page.fsp_header.highest_page_number):
@@ -59,9 +57,14 @@ def main(ctx, fn, log_level, validate_first, version):
         print("use --fn to specify ibd file")
         sys.exit(0)
 
-    logging.basicConfig(
-        format="[%(levelname)s]-[%(filename)s:%(lineno)d] %(message)s", level=log_level
+    logger = logging.getLogger("pyinnodb")
+    logger.setLevel(log_level)
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        logging.Formatter(fmt="[%(levelname)s]-[%(filename)s:%(lineno)d] %(message)s")
     )
+    logger.addHandler(handler)
+
     ctx.ensure_object(dict)
     ctx.obj["fn"] = fn
 
