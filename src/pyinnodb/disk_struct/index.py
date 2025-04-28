@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
 class MIndexHeader(CC):  # page0types.h call page header page_header_t
     dir_slot_number: int = cfield(cs.Int16ub)
     heap_top_pos: int = cfield(cs.Int16ub)
@@ -104,7 +105,9 @@ class MIndexPage(CC):
     system_records: MIndexSystemRecord = cfield(MIndexSystemRecord)
 
     @classmethod
-    def default_value_parser(cls, dd_object: Table, transfter=None, hidden_col=False, quick=True):
+    def default_value_parser(
+        cls, dd_object: Table, transfter=None, hidden_col=False, quick=True
+    ):
         primary_data_layout_col = dd_object.get_disk_data_layout()
 
         def value_parser(rh: MRecordHeader, f):
@@ -191,10 +194,12 @@ class MIndexPage(CC):
                 (i, c[0])
                 for i, c in enumerate(cols_disk_layout)
                 if (not c[0].column_type_utf8.startswith("binary"))
-                and (DDColumnType.is_big(c[0].type)
-                or DDColumnType.is_var(
-                    c[0].type, mysqld_version=dd_object.mysql_version_id
-                ))
+                and (
+                    DDColumnType.is_big(c[0].type)
+                    or DDColumnType.is_var(
+                        c[0].type, mysqld_version=dd_object.mysql_version_id
+                    )
+                )
             ]
             logger.debug(
                 "may_var_col is %s",
@@ -255,7 +260,10 @@ class MIndexPage(CC):
                 if col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]:
                     if not hidden_col and col.name in disk_data_parsed:
                         disk_data_parsed.pop(col.name)
-                elif col.private_data.get("version_dropped", 0) != 0 or col.is_hidden_from_user:
+                elif (
+                    col.private_data.get("version_dropped", 0) != 0
+                    or col.is_hidden_from_user
+                ):
                     if col.name in disk_data_parsed:
                         disk_data_parsed.pop(col.name)
                 elif col.is_virtual or col.generation_expression_utf8 != "":
@@ -397,7 +405,7 @@ class MSDIPage(CC):
             index_header = MIndexHeader.parse_stream(stream)
             if index_header.page_level == 0:
                 break
-            fseg_header = MFsegHeader.parse_stream(stream) # noqa: F841
+            fseg_header = MFsegHeader.parse_stream(stream)  # noqa: F841
             infimum = MSystemRecord.parse_stream(stream)
             stream.seek(-8 + infimum.next_record_offset + 12, 1)
             cur_page_num = int.from_bytes(stream.read(4), byteorder="big")

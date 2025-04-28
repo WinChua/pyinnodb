@@ -6,6 +6,7 @@ from pyinnodb.sdi.table import Table
 from pyinnodb.disk_struct.rollback import History
 from pathlib import Path
 import os
+import json
 import typing as t
 
 from . import main, click, const
@@ -18,10 +19,9 @@ import dataclasses
 @click.option("--pageno", type=click.INT, default=5)
 def list_first_page(ctx, pageno):
     f = ctx.obj["fn"]
-    #fsp_page = ctx.obj["fsp_page"]
+    # fsp_page = ctx.obj["fsp_page"]
     f.seek(pageno * const.PAGE_SIZE)
     first_page = MFirstPage.parse_stream(f)
-    import json
 
     print(json.dumps(dataclasses.asdict(first_page)))
     first_entry = first_page.index_list.idx(0, f)
@@ -65,7 +65,7 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
 
     if datadir is None:
         fpath = Path(f.name)
-        if not (fpath.parent.parent/"mysql.ibd").exists():
+        if not (fpath.parent.parent / "mysql.ibd").exists():
             print("--datadir should be specified to view the history")
             return
         datadir = fpath.parent.parent

@@ -1,5 +1,6 @@
 import dataclasses
 
+
 def modify_init(cls):
     old_init = cls.__init__
     field_names = [f.name for f in dataclasses.fields(cls)]
@@ -18,4 +19,3 @@ def modify_init(cls):
 
     cls.__init__ = __init__
     return cls
-

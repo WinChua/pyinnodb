@@ -42,6 +42,7 @@ def tosql(ctx, mode, sdi_idx, schema):
             dump_ibd(table_object, f)
         return
 
+
 def dump_ibd(table_object, f, oneline=True):
     root_page_no = int(table_object.indexes[0].private_data.get("root", 4))
     f.seek(root_page_no * const.PAGE_SIZE)
@@ -62,9 +63,7 @@ def dump_ibd(table_object, f, oneline=True):
         f.seek(first_leaf_page_no * const.PAGE_SIZE)
         index_page = MIndexPage.parse_stream(f)
         values.extend(
-            index_page.iterate_record_header(
-                f, value_parser=default_value_parser
-            )
+            index_page.iterate_record_header(f, value_parser=default_value_parser)
         )
         first_leaf_page_no = index_page.fil.next_page
 
@@ -73,17 +72,20 @@ def dump_ibd(table_object, f, oneline=True):
     table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
     if not oneline:
         print(
-            f"INSERT INTO {table_name}({','.join(
-                table_object.keys()
-            )}) values {', '.join(values)}"
+            f"INSERT INTO {table_name}({','.join(table_object.keys())}) values {
+                ', '.join(values)
+            }"
         )
     else:
         for v in values:
-            print(f"INSERT INTO {table_name}({','.join(table_object.keys())}) values {v};")
-        
+            print(
+                f"INSERT INTO {table_name}({','.join(table_object.keys())}) values {v};"
+            )
 
     return
-# 
+
+
+#
 # 'type': sql/dd/types/column.h::enum_column_type
 # column_key : ag --cpp \ CK_NONE
 

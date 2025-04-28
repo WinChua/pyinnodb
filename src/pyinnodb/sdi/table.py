@@ -38,7 +38,6 @@ class Lob:
         return f"<Lob length:{len(self.data)} preview:{self.data[:5] + b'..' + self.data[-5:]} off_page:{self.off_page}>"
 
 
-
 @modify_init
 @dataclass(eq=False)
 class CheckCons:
@@ -49,8 +48,6 @@ class CheckCons:
 
     def gen(self):
         return f"CONSTRAINT `{self.name}` CHECK ({self.check_clause_utf8})"
-
-
 
 
 @modify_init
@@ -168,7 +165,9 @@ class Table:
     #
 
     def gen_ddl(self, schema):
-        table_name = f"`{self.schema_ref}`.`{self.name}`" if schema else f"`{self.name}`"
+        table_name = (
+            f"`{self.schema_ref}`.`{self.name}`" if schema else f"`{self.name}`"
+        )
         column_desc = []
         for c in self.columns:
             if c.hidden == const.column_hidden_type.ColumnHiddenType.HT_HIDDEN_SE.value:
@@ -184,11 +183,7 @@ class Table:
         parts = self.gen_sql_for_partition()
         collation = const.get_collation_by_id(self.collation_id)
         desc = f"ENGINE={self.engine} DEFAULT CHARSET={collation.CHARACTER_SET_NAME} COLLATE={collation.COLLATION_NAME}"
-        comment = (
-            "\nCOMMENT '" + self.comment + "'"
-            if self.comment
-            else ""
-        )
+        comment = "\nCOMMENT '" + self.comment + "'" if self.comment else ""
         return f"CREATE TABLE {table_name} ({column_desc}) {desc}{parts}{comment}"
 
     def update_with_frm(self, frm):
@@ -196,7 +191,9 @@ class Table:
             frm_header = mfrm.MFrm.parse_stream(f)
             self.columns = []
             for i, col in enumerate(frm_header.cols):
-                self.columns.append(col.to_dd_column(col.name, i, frm_header.column_labels))
+                self.columns.append(
+                    col.to_dd_column(col.name, i, frm_header.column_labels)
+                )
 
             keys, key_name, key_comment = frm_header.keys[0]
 
@@ -209,7 +206,6 @@ class Table:
 
             self.indexes = [idx]
 
-    
     @property
     @cache
     def private_data(self):
@@ -230,14 +226,19 @@ class Table:
         return namedtuple(self.name, " ".join(cols))
 
     def keys(self, no_primary=False, for_rand=False):
-        v =  [f.name for f in dataclasses.fields(self.DataClass)] 
+        v = [f.name for f in dataclasses.fields(self.DataClass)]
         if not no_primary and not for_rand:
-            return  v
+            return v
         primary_key_name = [f.name for f in self.get_primary_key_col()]
         v = [f for f in v if f not in primary_key_name]
         if not for_rand:
             return v
-        target = [f.name for f in dataclasses.fields(self.DataClass) if DDColConf.get_col_type_conf(f.metadata['col'].type).rand_func != rand_none]
+        target = [
+            f.name
+            for f in dataclasses.fields(self.DataClass)
+            if DDColConf.get_col_type_conf(f.metadata["col"].type).rand_func
+            != rand_none
+        ]
 
         return [f for f in v if f in target]
 
@@ -257,9 +258,9 @@ class Table:
             for f in dataclasses.fields(self.DataClass):
                 if f.name not in keys:
                     continue
-                func = DDColConf.get_col_type_conf(f.metadata['col'].type).rand_func
+                func = DDColConf.get_col_type_conf(f.metadata["col"].type).rand_func
                 if func:
-                    v.append(func(f.metadata['col']))
+                    v.append(func(f.metadata["col"]))
             vs.append(v)
         return vs
 
@@ -279,22 +280,18 @@ class Table:
                 vs.append("NULL")
             elif isinstance(f, MTime2):
                 vs.append(f.to_str())
-            elif (
-                isinstance(f, date)
-                or isinstance(f, datetime)
-            ):
+            elif isinstance(f, date) or isinstance(f, datetime):
                 vs.append(f"'{str(f)}'")
             elif isinstance(f, MGeo):
                 d = f.build().hex()  # .zfill(50)
                 vs.append("0x" + d)
             elif isinstance(f, bytes):
-                vs.append("0x"+f.hex())
+                vs.append("0x" + f.hex())
             elif isinstance(f, decimal.Decimal):
                 vs.append(str(f))
             else:
                 vs.append(repr(f))
         return vs
-        
 
     @property
     @cache
@@ -457,7 +454,9 @@ class Table:
         else:
             primary_key = self.build_primary_key_bytes((primary_key,))
         value_parser = MIndexPage.default_value_parser(
-            self, hidden_col=hidden_col, transfter=lambda id: id,
+            self,
+            hidden_col=hidden_col,
+            transfter=lambda id: id,
             quick=False,
         )
 
@@ -530,7 +529,10 @@ class Table:
                     start_rh = MRecordHeader.parse_stream(f)
 
             logging.debug("index_page.fil.next_page is %s", index_page.fil.next_page)
-            if first_leaf_page == const.FFFFFFFF and index_page.fil.next_page != const.FFFFFFFF:
+            if (
+                first_leaf_page == const.FFFFFFFF
+                and index_page.fil.next_page != const.FFFFFFFF
+            ):
                 first_leaf_page = index_page.fil.next_page
 
     def iter_record(self, f, hidden_col=False, garbage=False, transfter=None):
@@ -629,9 +631,15 @@ class Table:
             parts = ",\n    ".join(parts) + "\n"
             return "\n" + f"{p}{parts})*/"
         elif pt == const.partition.PartitionType.PT_HASH:
-            return "\n" + f"/*!50100 PARTITION BY HASH ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            return (
+                "\n"
+                + f"/*!50100 PARTITION BY HASH ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            )
         elif pt == const.partition.PartitionType.PT_KEY_55:
-            return "\n" + f"/*!50100 PARTITION BY KEY ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            return (
+                "\n"
+                + f"/*!50100 PARTITION BY KEY ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            )
         elif pt == const.partition.PartitionType.PT_LIST:
             p = f"/*!50100 PARTITION BY LIST ({self.partition_expression_utf8}) (\n    "
             parts = []
