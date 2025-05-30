@@ -70,9 +70,7 @@ def dump_ibd(table_object, f, oneline=True):
     table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
     if not oneline:
         print(
-            f"INSERT INTO {table_name}({','.join(
-                table_object.keys()
-            )}) values {', '.join(values)}"
+            f"INSERT INTO {table_name}({','.join( table_object.keys() )}) values {', '.join(values)}"
         )
     else:
         for v in values:
