@@ -381,7 +381,7 @@ class Table:
             data_layout_col = []
             for i, c in enumerate(self.columns):
                 data_layout_col.append((c, c_l.get(i, const.FFFFFFFF)))
-            data_layout_col.sort(key=lambda c: c[0].private_data.get("physical_pos", 0))
+            data_layout_col.sort(key=lambda c: int(c[0].private_data.get("physical_pos", 0)))
             return data_layout_col
 
         data_layout_col = []
