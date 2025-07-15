@@ -1,5 +1,6 @@
 from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.fsp import MFspHeader
+from io import BytesIO
 
 from . import *
 
