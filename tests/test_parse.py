@@ -15,7 +15,7 @@ def test_parse_mysql8(mysqlfile: MysqlFile):
     sdi_page = MSDIPage.parse_stream(mysqlfile.mysql8ibd)
     dd_object = Table(**sdi_page.ddl(mysqlfile.mysql8ibd, 0)["dd_object"])
 
-    result = dd_object.iter_record(mysqlfile.mysql8ibd, transfter=lambda x: x)
+    result = dd_object.iter_record(mysqlfile.mysql8ibd)
     cls = dd_object.DataClass
     test_data = cls(
         id=1,

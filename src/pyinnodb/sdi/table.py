@@ -263,6 +263,9 @@ class Table:
             vs.append(v)
         return vs
 
+    def wrap_transfer(self, rh, dc):
+        return self.transfer(dc)
+    
     def transfer(self, dc, keys=None):
         vs = []
         if keys is None:
@@ -457,7 +460,7 @@ class Table:
         else:
             primary_key = self.build_primary_key_bytes((primary_key,))
         value_parser = MIndexPage.default_value_parser(
-            self, hidden_col=hidden_col, transfter=lambda id: id,
+            self, hidden_col=hidden_col, # transfter=lambda rh, data: data,
             quick=False,
         )
 

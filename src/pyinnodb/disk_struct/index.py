@@ -271,7 +271,7 @@ class MIndexPage(CC):
             if transfter is None:
                 return klass(**disk_data_parsed)
             else:
-                return transfter(klass(**disk_data_parsed))
+                return transfter(rh, klass(**disk_data_parsed))
             return
 
         return value_parser
