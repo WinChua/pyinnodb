@@ -102,7 +102,8 @@ def primary_key_only(key_len: int):
 @click.option("--pageno", default=None, type=click.INT, help="iterate on pageno only")
 # @click.option("--primary-key-len", type=click.INT, help="primary key only if not 0", default=0)
 @click.option("--sdi-idx", type=click.INT, default=0, help="idx of sdi")
-def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx):
+@click.option("--header", type=click.INT, help="0:parse value, 1:header only, 2:header with primary key and value, 3:header with primary value")
+def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx, header=0):
     """iterate on the leaf pages
 
     by default, iter_record will iterate from the first leaf page
@@ -116,6 +117,15 @@ def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx):
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
 
-    dd_object.iter_record(f, hidden_col=hidden_col, garbage=garbage)
+    tf = None
+    if header == 1:
+        tf = dd_object.trans_record_header
+    elif header == 2:
+        tf = dd_object.trans_record_header_key(True)
+    elif header == 3:
+        tf =dd_object.trans_record_header_key(False)
+
+    for data in dd_object.iter_record(f, hidden_col=hidden_col, garbage=garbage, transfer=tf):
+        print(data)
 
     return

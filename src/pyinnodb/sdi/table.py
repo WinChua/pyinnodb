@@ -263,6 +263,26 @@ class Table:
             vs.append(v)
         return vs
 
+    def trans_record_header_key(self, with_key=False):
+        primary_key_col = self.get_primary_key_col()
+        if with_key:
+            def tf(rh, dc):
+                data = [{col.name: getattr(dc, col.name, None)} for col in primary_key_col]
+                if len(data) == 1:
+                    return data[0], rh
+                return data, rh
+            return tf
+        else:
+            def tf(rh, dc):
+                data = [getattr(dc, col.name, None) for col in primary_key_col]
+                if len(data) == 1:
+                    return data[0], rh
+                return data, rh
+            return tf
+
+    def trans_record_header(self, rh, dc):
+        return rh
+    
     def wrap_transfer(self, rh, dc):
         return self.transfer(dc)
     
