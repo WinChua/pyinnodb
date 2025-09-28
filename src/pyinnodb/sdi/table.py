@@ -263,6 +263,29 @@ class Table:
             vs.append(v)
         return vs
 
+    def trans_record_header_key(self, with_key=False):
+        primary_key_col = self.get_primary_key_col()
+        if with_key:
+            def tf(rh, dc):
+                data = [{col.name: getattr(dc, col.name, None)} for col in primary_key_col]
+                if len(data) == 1:
+                    return data[0], rh
+                return data, rh
+            return tf
+        else:
+            def tf(rh, dc):
+                data = [getattr(dc, col.name, None) for col in primary_key_col]
+                if len(data) == 1:
+                    return data[0], rh
+                return data, rh
+            return tf
+
+    def trans_record_header(self, rh, dc):
+        return rh
+    
+    def wrap_transfer(self, rh, dc):
+        return self.transfer(dc)
+    
     def transfer(self, dc, keys=None):
         vs = []
         if keys is None:
@@ -457,7 +480,7 @@ class Table:
         else:
             primary_key = self.build_primary_key_bytes((primary_key,))
         value_parser = MIndexPage.default_value_parser(
-            self, hidden_col=hidden_col, transfter=lambda id: id,
+            self, hidden_col=hidden_col, # transfter=lambda rh, data: data,
             quick=False,
         )
 
@@ -533,7 +556,7 @@ class Table:
             if first_leaf_page == const.FFFFFFFF and index_page.fil.next_page != const.FFFFFFFF:
                 first_leaf_page = index_page.fil.next_page
 
-    def iter_record(self, f, hidden_col=False, garbage=False, transfter=None):
+    def iter_record(self, f, hidden_col=False, garbage=False, transfer=None):
         root_page_no = int(self.indexes[0].private_data.get("root", 4))
         f.seek(root_page_no * const.PAGE_SIZE)
         root_index_page = MIndexPage.parse_stream(f)
@@ -544,7 +567,7 @@ class Table:
             return
 
         default_value_parser = MIndexPage.default_value_parser(
-            self, hidden_col=hidden_col, transfter=transfter
+            self, hidden_col=hidden_col, transfer=transfer
         )
 
         result = []

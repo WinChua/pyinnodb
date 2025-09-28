@@ -108,7 +108,7 @@ class MIndexPage(CC):
     system_records: MIndexSystemRecord = cfield(MIndexSystemRecord)
 
     @classmethod
-    def default_value_parser(cls, dd_object: Table, transfter=None, hidden_col=False, quick=True):
+    def default_value_parser(cls, dd_object: Table, transfer=None, hidden_col=False, quick=True):
         primary_data_layout_col = dd_object.get_disk_data_layout()
 
         def value_parser(rh: MRecordHeader, f):
@@ -268,10 +268,10 @@ class MIndexPage(CC):
                     disk_data_parsed[col.name] = col.get_instant_default()
 
             klass = dd_object.DataClassHiddenCol if hidden_col else dd_object.DataClass
-            if transfter is None:
+            if transfer is None:
                 return klass(**disk_data_parsed)
             else:
-                return transfter(klass(**disk_data_parsed))
+                return transfer(rh, klass(**disk_data_parsed))
             return
 
         return value_parser

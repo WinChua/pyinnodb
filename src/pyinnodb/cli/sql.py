@@ -51,7 +51,7 @@ def dump_ibd(table_object, f, oneline=True):
         return
 
     default_value_parser = MIndexPage.default_value_parser(
-        table_object, table_object.transfer
+        table_object, table_object.wrap_transfer
     )
 
     values = []

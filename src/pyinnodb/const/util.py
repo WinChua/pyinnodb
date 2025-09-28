@@ -27,7 +27,7 @@ def get_undo_tablespacefile(fn: str):
             if dd_object.name != "tablespace_files":
                 continue
 
-            for r in dd_object.iter_record(f, transfter=lambda x: x):
+            for r in dd_object.iter_record(f):
                 if r.se_private_data is None:
                     continue
                 private_data = const.line_to_dict(r.se_private_data, ";", "=")
