@@ -536,7 +536,7 @@ class Table:
             if first_leaf_page == const.FFFFFFFF and index_page.fil.next_page != const.FFFFFFFF:
                 first_leaf_page = index_page.fil.next_page
 
-    def iter_record(self, f, hidden_col=False, garbage=False, transfter=None):
+    def iter_record(self, f, hidden_col=False, garbage=False, transfer=None):
         root_page_no = int(self.indexes[0].private_data.get("root", 4))
         f.seek(root_page_no * const.PAGE_SIZE)
         root_index_page = MIndexPage.parse_stream(f)
@@ -547,7 +547,7 @@ class Table:
             return
 
         default_value_parser = MIndexPage.default_value_parser(
-            self, hidden_col=hidden_col, transfter=transfter
+            self, hidden_col=hidden_col, transfer=transfer
         )
 
         result = []
