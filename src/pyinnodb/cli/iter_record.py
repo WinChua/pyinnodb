@@ -63,7 +63,7 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
 
     if datadir is None:
         fpath = Path(f.name)
-        if not (fpath.parent.parent/"mysql.ibd").exists():
+        if not (fpath.parent.parent / "mysql.ibd").exists():
             print("--datadir should be specified to view the history")
             return
         datadir = fpath.parent.parent
@@ -102,7 +102,11 @@ def primary_key_only(key_len: int):
 @click.option("--pageno", default=None, type=click.INT, help="iterate on pageno only")
 # @click.option("--primary-key-len", type=click.INT, help="primary key only if not 0", default=0)
 @click.option("--sdi-idx", type=click.INT, default=0, help="idx of sdi")
-@click.option("--header", type=click.INT, help="0:parse value, 1:header only, 2:header with primary key and value, 3:header with primary value")
+@click.option(
+    "--header",
+    type=click.INT,
+    help="0:parse value, 1:header only, 2:header with primary key and value, 3:header with primary value, 4:header with primary value and pageno",
+)
 def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx, header=0):
     """iterate on the leaf pages
 
@@ -121,11 +125,15 @@ def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx, header=0):
     if header == 1:
         tf = dd_object.trans_record_header
     elif header == 2:
-        tf = dd_object.trans_record_header_key(True)
+        tf = dd_object.trans_record_header_key(with_key=True)
     elif header == 3:
-        tf =dd_object.trans_record_header_key(False)
+        tf = dd_object.trans_record_header_key()
+    elif header == 4:
+        tf = dd_object.trans_record_header_key(with_page=True)
 
-    for data in dd_object.iter_record(f, hidden_col=hidden_col, garbage=garbage, transfer=tf):
+    for data in dd_object.iter_record(
+        f, hidden_col=hidden_col, garbage=garbage, transfer=tf
+    ):
         print(data)
 
     return

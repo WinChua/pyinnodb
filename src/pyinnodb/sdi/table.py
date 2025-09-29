@@ -263,27 +263,28 @@ class Table:
             vs.append(v)
         return vs
 
-    def trans_record_header_key(self, with_key=False):
+    def trans_record_header_key(self, with_key=False, with_page=False):
         primary_key_col = self.get_primary_key_col()
-        if with_key:
-            def tf(rh, dc):
-                data = [{col.name: getattr(dc, col.name, None)} for col in primary_key_col]
-                if len(data) == 1:
-                    return data[0], rh
-                return data, rh
-            return tf
-        else:
-            def tf(rh, dc):
-                data = [getattr(dc, col.name, None) for col in primary_key_col]
-                if len(data) == 1:
-                    return data[0], rh
-                return data, rh
-            return tf
 
-    def trans_record_header(self, rh, dc):
+        def tf(rh, dc, **ctx):
+            result = []
+            if with_page:
+                result.append(ctx.get("page", None))
+            if with_key:
+                data = [{col.name: getattr(dc, col.name, None)} for col in primary_key_col]
+            else:
+                data = [getattr(dc, col.name, None) for col in primary_key_col]
+            if len(data) == 1:
+                data = data[0]
+            result.append(data)
+            result.append(rh)
+            return result
+        return tf
+
+    def trans_record_header(self, rh, dc, **ctx):
         return rh
     
-    def wrap_transfer(self, rh, dc):
+    def wrap_transfer(self, rh, dc, **ctx):
         return self.transfer(dc)
     
     def transfer(self, dc, keys=None):
@@ -576,7 +577,8 @@ class Table:
             index_page = MIndexPage.parse_stream(f)
             result.extend(
                 index_page.iterate_record_header(
-                    f, value_parser=default_value_parser, garbage=garbage
+                    f, value_parser=default_value_parser, garbage=garbage,
+                    page=first_leaf_page,
                 )
             )
             first_leaf_page = index_page.fil.next_page

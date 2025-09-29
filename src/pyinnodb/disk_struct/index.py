@@ -111,7 +111,7 @@ class MIndexPage(CC):
     def default_value_parser(cls, dd_object: Table, transfer=None, hidden_col=False, quick=True):
         primary_data_layout_col = dd_object.get_disk_data_layout()
 
-        def value_parser(rh: MRecordHeader, f):
+        def value_parser(rh: MRecordHeader, f, **ctx):
             cur = f.tell()
             logger.debug(
                 "-------start parse-----------rh: %s, @cur: %d/(%d, %d)",
@@ -271,7 +271,7 @@ class MIndexPage(CC):
             if transfer is None:
                 return klass(**disk_data_parsed)
             else:
-                return transfer(rh, klass(**disk_data_parsed))
+                return transfer(rh, klass(**disk_data_parsed), **ctx)
             return
 
         return value_parser
@@ -304,7 +304,7 @@ class MIndexPage(CC):
             next_index_page = MIndexPage.parse_stream(stream)
             return next_index_page.get_first_leaf_page(stream, primary_cols)
 
-    def iterate_record_header(self, f, value_parser=None, garbage=False):
+    def iterate_record_header(self, f, value_parser=None, garbage=False, **ctx):
         page_no = self.fil.offset
         result = []
         infimum_offset = self.system_records.infimum.get_current_offset()
@@ -325,7 +325,7 @@ class MIndexPage(CC):
                 break
             if value_parser is not None:
                 cur = f.tell()
-                result.append(value_parser(rh, f))
+                result.append(value_parser(rh, f, **ctx))
                 f.seek(cur)
             next_offset = rh.next_record_offset
 
