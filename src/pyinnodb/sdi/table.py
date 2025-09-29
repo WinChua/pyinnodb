@@ -242,9 +242,9 @@ class Table:
 
         return [f for f in v if f in target]
 
-    def gen_rand_data_sql(self, size, rand_primary_key=False):
+    def gen_rand_data_sql(self, size, rand_primary_key=False, varsize=None):
         rand_key = self.keys(for_rand=True)
-        rand_datas = self.gen_rand_data(size)
+        rand_datas = self.gen_rand_data(size,varsize=varsize)
 
         if rand_primary_key:
             primary_key_name = [f.name for f in self.get_primary_key_col()]
@@ -271,7 +271,7 @@ class Table:
 
         return f"INSERT INTO `{self.schema_ref}`.`{self.name}`({','.join(rand_key)}) values {', '.join(values)}"
 
-    def gen_rand_data(self, size):
+    def gen_rand_data(self, size, varsize=None):
         keys = self.keys(for_rand=True)
         vs = []
         for i in range(size):
@@ -281,7 +281,10 @@ class Table:
                     continue
                 func = DDColConf.get_col_type_conf(f.metadata['col'].type).rand_func
                 if func:
-                    v.append(func(f.metadata['col']))
+                    if varsize is not None and DDColumnType(f.metadata['col'].type) == DDColumnType.VARCHAR:
+                        v.append(func(f.metadata['col'], varsize))
+                    else:
+                        v.append(func(f.metadata['col']))
             vs.append(v)
         return vs
 

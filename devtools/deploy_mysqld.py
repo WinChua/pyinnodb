@@ -154,7 +154,8 @@ def exec(version, sql, file):
 @click.option("--size", type=click.INT, default=100)
 @click.option("--idx", type=click.INT, default=-1)
 @click.option("--random-primary-key/--no-random-primary-key", type=click.BOOL, default=False)
-def rand_data(version, table, size, idx, random_primary_key):
+@click.option("--varsize", type=click.INT, default=None, help="up size of varchar")
+def rand_data(version, table, size, idx, random_primary_key, varsize):
     deploy_container = load_deploy()
     if version not in deploy_container:
         mDeploy(version)
@@ -179,7 +180,7 @@ def rand_data(version, table, size, idx, random_primary_key):
         elif len(all_tables) == 1:
             idx = 0
         dd_object = Table(**all_tables[idx]["dd_object"])
-        sql = dd_object.gen_rand_data_sql(size, rand_primary_key=random_primary_key)
+        sql = dd_object.gen_rand_data_sql(size, rand_primary_key=random_primary_key, varsize=varsize)
         engine = create_engine(deploy_container.get(version).url)
         with engine.connect() as conn:
             conn.exec_driver_sql(sql)
