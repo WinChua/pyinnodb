@@ -39,6 +39,15 @@ class MIndexEntryNode(CC):  ## index_entry_t
     data_len: int = cfield(cs.Int32ul)
     lob_version: int = cfield(cs.Int32ub)
 
+class MFirstPageHeader(CC):
+    version: int = cfield(cs.Int8ub)
+    flag: int = cfield(cs.Int8ub)
+    lob_version: int = cfield(cs.Int32ub)
+    last_trx_id: int = cfield(IntFromBytes(6))
+    last_undo_no: int = cfield(cs.Int32ub)
+    data_len: int = cfield(cs.Int32ub)
+    trx_id: int = cfield(IntFromBytes(6))
+    
 
 class MFirstPage(CC):  ## first_page_t
     fil: MFil = cfield(MFil)
@@ -58,16 +67,18 @@ class MFirstPage(CC):  ## first_page_t
     index_entry: typing.List[MIndexEntryNode] = cfield(carray(10, MIndexEntryNode))
 
     def _post_parsed(self, stream, context, path):
+        logger.debug("first page seek %d", stream.tell())
         self.first_page_data = stream.read(self.data_len)
 
     def get_data(self, stream):
         ie = self.index_entry[0]
         data = self.first_page_data
+        logger.debug("data_len is %d, index_list.length is %d", self.data_len, self.index_list.length)
         for i in range(self.index_list.length):
-            logger.debug("ie is %s", ie)
             stream.seek(ie.page_no * const.PAGE_SIZE)
             dp = MDataPage.parse_stream(stream)
             data += stream.read(dp.data_len)
+            logger.debug("ie is %s, dp.data_len is %d", ie, dp.data_len)
             if ie.node.next.page_number == const.FFFFFFFF:
                 break
             stream.seek(ie.node.next.seek_loc())

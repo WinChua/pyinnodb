@@ -143,7 +143,7 @@ class DDColConf(DDColConf, Enum):
     DATETIME = DDColumnType.DATETIME, 0, datetime, lambda col: datetime(random.randint(1, 10), random.randint(1, 10), random.randint(1, 10))
     YEAR = DDColumnType.YEAR, 1, int, lambda col: random.randint(1901, 2155)
     NEWDATE = DDColumnType.NEWDATE, 3, date, lambda col: date(random.randint(0, 2000), random.randint(1, 12), random.randint(1, 28))
-    VARCHAR = DDColumnType.VARCHAR, 0, str, lambda col: random.randbytes(col.varchar_size).hex()
+    VARCHAR = DDColumnType.VARCHAR, 0, str, lambda col, size=None: random.randbytes(size if size is not None and size < col.varchar_size else col.varchar_size).hex()
     BIT = DDColumnType.BIT, 0, int, lambda col: random.randint(0,1)
     TIMESTAMP2 = DDColumnType.TIMESTAMP2, 0, int, lambda col: datetime.fromtimestamp(int(time.time()) + random.randint(-100, 100)).strftime("%Y-%m-%d %H:%M:%S")
     DATETIME2 = DDColumnType.DATETIME2, 0, datetime, lambda col: datetime(random.randint(1, 10), random.randint(1, 10), random.randint(1, 10))
