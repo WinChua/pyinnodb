@@ -3,6 +3,7 @@ from pyinnodb.disk_struct.fil import MFil
 from pyinnodb.disk_struct.fsp import MFspPage
 from pyinnodb.disk_struct.index import MIndexHeader
 from pyinnodb.disk_struct.inode import MInodeEntry, MInodePage
+from pyinnodb.disk_struct.first_page import MFirstPageHeader
 
 from . import *
 
@@ -29,6 +30,9 @@ def list_page(ctx, kind):
             if const.PageType(fil.page_type) == const.PageType.INDEX:
                 index_header = MIndexHeader.parse_stream(f)
                 ratios.append(index_header.heap_top_pos / const.PAGE_SIZE)
+            elif const.PageType(fil.page_type) == const.PageType.TYPE_LOB_FIRST:
+                first_page_header =MFirstPageHeader.parse_stream(f)
+                ratios.append(first_page_header.data_len / const.PAGE_SIZE)
             else:
                 ratios.append(-1)
 
