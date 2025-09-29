@@ -60,7 +60,8 @@ def dump_ibd(table_object, f, oneline=True):
         index_page = MIndexPage.parse_stream(f)
         values.extend(
             index_page.iterate_record_header(
-                f, value_parser=default_value_parser
+                f, value_parser=default_value_parser,
+                page=first_leaf_page_no,   # ctx
             )
         )
         first_leaf_page_no = index_page.fil.next_page
