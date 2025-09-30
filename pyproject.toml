@@ -1,6 +1,6 @@
 [project]
 name = "pyinnodb"
-version = "0.0.25"
+version = "0.0.26"
 description = "A parser for InnoDB file formats, in Python"
 authors = [
     { name = "WinChua", email = "winchua@foxmail.com" }
