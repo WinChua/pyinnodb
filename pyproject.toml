@@ -18,9 +18,11 @@ requires-python = ">= 3.9"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.rye]
+[tool.uv]
 managed = true
-dev-dependencies = [
+
+[dependency-groups]
+dev = [
     "pytest>=8.1.1",
     "testcontainers>=4.1.1",
     "docker>=7.0.0",
