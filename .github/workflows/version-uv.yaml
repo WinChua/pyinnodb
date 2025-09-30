@@ -25,7 +25,7 @@ jobs:
         then
           echo "should_tag=true"
           echo "should_tag=true" >> $GITHUB_OUTPUT
-          NEW_VERSION=`uv version`
+          NEW_VERSION=`uv version --short`
           echo "new_version=$NEW_VERSION"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           git tag v$NEW_VERSION && git push --tags
