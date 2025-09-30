@@ -32,6 +32,7 @@ dev = [
     "python-lsp-server>=1.12.0",
     "pymysql>=1.1.1",
     "mysqlclient>=2.2.7",
+    "poethepoet>=0.37.0",
 ]
 
 [tool.hatch.metadata]
@@ -43,12 +44,12 @@ packages = ["src/pyinnodb"]
 [tool.hatch.build]
 exclude = [".venv", "data", "datadir"]
 
-[tool.rye.scripts]
-gencols = { chain = ["gencols:cols", "gencols:fmt"] }
+[tool.poe.tasks]
+gencols = ["gencols:cols", "gencols:fmt"]
 "gencols:cols" = "python devtools/gen-collations.py"
-"gencols:fmt" = "rye fmt src/pyinnodb/const/collations.py"
-cli = { call = "pyinnodb.cli" }
-of = { chain = ["of:init", "of:req", "of:cp", "of:clean",  "of:zip", "of:patch", "of:ex"] }
+"gencols:fmt" = "uv fmt src/pyinnodb/const/collations.py"
+cli.script = "pyinnodb.cli"
+of = ["of:init", "of:req", "of:cp", "of:clean",  "of:zip", "of:patch", "of:ex"]
 "of:init" = "mkdir -p target"
 "of:req" = "uv pip install -r requirements.lock --target target"
 "of:cp" = "cp -r src/pyinnodb target"
