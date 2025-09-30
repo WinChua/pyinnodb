@@ -1,0 +1,34 @@
+name: version-uv
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ closed ]
+
+
+jobs:
+  bump_version_and_tags:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v5
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: "0.8.22"
+    - name: Setup project
+      run: uv sync --locked --all-extras --dev
+    - name: version-check
+      run: |
+        git show -- HEAD^..HEAD pyproject.toml | grep version
+        if [ $? == 0 ]
+        then
+          echo "should_tag=true"
+          echo "should_tag=true" >> $GITHUB_OUTPUT
+          NEW_VERSION=`uv version`
+          echo "new_version=$NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          git tag v$NEW_VERSION && git push --tags
+        else
+          echo "should_tag=false" >> $GITHUB_OUTPUT
+        fi
