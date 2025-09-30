@@ -1,6 +1,6 @@
 [project]
 name = "pyinnodb"
-version = "0.0.25"
+version = "0.0.26"
 description = "A parser for InnoDB file formats, in Python"
 authors = [
     { name = "WinChua", email = "winchua@foxmail.com" }
@@ -51,7 +51,7 @@ gencols = ["gencols:cols", "gencols:fmt"]
 cli.script = "pyinnodb.cli"
 of = ["of:init", "of:req", "of:cp", "of:clean",  "of:zip", "of:patch", "of:ex"]
 "of:init" = "mkdir -p target"
-"of:req" = "uv pip install -r requirements.lock --target target"
+"of:req".shell = "uv export --no-dev > requirements.lock && uv pip install -r requirements.lock --target target"
 "of:cp" = "cp -r src/pyinnodb target"
 "of:clean" = "find target  -type d -name '__pycache__' -exec rm -rf {} +"
 "of:zip" = "python -m zipapp target/ -m pyinnodb.cli:main -o pyinnodb.sh"
@@ -59,4 +59,4 @@ of = ["of:init", "of:req", "of:cp", "of:clean",  "of:zip", "of:patch", "of:ex"]
 "of:ex" = 'chmod a+x pyinnodb.sh'
 "dp" = "python devtools/deploy_mysqld.py"
 "td" = "tar cvzf tests/test_data.tgz tests/mysql5/ tests/mysql8"
-bp.shell = "uv version --bump patch && git add -u . && git commit -m 'bump: patch' && git push"
+bp.shell = "uv version --bump patch && git add -u . && git commit -m \"version release: `uv version --short`\" && git push"
