@@ -59,4 +59,4 @@ of = ["of:init", "of:req", "of:cp", "of:clean",  "of:zip", "of:patch", "of:ex"]
 "of:ex" = 'chmod a+x pyinnodb.sh'
 "dp" = "python devtools/deploy_mysqld.py"
 "td" = "tar cvzf tests/test_data.tgz tests/mysql5/ tests/mysql8"
-bp.shell = "uv version --bump patch && git add -u . && git commit -m 'bump: patch' && git push"
+bp.shell = "uv version --bump patch && git add -u . && git commit -m \"version release: `uv version --short`\" && git push"
