@@ -99,7 +99,7 @@ def mDeploy(version):
         deploy_container[version] = Instance(
             url=mysql.get_connection_url().replace("localhost", "127.0.0.1"),
             container_id=f"{mysql._container.short_id}",
-            cmd=f"mysql -h 127.0.0.1 -P{mysql.get_exposed_port(mysql.port)} -u{mysql.username} -p{mysql.password}",
+            cmd=f"mysql -h 127.0.0.1 -P{mysql.get_exposed_port(mysql.port)} -u{mysql.username} -p{mysql.password} test",
             datadir=datadir,
         )
         dump_deploy(deploy_container, f)
