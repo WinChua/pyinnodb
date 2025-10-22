@@ -8,7 +8,7 @@ from dataclasses import dataclass, asdict
 from testcontainers.mysql import MySqlContainer
 from testcontainers.core.config import testcontainers_config as c
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 
 from pyinnodb import const
@@ -140,12 +140,16 @@ def exec(version, sql, file):
         with open(file, "r") as f:
             sql = f.read()
     with engine.connect() as conn:
-        result = conn.exec_driver_sql(sql)
+        #result = conn.exec_driver_sql(sql)
+        result = conn.execute(text(sql))
+        conn.commit()
         if result.rowcount == 0:
             print("无结果返回")
-        else:
+        elif result.returns_rows:
             for r in result.fetchall():
                 print(r)
+        else:
+            print("执行成功,影响行数:", result.rowcount)
             
 
 @main.command()

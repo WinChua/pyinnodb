@@ -1,4 +1,5 @@
 import json
+import dataclasses
 
 from pyinnodb.disk_struct.index import MIndexPage, MSDIPage
 from pyinnodb.sdi.table import Table
@@ -10,15 +11,17 @@ logger = logging.getLogger(__name__)
 
 @main.command()
 @click.pass_context
-@click.option("--mode", type=click.Choice(["sdi", "ddl", "dump"]), default="ddl")
+@click.option("--mode", type=click.Choice(["sdi", "ddl", "dump", "json"]), default="ddl")
 @click.option("--sdi-idx", type=click.INT, default=0)
+@click.option("--sdi-name", type=click.STRING, default=None)
 @click.option("--schema/--no-schema", default=True)
-def tosql(ctx, mode, sdi_idx, schema):
+def tosql(ctx, mode, sdi_idx, sdi_name, schema):
     """dump the ddl/dml/sdi of the ibd table
 
     ddl) output the create table ddl;
     dump) output the dml of ibd file;
     sdi) output the dd_object stored in the SDIPage as json format
+    json) dump records in json format
     """
 
     f = ctx.obj["fn"]
@@ -35,11 +38,13 @@ def tosql(ctx, mode, sdi_idx, schema):
             print(json.dumps(dd_obj))
         elif mode == "ddl":
             print(table_object.gen_ddl(schema))
+        elif mode == "json":
+            dump_ibd(table_object, f, in_json=True)
         else:
             dump_ibd(table_object, f)
         return
 
-def dump_ibd(table_object, f, oneline=True):
+def dump_ibd(table_object, f, oneline=True, in_json=False):
     root_page_no = int(table_object.indexes[0].private_data.get("root", 4))
     f.seek(root_page_no * const.PAGE_SIZE)
     root_index_page = MIndexPage.parse_stream(f)
@@ -50,8 +55,11 @@ def dump_ibd(table_object, f, oneline=True):
         print("no data")
         return
 
+    transfer = table_object.wrap_transfer
+    if in_json:
+        transfer = None
     default_value_parser = MIndexPage.default_value_parser(
-        table_object, table_object.wrap_transfer
+        table_object, transfer 
     )
 
     values = []
@@ -66,6 +74,9 @@ def dump_ibd(table_object, f, oneline=True):
         )
         first_leaf_page_no = index_page.fil.next_page
 
+    if in_json:
+        print(json.dumps([dataclasses.asdict(v) for v in values], default=str))
+        return
     values = [f"({','.join(v)})" for v in values]
 
     table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"

@@ -108,6 +108,20 @@ class MIndexPage(CC):
     system_records: MIndexSystemRecord = cfield(MIndexSystemRecord)
 
     @classmethod
+    def value_parser_with_primary_key_only(
+        cls, dd_object: Table, key_len: int
+    ):
+        def value_parser(rh: MRecordHeader, f, **ctx):
+            if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
+                next_page_no = const.parse_mysql_int(f.read(4))
+                return
+
+            key_data = f.read(key_len)
+            return key_data
+
+        return value_parser
+
+    @classmethod
     def default_value_parser(cls, dd_object: Table, transfer=None, hidden_col=False, quick=True):
         primary_data_layout_col = dd_object.get_disk_data_layout()
 
@@ -389,7 +403,16 @@ class MSDIPage(CC):
         self.fil_tailer = MFilTrailer.parse_stream(stream)
         # self.ddl = next(self.iterate_sdi_record(stream))
 
-    def ddl(self, stream, idx):
+    def ddl(self, stream, idx, name=None):
+        target = None
+        for i, table in enumerate(self.iterate_sdi_record(stream)):
+            if name is not None and table["dd_object_type"] == "Table":
+                if name == table["dd_object"]["name"]:
+                    return table
+            if i == idx:
+                target = table
+        return target
+
         return list(self.iterate_sdi_record(stream))[idx]
         return next(self.iterate_sdi_record(stream))
 
