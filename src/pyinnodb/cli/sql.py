@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 @main.command()
 @click.pass_context
-@click.option("--mode", type=click.Choice(["sdi", "ddl", "dump", "json"]), default="ddl")
+@click.option(
+    "--mode", type=click.Choice(["sdi", "ddl", "dump", "json"]), default="ddl"
+)
 @click.option("--sdi-idx", type=click.INT, default=0)
 @click.option("--sdi-name", type=click.STRING, default=None)
 @click.option("--schema/--no-schema", default=True)
@@ -44,6 +46,7 @@ def tosql(ctx, mode, sdi_idx, sdi_name, schema):
             dump_ibd(table_object, f)
         return
 
+
 def dump_ibd(table_object, f, oneline=True, in_json=False):
     root_page_no = int(table_object.indexes[0].private_data.get("root", 4))
     f.seek(root_page_no * const.PAGE_SIZE)
@@ -58,9 +61,7 @@ def dump_ibd(table_object, f, oneline=True, in_json=False):
     transfer = table_object.wrap_transfer
     if in_json:
         transfer = None
-    default_value_parser = MIndexPage.default_value_parser(
-        table_object, transfer 
-    )
+    default_value_parser = MIndexPage.default_value_parser(table_object, transfer)
 
     values = []
     while first_leaf_page_no != const.FFFFFFFF:
@@ -68,8 +69,9 @@ def dump_ibd(table_object, f, oneline=True, in_json=False):
         index_page = MIndexPage.parse_stream(f)
         values.extend(
             index_page.iterate_record_header(
-                f, value_parser=default_value_parser,
-                page=first_leaf_page_no,   # ctx
+                f,
+                value_parser=default_value_parser,
+                page=first_leaf_page_no,  # ctx
             )
         )
         first_leaf_page_no = index_page.fil.next_page
@@ -82,15 +84,18 @@ def dump_ibd(table_object, f, oneline=True, in_json=False):
     table_name = f"`{table_object.schema_ref}`.`{table_object.name}`"
     if not oneline:
         print(
-            f"INSERT INTO {table_name}({','.join( table_object.keys() )}) values {', '.join(values)}"
+            f"INSERT INTO {table_name}({','.join(table_object.keys())}) values {', '.join(values)}"
         )
     else:
         for v in values:
-            print(f"INSERT INTO {table_name}({','.join(table_object.keys())}) values {v};")
-        
+            print(
+                f"INSERT INTO {table_name}({','.join(table_object.keys())}) values {v};"
+            )
 
     return
-# 
+
+
+#
 # 'type': sql/dd/types/column.h::enum_column_type
 # column_key : ag --cpp \ CK_NONE
 

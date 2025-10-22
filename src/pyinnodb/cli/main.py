@@ -28,6 +28,7 @@ def validate_ibd(fsp_page: MFspPage, fn: t.IO[t.Any]):
             return False
     return True
 
+
 @click.group(invoke_without_command=True)
 @click.option("--fn", type=click.File("rb"), default=None)
 @click.option(

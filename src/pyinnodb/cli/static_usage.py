@@ -31,7 +31,7 @@ def list_page(ctx, kind):
                 index_header = MIndexHeader.parse_stream(f)
                 ratios.append(index_header.heap_top_pos / const.PAGE_SIZE)
             elif const.PageType(fil.page_type) == const.PageType.TYPE_LOB_FIRST:
-                first_page_header =MFirstPageHeader.parse_stream(f)
+                first_page_header = MFirstPageHeader.parse_stream(f)
                 ratios.append(first_page_header.data_len / const.PAGE_SIZE)
             else:
                 ratios.append(-1)

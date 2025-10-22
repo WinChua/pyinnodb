@@ -37,6 +37,7 @@ decimal_leftover_part = {
 
 column_type_size = re.compile("[^(]*[(]([^)]*)[)]")
 
+
 @modify_init
 @dataclass(eq=False)
 class IndexElement:
@@ -46,11 +47,13 @@ class IndexElement:
     hidden: bool = False
     column_opx: int = 0
 
+
 @modify_init
 @dataclass(eq=False)
 class ColumnElement:
     name: str = ""  ## BINARY VARBINARY
     index: int = 0
+
 
 NewDecimalSize = namedtuple(
     "NewDecimalSize", "intg frac intg0 intg0x frac0 frac0x total"
@@ -110,7 +113,7 @@ class Column:
         kw_only = False
         default = dataclasses.MISSING
         if self.pytype == nop:
-            kw_only  = True
+            kw_only = True
             default = None
         return field(
             default=default,
@@ -122,9 +125,7 @@ class Column:
         if ie.length == const.FFFFFFFF:
             return 0, False
         varlen, prekey_len = 1, 0
-        if DDColumnType.is_var(
-            self.type
-        ):  ## TODO: judge prefix key
+        if DDColumnType.is_var(self.type):  ## TODO: judge prefix key
             if self.collation_id == 255:
                 varlen = 4
             elif DDColumnType(self.type) in [
@@ -195,8 +196,8 @@ class Column:
     def varchar_size(self):
         s = column_type_size.match(self.column_type_utf8)
         if s is not None:
-            return int(int(s.group(1))/2 - 1)
-        return int(self.char_length/2) - 1
+            return int(int(s.group(1)) / 2 - 1)
+        return int(self.char_length / 2) - 1
 
     def __post_init__(self):
         ce: typing.List[ColumnElement] = [ColumnElement(**e) for e in self.elements]
@@ -493,6 +494,7 @@ class Column:
                 data = MGeo.parse_stream(stream)
                 logging.debug("geometry data is %s, size is %d", data, dsize)
                 return data
+
 
 @modify_init
 @dataclass(eq=False)
