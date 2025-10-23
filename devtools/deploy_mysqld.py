@@ -125,6 +125,7 @@ def connect(version, sql):
     else:
         os.system(deploy_container.get(version).cmd + f" -e '{sql}'")
 
+
 @main.command()
 @click.option("--version", type=click.STRING, default="")
 @click.option("--sql", type=click.STRING, default="")
@@ -140,7 +141,7 @@ def exec(version, sql, file):
         with open(file, "r") as f:
             sql = f.read()
     with engine.connect() as conn:
-        #result = conn.exec_driver_sql(sql)
+        # result = conn.exec_driver_sql(sql)
         result = conn.execute(text(sql))
         conn.commit()
         if result.rowcount == 0:
@@ -150,14 +151,16 @@ def exec(version, sql, file):
                 print(r)
         else:
             print("执行成功,影响行数:", result.rowcount)
-            
+
 
 @main.command()
 @click.option("--version", type=click.STRING, default="")
 @click.option("--table", type=click.STRING, default="")
 @click.option("--size", type=click.INT, default=100)
 @click.option("--idx", type=click.INT, default=-1)
-@click.option("--random-primary-key/--no-random-primary-key", type=click.BOOL, default=False)
+@click.option(
+    "--random-primary-key/--no-random-primary-key", type=click.BOOL, default=False
+)
 @click.option("--varsize", type=click.INT, default=None, help="up size of varchar")
 def rand_data(version, table, size, idx, random_primary_key, varsize):
     deploy_container = load_deploy()
@@ -177,20 +180,26 @@ def rand_data(version, table, size, idx, random_primary_key, varsize):
             return
         f.seek(fsp.sdi_page_no * const.PAGE_SIZE)
         sdi_page = MSDIPage.parse_stream(f)
-        all_tables = [d for d in sdi_page.iterate_sdi_record(f) if d["dd_object_type"] == "Table"]
+        all_tables = [
+            d for d in sdi_page.iterate_sdi_record(f) if d["dd_object_type"] == "Table"
+        ]
         if len(all_tables) > 1 and idx == -1:
             print("these is more than one table, please use --idx to specify one")
             return
         elif len(all_tables) == 1:
             idx = 0
         dd_object = Table(**all_tables[idx]["dd_object"])
-        sql = dd_object.gen_rand_data_sql(size, rand_primary_key=random_primary_key, varsize=varsize)
+        sql = dd_object.gen_rand_data_sql(
+            size, rand_primary_key=random_primary_key, varsize=varsize
+        )
         engine = create_engine(deploy_container.get(version).url)
         with engine.connect() as conn:
             conn.exec_driver_sql(sql)
             conn.commit()
-        print(f"insert {size} record randomly into {dd_object.schema_ref}.{dd_object.name}")
-                
+        print(
+            f"insert {size} record randomly into {dd_object.schema_ref}.{dd_object.name}"
+        )
+
 
 if __name__ == "__main__":
     main()
