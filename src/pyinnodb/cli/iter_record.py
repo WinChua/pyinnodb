@@ -92,16 +92,16 @@ def primary_key_only(key_len: int):
 
 @main.command()
 @click.pass_context
-@click.option("--ellip-leaf/--no-ellip-leaf", type=click.BOOL, default=True)
-@click.option("--ellip-all/--no-ellip-all", type=click.BOOL, default=True)
-def tree_view(ctx, ellip_leaf=True, ellip_all=True):
+@click.option("--hidden-leaf/--no-hidden-leaf", type=click.BOOL, default=True)
+@click.option("--hidden-all/--no-hidden-all", type=click.BOOL, default=True)
+def tree_view(ctx, hidden_leaf=True, hidden_all=True):
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
     f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl(f, 0)["dd_object"])
     tree = dd_object.tree_view(f)
-    print(tree.build_block(ellip_leaf=ellip_leaf, ellip_all=ellip_all).text)
+    print(tree.build_block(hidden_leaf=hidden_leaf, hidden_all=hidden_all).text)
 
 
 @main.command()

@@ -95,27 +95,27 @@ class TreeNode:
     def is_leaf(self) -> bool:
         return len(self.children) == 0
 
-    def build_block(self, ellip_leaf=False, ellip_all=False) -> TextBlock:
+    def build_block(self, hidden_leaf=False, hidden_all=False) -> TextBlock:
         if self.is_leaf:
             return TextBlock(self.text)
 
         blocks = []
-        ellip_leaf_cnt = 0
+        hidden_leaf_cnt = 0
         for i, c in enumerate(self.children):
-            if ellip_leaf and len(self.children) > 3:
+            if hidden_leaf and len(self.children) > 3:
                 if i != 0 and i != len(self.children) - 1:
-                    if c.is_leaf or ellip_all:
-                        ellip_leaf_cnt += 1
+                    if c.is_leaf or hidden_all:
+                        hidden_leaf_cnt += 1
                     else:
-                        if ellip_leaf_cnt != 0:
-                            blocks.append(TextBlock(f"({ellip_leaf_cnt} ellip)"))
-                        blocks.append(c.build_block(ellip_leaf=ellip_leaf, ellip_all=ellip_all))
-                        ellip_leaf_cnt = 0
+                        if hidden_leaf_cnt != 0:
+                            blocks.append(TextBlock(f"({hidden_leaf_cnt} hidden)"))
+                        blocks.append(c.build_block(hidden_leaf=hidden_leaf, hidden_all=hidden_all))
+                        hidden_leaf_cnt = 0
                     continue
                 if i == len(self.children) - 1:
-                    if ellip_leaf_cnt != 0:
-                        blocks.append(TextBlock(f"({ellip_leaf_cnt} ellip)"))
-            blocks.append(c.build_block(ellip_leaf=ellip_leaf, ellip_all=ellip_all))
+                    if hidden_leaf_cnt != 0:
+                        blocks.append(TextBlock(f"({hidden_leaf_cnt} hidden)"))
+            blocks.append(c.build_block(hidden_leaf=hidden_leaf, hidden_all=hidden_all))
 
         max_lines = max(block.size[0] for block in blocks)
         tops = []
