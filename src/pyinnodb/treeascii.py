@@ -137,7 +137,7 @@ class TreeNode:
         parent_text = TextBlock(parent_text.ljust(joined.size[1], " "))
         l, m, r = parent_text.loc
         p_mid = m
-        r_text = uni_invt if top_line[p_mid] == uni_h else uni_ten
+        r_text = uni_invt if p_mid < len(top_line) and top_line[p_mid] == uni_h else uni_ten
         r_text = uni_v if len(blocks) == 1 else r_text
         top_line = top_line[:p_mid] + r_text + top_line[p_mid + 1 :]
         return TextBlock("\n".join([parent_text.text, top_line, joined.text]))
