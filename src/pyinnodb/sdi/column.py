@@ -156,6 +156,8 @@ class Column:
     @property
     @cache
     def is_hidden_from_user(self):
+        if isinstance(self.hidden, bool):
+            return self.hidden
         return (
             const.column_hidden_type.ColumnHiddenType(self.hidden)
             != const.column_hidden_type.ColumnHiddenType.HT_VISIBLE

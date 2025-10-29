@@ -45,3 +45,15 @@ class MFspPage(CC):
             f.seek(pn * const.PAGE_SIZE)
             if iter_func is not None:
                 iter_func(f)
+
+    def get_sdi_page_no_with_guess(self, f):
+        if self.sdi_version == 1:
+            return self.sdi_page_no
+
+        for pn in range(self.fsp_header.highest_page_number):
+            f.seek(pn *const.PAGE_SIZE)
+            fil = MFil.parse_stream(f)
+            if const.PageType(fil.page_type) == const.PageType.SDI:
+                return fil.offset
+
+        return None

@@ -39,7 +39,7 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
     f: t.IO[t.Any] = ctx.obj["fn"]
     # print("search start cost:", time.time() - ctx.obj["start_time"])
     fsp_page: MFspPage = ctx.obj["fsp_page"]
-    f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
+    f.seek(fsp_page.get_sdi_page_no_with_guess(f) * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl(f, 0)["dd_object"])
 
@@ -97,7 +97,7 @@ def primary_key_only(key_len: int):
 def tree_view(ctx, hidden_leaf=True, hidden_all=True):
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
-    f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
+    f.seek(fsp_page.get_sdi_page_no_with_guess(f) * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl(f, 0)["dd_object"])
     tree = dd_object.tree_view(f)
@@ -131,7 +131,7 @@ def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx, header=0):
     """
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
-    f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
+    f.seek(fsp_page.get_sdi_page_no_with_guess(f) * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
 
