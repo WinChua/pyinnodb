@@ -6,3 +6,5 @@ tests/mysql8/
 tests/test_data.tgz
 .deploy_mysqld
 datadir/
+target
+pyinnodb.sh

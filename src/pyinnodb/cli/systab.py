@@ -21,7 +21,7 @@ def sys_tablespace(ctx):
         print("there is no SDI info in this file")
         return
 
-    f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
+    f.seek(fsp_page.get_sdi_page_no_with_guess(f) * const.PAGE_SIZE)
 
     sdi_page = MSDIPage.parse_stream(f)
 

@@ -39,7 +39,7 @@ def undo_record(ctx, pageno, offset, insert, rsegid):
     """show the history version of an RollbackPointer"""
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
-    f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
+    f.seek(fsp_page.get_sdi_page_no_with_guess(f) * constPAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl["dd_object"])
     undo_001 = open("datadir/undo_001", "rb")

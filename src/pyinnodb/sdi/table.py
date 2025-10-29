@@ -16,7 +16,7 @@ from collections import namedtuple
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
-from .. import const
+from .. import const, treeascii
 from ..const.dd_column_type import DDColumnType, DDColConf, rand_none
 from ..disk_struct.data import MGeo, MTime2
 from ..disk_struct.index import MIndexPage
@@ -39,7 +39,6 @@ class Lob:
         return f"<Lob length:{len(self.data)} preview:{self.data[:5] + b'..' + self.data[-5:]} off_page:{self.off_page}>"
 
 
-
 @modify_init
 @dataclass(eq=False)
 class CheckCons:
@@ -50,8 +49,6 @@ class CheckCons:
 
     def gen(self):
         return f"CONSTRAINT `{self.name}` CHECK ({self.check_clause_utf8})"
-
-
 
 
 @modify_init
@@ -169,7 +166,9 @@ class Table:
     #
 
     def gen_ddl(self, schema):
-        table_name = f"`{self.schema_ref}`.`{self.name}`" if schema else f"`{self.name}`"
+        table_name = (
+            f"`{self.schema_ref}`.`{self.name}`" if schema else f"`{self.name}`"
+        )
         column_desc = []
         for c in self.columns:
             if c.hidden == const.column_hidden_type.ColumnHiddenType.HT_HIDDEN_SE.value:
@@ -185,11 +184,7 @@ class Table:
         parts = self.gen_sql_for_partition()
         collation = const.get_collation_by_id(self.collation_id)
         desc = f"ENGINE={self.engine} DEFAULT CHARSET={collation.CHARACTER_SET_NAME} COLLATE={collation.COLLATION_NAME}"
-        comment = (
-            "\nCOMMENT '" + self.comment + "'"
-            if self.comment
-            else ""
-        )
+        comment = "\nCOMMENT '" + self.comment + "'" if self.comment else ""
         return f"CREATE TABLE {table_name} ({column_desc}) {desc}{parts}{comment}"
 
     def update_with_frm(self, frm):
@@ -197,7 +192,9 @@ class Table:
             frm_header = mfrm.MFrm.parse_stream(f)
             self.columns = []
             for i, col in enumerate(frm_header.cols):
-                self.columns.append(col.to_dd_column(col.name, i, frm_header.column_labels))
+                self.columns.append(
+                    col.to_dd_column(col.name, i, frm_header.column_labels)
+                )
 
             keys, key_name, key_comment = frm_header.keys[0]
 
@@ -210,7 +207,6 @@ class Table:
 
             self.indexes = [idx]
 
-    
     @property
     @cache
     def private_data(self):
@@ -231,20 +227,25 @@ class Table:
         return namedtuple(self.name, " ".join(cols))
 
     def keys(self, no_primary=False, for_rand=False):
-        v =  [f.name for f in dataclasses.fields(self.DataClass)] 
+        v = [f.name for f in dataclasses.fields(self.DataClass)]
         if not no_primary and not for_rand:
-            return  v
+            return v
         primary_key_name = [f.name for f in self.get_primary_key_col()]
         v = [f for f in v if f not in primary_key_name]
         if not for_rand:
             return v
-        target = [f.name for f in dataclasses.fields(self.DataClass) if DDColConf.get_col_type_conf(f.metadata['col'].type).rand_func != rand_none]
+        target = [
+            f.name
+            for f in dataclasses.fields(self.DataClass)
+            if DDColConf.get_col_type_conf(f.metadata["col"].type).rand_func
+            != rand_none
+        ]
 
         return [f for f in v if f in target]
 
     def gen_rand_data_sql(self, size, rand_primary_key=False, varsize=None):
         rand_key = self.keys(for_rand=True)
-        rand_datas = self.gen_rand_data(size,varsize=varsize)
+        rand_datas = self.gen_rand_data(size, varsize=varsize)
 
         if rand_primary_key:
             primary_key_name = [f.name for f in self.get_primary_key_col()]
@@ -255,7 +256,7 @@ class Table:
                 for f in dataclasses.fields(self.DataClass):
                     if f.name != pk:
                         continue
-                    pytype = DDColConf.get_col_type_conf(f.metadata['col'].type).pytype
+                    pytype = DDColConf.get_col_type_conf(f.metadata["col"].type).pytype
                     if pytype != int:
                         print("not int primary key is not support")
                         break
@@ -279,12 +280,15 @@ class Table:
             for f in dataclasses.fields(self.DataClass):
                 if f.name not in keys:
                     continue
-                func = DDColConf.get_col_type_conf(f.metadata['col'].type).rand_func
+                func = DDColConf.get_col_type_conf(f.metadata["col"].type).rand_func
                 if func:
-                    if varsize is not None and DDColumnType(f.metadata['col'].type) == DDColumnType.VARCHAR:
-                        v.append(func(f.metadata['col'], varsize))
+                    if (
+                        varsize is not None
+                        and DDColumnType(f.metadata["col"].type) == DDColumnType.VARCHAR
+                    ):
+                        v.append(func(f.metadata["col"], varsize))
                     else:
-                        v.append(func(f.metadata['col']))
+                        v.append(func(f.metadata["col"]))
             vs.append(v)
         return vs
 
@@ -296,7 +300,9 @@ class Table:
             if with_page:
                 result.append(ctx.get("page", None))
             if with_key:
-                data = [{col.name: getattr(dc, col.name, None)} for col in primary_key_col]
+                data = [
+                    {col.name: getattr(dc, col.name, None)} for col in primary_key_col
+                ]
             else:
                 data = [getattr(dc, col.name, None) for col in primary_key_col]
             if len(data) == 1:
@@ -304,14 +310,15 @@ class Table:
             result.append(data)
             result.append(rh)
             return result
+
         return tf
 
     def trans_record_header(self, rh, dc, **ctx):
         return rh
-    
+
     def wrap_transfer(self, rh, dc, **ctx):
         return self.transfer(dc)
-    
+
     def transfer(self, dc, keys=None):
         vs = []
         if keys is None:
@@ -328,22 +335,18 @@ class Table:
                 vs.append("NULL")
             elif isinstance(f, MTime2):
                 vs.append(f.to_str())
-            elif (
-                isinstance(f, date)
-                or isinstance(f, datetime)
-            ):
+            elif isinstance(f, date) or isinstance(f, datetime):
                 vs.append(f"'{str(f)}'")
             elif isinstance(f, MGeo):
                 d = f.build().hex()  # .zfill(50)
                 vs.append("0x" + d)
             elif isinstance(f, bytes):
-                vs.append("0x"+f.hex())
+                vs.append("0x" + f.hex())
             elif isinstance(f, decimal.Decimal):
                 vs.append(str(f))
             else:
                 vs.append(repr(f))
         return vs
-        
 
     @property
     @cache
@@ -430,7 +433,9 @@ class Table:
             data_layout_col = []
             for i, c in enumerate(self.columns):
                 data_layout_col.append((c, c_l.get(i, const.FFFFFFFF)))
-            data_layout_col.sort(key=lambda c: int(c[0].private_data.get("physical_pos", 0)))
+            data_layout_col.sort(
+                key=lambda c: int(c[0].private_data.get("physical_pos", 0))
+            )
             return data_layout_col
 
         data_layout_col = []
@@ -506,7 +511,8 @@ class Table:
         else:
             primary_key = self.build_primary_key_bytes((primary_key,))
         value_parser = MIndexPage.default_value_parser(
-            self, hidden_col=hidden_col, # transfter=lambda rh, data: data,
+            self,
+            hidden_col=hidden_col,  # transfter=lambda rh, data: data,
             quick=False,
         )
 
@@ -579,8 +585,20 @@ class Table:
                     start_rh = MRecordHeader.parse_stream(f)
 
             logging.debug("index_page.fil.next_page is %s", index_page.fil.next_page)
-            if first_leaf_page == const.FFFFFFFF and index_page.fil.next_page != const.FFFFFFFF:
+            if (
+                first_leaf_page == const.FFFFFFFF
+                and index_page.fil.next_page != const.FFFFFFFF
+            ):
                 first_leaf_page = index_page.fil.next_page
+
+    def tree_view(self, f):
+        root_page_no = int(self.indexes[0].private_data.get("root", 4))
+        f.seek(root_page_no * const.PAGE_SIZE)
+        root_index_page = MIndexPage.parse_stream(f)
+        vp = MIndexPage.value_parser_with_primary_key_only(self)
+        return treeascii.TreeNode(
+            root_page_no, children=root_index_page.list_records(f, vp)
+        )
 
     def iter_record(self, f, hidden_col=False, garbage=False, transfer=None):
         root_page_no = int(self.indexes[0].private_data.get("root", 4))
@@ -602,7 +620,9 @@ class Table:
             index_page = MIndexPage.parse_stream(f)
             result.extend(
                 index_page.iterate_record_header(
-                    f, value_parser=default_value_parser, garbage=garbage,
+                    f,
+                    value_parser=default_value_parser,
+                    garbage=garbage,
                     page=first_leaf_page,
                 )
             )
@@ -679,9 +699,15 @@ class Table:
             parts = ",\n    ".join(parts) + "\n"
             return "\n" + f"{p}{parts})*/"
         elif pt == const.partition.PartitionType.PT_HASH:
-            return "\n" + f"/*!50100 PARTITION BY HASH ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            return (
+                "\n"
+                + f"/*!50100 PARTITION BY HASH ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            )
         elif pt == const.partition.PartitionType.PT_KEY_55:
-            return "\n" + f"/*!50100 PARTITION BY KEY ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            return (
+                "\n"
+                + f"/*!50100 PARTITION BY KEY ({self.partition_expression_utf8}) PARTITIONS ({len(self.partitions)})*/"
+            )
         elif pt == const.partition.PartitionType.PT_LIST:
             p = f"/*!50100 PARTITION BY LIST ({self.partition_expression_utf8}) (\n    "
             parts = []

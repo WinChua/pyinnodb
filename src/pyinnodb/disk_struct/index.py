@@ -7,6 +7,8 @@ from ..mconstruct import *
 from .. import const
 from ..const.dd_column_type import DDColumnType
 
+from .. import treeascii
+
 from typing import TYPE_CHECKING
 import typing
 
@@ -50,16 +52,18 @@ class MFsegHeader(CC):
     # should not use this way to determine the first leaf page number
     # as off-page may allocate first
     # def get_first_leaf_page(self, f):
-const.FFFFFFFF   #     if self.leaf_pointer.page_number != const.FFFFFFFF:
-    #         f.seek(self.leaf_pointer.seek_loc())
-    #         inode_entry = MInodeEntry.parse_stream(f)
-    #         fp = inode_entry.first_page()
-    #         if fp is not None:
-    #             return fp
 
-    #     f.seek(self.internal_pointer.seek_loc())
-    #     inode_entry = MInodeEntry.parse_stream(f)
-    #     return inode_entry.first_page()
+
+const.FFFFFFFF  #     if self.leaf_pointer.page_number != const.FFFFFFFF:
+#         f.seek(self.leaf_pointer.seek_loc())
+#         inode_entry = MInodeEntry.parse_stream(f)
+#         fp = inode_entry.first_page()
+#         if fp is not None:
+#             return fp
+
+#     f.seek(self.internal_pointer.seek_loc())
+#     inode_entry = MInodeEntry.parse_stream(f)
+#     return inode_entry.first_page()
 
 
 class MSystemRecord(CC):
@@ -108,8 +112,28 @@ class MIndexPage(CC):
     system_records: MIndexSystemRecord = cfield(MIndexSystemRecord)
 
     @classmethod
-    def default_value_parser(cls, dd_object: Table, transfer=None, hidden_col=False, quick=True):
+    def value_parser_with_primary_key_only(cls, dd_object: Table):
+        primary_key_col = dd_object.get_primary_key_col()
+
+        def value_parser(rh: MRecordHeader, f, **ctx):
+            if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
+                values = [c.read_data(f) for c in primary_key_col]
+                next_page_no = int.from_bytes(f.read(4), "big")
+                return next_page_no, values
+            elif const.RecordType(rh.record_type) == const.RecordType.Conventional:
+                return [c.read_data(f) for c in primary_key_col]
+
+            return None
+
+        return value_parser
+
+    @classmethod
+    def default_value_parser(
+        cls, dd_object: Table, transfer=None, hidden_col=False, quick=True
+    ):
         primary_data_layout_col = dd_object.get_disk_data_layout()
+
+        primary_key_col = dd_object.get_primary_key_col()
 
         def value_parser(rh: MRecordHeader, f, **ctx):
             cur = f.tell()
@@ -121,8 +145,12 @@ class MIndexPage(CC):
                 cur % const.PAGE_SIZE,
             )
             if const.RecordType(rh.record_type) == const.RecordType.NodePointer:
-                next_page_no = const.parse_mysql_int(f.read(4))
-                return
+                primary_key_values = []
+                for c in primary_key_col:
+                    primary_key_values.append(c.read_data(f))
+                # next_page_no = const.parse_mysql_int(f.read(4))
+                next_page_no = int.from_bytes(f.read(4), "big")
+                return next_page_no, primary_key_values
 
             # data scheme version
             data_schema_version = 0
@@ -195,10 +223,12 @@ class MIndexPage(CC):
                 (i, c[0])
                 for i, c in enumerate(cols_disk_layout)
                 if (not c[0].column_type_utf8.startswith("binary"))
-                and (DDColumnType.is_big(c[0].type)
-                or DDColumnType.is_var(
-                    c[0].type, mysqld_version=dd_object.mysql_version_id
-                ))
+                and (
+                    DDColumnType.is_big(c[0].type)
+                    or DDColumnType.is_var(
+                        c[0].type, mysqld_version=dd_object.mysql_version_id
+                    )
+                )
             ]
             logger.debug(
                 "may_var_col is %s",
@@ -259,7 +289,10 @@ class MIndexPage(CC):
                 if col.name in ["DB_ROW_ID", "DB_TRX_ID", "DB_ROLL_PTR"]:
                     if not hidden_col and col.name in disk_data_parsed:
                         disk_data_parsed.pop(col.name)
-                elif col.private_data.get("version_dropped", 0) != 0 or col.is_hidden_from_user:
+                elif (
+                    col.private_data.get("version_dropped", 0) != 0
+                    or col.is_hidden_from_user
+                ):
                     if col.name in disk_data_parsed:
                         disk_data_parsed.pop(col.name)
                 elif col.is_virtual or col.generation_expression_utf8 != "":
@@ -303,6 +336,22 @@ class MIndexPage(CC):
             stream.seek(next_page * const.PAGE_SIZE)
             next_index_page = MIndexPage.parse_stream(stream)
             return next_index_page.get_first_leaf_page(stream, primary_cols)
+
+    def list_records(self, f, value_parser):
+        childrens = []
+        for data in self.iterate_record_header(f, value_parser=value_parser):
+            if isinstance(data, tuple):  # node pointer
+                next_page_no, data = data
+                f.seek(next_page_no * const.PAGE_SIZE)
+                next_page = MIndexPage.parse_stream(f)
+                childrens.append(
+                    treeascii.TreeNode(
+                        (next_page_no, data), children=next_page.list_records(f, value_parser)
+                    )
+                )
+            else:
+                childrens.append(treeascii.TreeNode(data))
+        return childrens
 
     def iterate_record_header(self, f, value_parser=None, garbage=False, **ctx):
         page_no = self.fil.offset
@@ -389,7 +438,16 @@ class MSDIPage(CC):
         self.fil_tailer = MFilTrailer.parse_stream(stream)
         # self.ddl = next(self.iterate_sdi_record(stream))
 
-    def ddl(self, stream, idx):
+    def ddl(self, stream, idx, name=None):
+        target = None
+        for i, table in enumerate(self.iterate_sdi_record(stream)):
+            if name is not None and table["dd_object_type"] == "Table":
+                if name == table["dd_object"]["name"]:
+                    return table
+            if i == idx:
+                target = table
+        return target
+
         return list(self.iterate_sdi_record(stream))[idx]
         return next(self.iterate_sdi_record(stream))
 

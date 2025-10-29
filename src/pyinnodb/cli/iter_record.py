@@ -1,6 +1,6 @@
 from pyinnodb.disk_struct.first_page import MFirstPage
 from pyinnodb.disk_struct.fsp import MFspPage
-from pyinnodb.disk_struct.index import MSDIPage
+from pyinnodb.disk_struct.index import MSDIPage, MIndexPage
 from pyinnodb.disk_struct.record import MRecordHeader
 from pyinnodb.sdi.table import Table
 from pyinnodb.disk_struct.rollback import History
@@ -39,7 +39,7 @@ def search(ctx, primary_key, pageno, hidden_col, with_hist, datadir):
     f: t.IO[t.Any] = ctx.obj["fn"]
     # print("search start cost:", time.time() - ctx.obj["start_time"])
     fsp_page: MFspPage = ctx.obj["fsp_page"]
-    f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
+    f.seek(fsp_page.get_sdi_page_no_with_guess(f) * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl(f, 0)["dd_object"])
 
@@ -92,6 +92,20 @@ def primary_key_only(key_len: int):
 
 @main.command()
 @click.pass_context
+@click.option("--hidden-leaf/--no-hidden-leaf", type=click.BOOL, default=True)
+@click.option("--hidden-all/--no-hidden-all", type=click.BOOL, default=True)
+def tree_view(ctx, hidden_leaf=True, hidden_all=True):
+    f = ctx.obj["fn"]
+    fsp_page: MFspPage = ctx.obj["fsp_page"]
+    f.seek(fsp_page.get_sdi_page_no_with_guess(f) * const.PAGE_SIZE)
+    sdi_page = MSDIPage.parse_stream(f)
+    dd_object = Table(**sdi_page.ddl(f, 0)["dd_object"])
+    tree = dd_object.tree_view(f)
+    print(tree.build_block(hidden_leaf=hidden_leaf, hidden_all=hidden_all).text)
+
+
+@main.command()
+@click.pass_context
 @click.option("--garbage/--no-garbage", default=False, help="include garbage mark data")
 @click.option(
     "--hidden-col/--no-hidden-col",
@@ -111,13 +125,13 @@ def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx, header=0):
     """iterate on the leaf pages
 
     by default, iter_record will iterate from the first leaf page
-    output every record as a namedtuple whose filed is all the column
+    output every record as a namedtuple whose field is all the column
     name of the ibd file.
 
     """
     f = ctx.obj["fn"]
     fsp_page: MFspPage = ctx.obj["fsp_page"]
-    f.seek(fsp_page.sdi_page_no * const.PAGE_SIZE)
+    f.seek(fsp_page.get_sdi_page_no_with_guess(f) * const.PAGE_SIZE)
     sdi_page = MSDIPage.parse_stream(f)
     dd_object = Table(**sdi_page.ddl(f, sdi_idx)["dd_object"])
 
@@ -130,6 +144,14 @@ def iter_record(ctx, garbage, hidden_col, pageno, sdi_idx, header=0):
         tf = dd_object.trans_record_header_key()
     elif header == 4:
         tf = dd_object.trans_record_header_key(with_page=True)
+
+    if pageno != None:
+        f.seek(pageno * const.PAGE_SIZE)
+        page = MIndexPage.parse_stream(f)
+        default_value_parser = MIndexPage.value_parser_with_primary_key_only(dd_object)
+        for data in page.iterate_record_header(f, value_parser=default_value_parser):
+            print(data)
+        return
 
     for data in dd_object.iter_record(
         f, hidden_col=hidden_col, garbage=garbage, transfer=tf

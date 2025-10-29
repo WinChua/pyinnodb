@@ -39,6 +39,7 @@ class MIndexEntryNode(CC):  ## index_entry_t
     data_len: int = cfield(cs.Int32ul)
     lob_version: int = cfield(cs.Int32ub)
 
+
 class MFirstPageHeader(CC):
     version: int = cfield(cs.Int8ub)
     flag: int = cfield(cs.Int8ub)
@@ -47,7 +48,7 @@ class MFirstPageHeader(CC):
     last_undo_no: int = cfield(cs.Int32ub)
     data_len: int = cfield(cs.Int32ub)
     trx_id: int = cfield(IntFromBytes(6))
-    
+
 
 class MFirstPage(CC):  ## first_page_t
     fil: MFil = cfield(MFil)
@@ -73,7 +74,11 @@ class MFirstPage(CC):  ## first_page_t
     def get_data(self, stream):
         ie = self.index_entry[0]
         data = self.first_page_data
-        logger.debug("data_len is %d, index_list.length is %d", self.data_len, self.index_list.length)
+        logger.debug(
+            "data_len is %d, index_list.length is %d",
+            self.data_len,
+            self.index_list.length,
+        )
         for i in range(self.index_list.length):
             stream.seek(ie.page_no * const.PAGE_SIZE)
             dp = MDataPage.parse_stream(stream)

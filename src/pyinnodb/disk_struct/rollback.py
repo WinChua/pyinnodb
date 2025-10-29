@@ -11,6 +11,7 @@ UNIV_EXTERN_STORAGE_FIELD = int.from_bytes(
 SPATIAL_STATUS_SHIFT = 12
 SPATIAL_STATUS_MASK = 3 << SPATIAL_STATUS_SHIFT
 
+
 class History:
     def __init__(self, final):
         self.final = final
@@ -40,10 +41,9 @@ class History:
             else:
                 print("insert record")
             last = h
-        
+
 
 class HistoryVersion:
-
     def __init__(self, trx_id, rollptr, upd):
         self.trx_id = trx_id
         self.field = []
