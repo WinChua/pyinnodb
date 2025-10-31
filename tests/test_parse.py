@@ -35,7 +35,7 @@ def test_parse_mysql8(mysqlfile: MysqlFile):
         REAL=1092.892,
         SMALLINT=981,
         TEXT="TEXT",
-        TIME=MTime2(bin_data=b'\x801\x00'),
+        TIME=MTime2(bin_data=b"\x801\x00"),
         TIMESTAMP=datetime.datetime.strptime("2024-07-24 09:05:28", timeformat).replace(
             tzinfo=datetime.timezone.utc
         ),

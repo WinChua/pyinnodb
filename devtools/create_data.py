@@ -32,14 +32,15 @@ if len(sys.argv) > 1 and sys.argv[1] == "random":
     ids = iter(random.sample(range(0, 2 * 1000 * 1000), 1000 * 1000))
     for i in range(1000):
         session.bulk_insert_mappings(
-            User, [{"id": next(ids), "name": "a"*5000, "age": 10} for j in range(1000)]
+            User,
+            [{"id": next(ids), "name": "a" * 5000, "age": 10} for j in range(1000)],
         )
 elif len(sys.argv) > 1 and sys.argv[1] == "drop":
     User.__table__.drop(bind=engine)
 else:
     for i in range(1000):
         session.bulk_insert_mappings(
-            User, [{"name": "a"*5000, "age": 10} for i in range(1000)]
+            User, [{"name": "a" * 5000, "age": 10} for i in range(1000)]
         )
 
 session.commit()
