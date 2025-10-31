@@ -3,6 +3,7 @@ import shutil
 import click
 import json
 from pprint import pprint
+from pathlib import Path
 
 from dataclasses import dataclass, asdict
 from testcontainers.mysql import MySqlContainer
@@ -18,6 +19,8 @@ from pyinnodb.sdi.table import Table
 
 c.ryuk_disabled = True
 
+def get_project_root():
+    return Path(__file__).parent.parent
 
 @click.group()
 def main():
@@ -29,6 +32,8 @@ def tlist():
     data = load_deploy()
     pprint(data)
 
+DEPLOY_MYSQLD_PATH=get_project_root() / ".deploy_mysqld"
+DATADIR_BASE=get_project_root() / "datadir"
 
 @main.command()
 @click.option("--version", type=click.STRING)
@@ -47,7 +52,7 @@ def clean(version):
         shutil.rmtree(deploy.datadir)
 
     del data[version]
-    with open(".deploy_mysqld", "w") as f:
+    with open(DEPLOY_MYSQLD_PATH, "w") as f:
         dump_deploy(data, f)
 
 
@@ -60,8 +65,8 @@ class Instance:
 
 
 def load_deploy():
-    if os.path.exists(".deploy_mysqld"):
-        with open(".deploy_mysqld", "r") as f:
+    if os.path.exists(DEPLOY_MYSQLD_PATH):
+        with open(DEPLOY_MYSQLD_PATH, "r") as f:
             try:
                 data = json.load(f)
                 for k, v in data.items():
@@ -90,12 +95,12 @@ def mDeploy(version):
         return
 
     mContainer = MySqlContainer(f"mysql:{version}")
-    datadir = os.getcwd() + f"/datadir/{version}"
+    datadir = DATADIR_BASE / f"/datadir/{version}"
     mContainer.with_volume_mapping(datadir, "/var/lib/mysql", "rw")
     os.makedirs(datadir)
     mContainer.with_kwargs(remove=True, user=os.getuid(), userns_mode="host")
     mysql = mContainer.start()
-    with open(".deploy_mysqld", "w") as f:
+    with open(DEPLOY_MYSQLD_PATH, "w") as f:
         deploy_container[version] = Instance(
             url=mysql.get_connection_url().replace("localhost", "127.0.0.1"),
             container_id=f"{mysql._container.short_id}",
@@ -138,6 +143,10 @@ def exec(version, sql, file):
     url = deploy_container.get(version).url
     engine = create_engine(url)
     if file != "":
+        if not os.path.isabs(file):
+            poe_cwd = os.getenv("POE_CWD")
+            if poe_cwd:
+                file = os.path.join(poe_cwd, file)
         with open(file, "r") as f:
             sql = f.read()
     with engine.connect() as conn:

@@ -1,6 +1,6 @@
 [project]
 name = "pyinnodb"
-version = "0.0.28"
+version = "0.0.29"
 description = "A parser for InnoDB file formats, in Python"
 authors = [
     { name = "WinChua", email = "winchua@foxmail.com" }
@@ -57,6 +57,6 @@ of = ["of:init", "of:req", "of:cp", "of:clean",  "of:zip", "of:patch", "of:ex"]
 "of:zip" = "python -m zipapp target/ -m pyinnodb.cli:main -o pyinnodb.sh"
 "of:patch" = 'sed -i "1i\#!/usr/bin/env python3" pyinnodb.sh'
 "of:ex" = 'chmod a+x pyinnodb.sh'
-"dp" = "python devtools/deploy_mysqld.py"
+"dp" = "python ${POE_ROOT}/devtools/deploy_mysqld.py"
 "td" = "tar cvzf tests/test_data.tgz tests/mysql5/ tests/mysql8"
 bp.shell = "uv version --bump patch && git add -u . && git commit -m \"version release: `uv version --short`\" && git push"
