@@ -19,6 +19,11 @@ from pyinnodb import disk_struct
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.sdi.table import Table
 
+
+def get_project_root():
+    return Path(__file__).parent.parent
+
+
 DATADIR_BASE = get_project_root() / "datadir"
 
 
@@ -95,7 +100,7 @@ def load_deploy():
     return target_instance
 
 
-def mDeploy(version):
+def m_deploy(version):
     deploy_container = load_deploy()
     if version in deploy_container:
         print(
@@ -114,7 +119,7 @@ def mDeploy(version):
 @main.command()
 @click.option("--version", type=click.STRING, default="8.0.17")
 def deploy(version):
-    mDeploy(version)
+    m_deploy(version)
 
 
 @main.command()
@@ -123,7 +128,7 @@ def deploy(version):
 def connect(version, sql):
     deploy_container = load_deploy()
     if version not in deploy_container:
-        mDeploy(version)
+        m_deploy(version)
         deploy_container = load_deploy()
 
     if sql == "":
@@ -139,7 +144,7 @@ def connect(version, sql):
 def exec(version, sql, file):
     deploy_container = load_deploy()
     if version not in deploy_container:
-        mDeploy(version)
+        m_deploy(version)
         deploy_container = load_deploy()
     url = deploy_container.get(version).url
     engine = create_engine(url)
@@ -175,7 +180,7 @@ def exec(version, sql, file):
 def rand_data(version, table, size, idx, random_primary_key, varsize):
     deploy_container = load_deploy()
     if version not in deploy_container:
-        mDeploy(version)
+        m_deploy(version)
         deploy_container = load_deploy()
 
     table_ibd = deploy_container.get(version).datadir + f"/test/{table}.ibd"
