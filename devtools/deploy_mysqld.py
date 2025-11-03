@@ -64,6 +64,35 @@ class Instance:
     datadir: str
 
 
+@main.command()
+def recover():
+    import docker
+    client = docker.from_env()
+    target_versions = {f"mysql:{v}":v for v in os.listdir(DATADIR_BASE)}
+    target_instance = {}
+    for container in client.containers.list():
+        for tag in container.image.tags:
+            if tag in target_versions:
+                port_maps = container.ports.get("3306/tcp", None)
+                if port_maps is None:
+                    continue
+
+                found = False
+                for p in port_maps: 
+                    if p.get("HostIp", None) == "0.0.0.0":
+                        port = p.get("HostPort", None)
+                        if port:
+                            target_instance[target_versions[tag]] = Instance(
+                                url=f"mysql://test:test@127.0.0.1:{port}/test",
+                                container_id=container.short_id,
+                                cmd=f"mysql -h 127.0.0.1 -P{port} -utest -ptest test",
+                                datadir=target_versions[tag],
+                            )
+                            found = True
+                    if found: break
+    with open(DEPLOY_MYSQLD_PATH, "w") as f:
+        dump_deploy(target_instance, f)
+
 def load_deploy():
     if os.path.exists(DEPLOY_MYSQLD_PATH):
         with open(DEPLOY_MYSQLD_PATH, "r") as f:
@@ -95,7 +124,7 @@ def mDeploy(version):
         return
 
     mContainer = MySqlContainer(f"mysql:{version}")
-    datadir = DATADIR_BASE / f"/datadir/{version}"
+    datadir = DATADIR_BASE / f"{version}"
     mContainer.with_volume_mapping(datadir, "/var/lib/mysql", "rw")
     os.makedirs(datadir)
     mContainer.with_kwargs(remove=True, user=os.getuid(), userns_mode="host")
@@ -105,7 +134,7 @@ def mDeploy(version):
             url=mysql.get_connection_url().replace("localhost", "127.0.0.1"),
             container_id=f"{mysql._container.short_id}",
             cmd=f"mysql -h 127.0.0.1 -P{mysql.get_exposed_port(mysql.port)} -u{mysql.username} -p{mysql.password} test",
-            datadir=datadir,
+            datadir=datadir.name,
         )
         dump_deploy(deploy_container, f)
 
