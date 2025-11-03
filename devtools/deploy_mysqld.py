@@ -74,8 +74,8 @@ def load_deploy():
     client = docker.from_env()
     target_versions = {f"mysql:{v}": v for v in os.listdir(DATADIR_BASE)}
     target_instance = {}
-    for tag, container in [
-        (t, c) for t in c.image.tags for c in client.containers.list()
+    for container, tag in [
+        (c, t) for c in client.containers.list() for t in c.image.tags
     ]:
         if tag not in target_versions:
             continue
