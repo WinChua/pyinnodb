@@ -19,8 +19,10 @@ from pyinnodb.sdi.table import Table
 
 c.ryuk_disabled = True
 
+
 def get_project_root():
     return Path(__file__).parent.parent
+
 
 @click.group()
 def main():
@@ -32,8 +34,10 @@ def tlist():
     data = load_deploy()
     pprint(data)
 
-DEPLOY_MYSQLD_PATH=get_project_root() / ".deploy_mysqld"
-DATADIR_BASE=get_project_root() / "datadir"
+
+DEPLOY_MYSQLD_PATH = get_project_root() / ".deploy_mysqld"
+DATADIR_BASE = get_project_root() / "datadir"
+
 
 @main.command()
 @click.option("--version", type=click.STRING)
@@ -67,8 +71,9 @@ class Instance:
 @main.command()
 def recover():
     import docker
+
     client = docker.from_env()
-    target_versions = {f"mysql:{v}":v for v in os.listdir(DATADIR_BASE)}
+    target_versions = {f"mysql:{v}": v for v in os.listdir(DATADIR_BASE)}
     target_instance = {}
     for container in client.containers.list():
         for tag in container.image.tags:
@@ -78,7 +83,7 @@ def recover():
                     continue
 
                 found = False
-                for p in port_maps: 
+                for p in port_maps:
                     if p.get("HostIp", None) == "0.0.0.0":
                         port = p.get("HostPort", None)
                         if port:
@@ -89,9 +94,11 @@ def recover():
                                 datadir=target_versions[tag],
                             )
                             found = True
-                    if found: break
+                    if found:
+                        break
     with open(DEPLOY_MYSQLD_PATH, "w") as f:
         dump_deploy(target_instance, f)
+
 
 def load_deploy():
     if os.path.exists(DEPLOY_MYSQLD_PATH):

@@ -51,8 +51,8 @@ class TextBlock:
             top_line = top_line[:mid] + uni_tr + " " * (self.size[1] - r - 1)
         elif kind == 2:
             top_line = top_line[:mid] + uni_t + top_line[mid + 1 :]
-        elif kind == 3: # only one child
-            return ' ' * self.size[1]
+        elif kind == 3:  # only one child
+            return " " * self.size[1]
         return top_line
 
     @property
@@ -109,7 +109,11 @@ class TreeNode:
                     else:
                         if hidden_leaf_cnt != 0:
                             blocks.append(TextBlock(f"({hidden_leaf_cnt} hidden)"))
-                        blocks.append(c.build_block(hidden_leaf=hidden_leaf, hidden_all=hidden_all))
+                        blocks.append(
+                            c.build_block(
+                                hidden_leaf=hidden_leaf, hidden_all=hidden_all
+                            )
+                        )
                         hidden_leaf_cnt = 0
                     continue
                 if i == len(self.children) - 1:
@@ -137,7 +141,9 @@ class TreeNode:
         parent_text = TextBlock(parent_text.ljust(joined.size[1], " "))
         l, m, r = parent_text.loc
         p_mid = m
-        r_text = uni_invt if p_mid < len(top_line) and top_line[p_mid] == uni_h else uni_ten
+        r_text = (
+            uni_invt if p_mid < len(top_line) and top_line[p_mid] == uni_h else uni_ten
+        )
         r_text = uni_v if len(blocks) == 1 else r_text
         top_line = top_line[:p_mid] + r_text + top_line[p_mid + 1 :]
         return TextBlock("\n".join([parent_text.text, top_line, joined.text]))

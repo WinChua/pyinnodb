@@ -346,7 +346,8 @@ class MIndexPage(CC):
                 next_page = MIndexPage.parse_stream(f)
                 childrens.append(
                     treeascii.TreeNode(
-                        (next_page_no, data), children=next_page.list_records(f, value_parser)
+                        (next_page_no, data),
+                        children=next_page.list_records(f, value_parser),
                     )
                 )
             else:
