@@ -5,6 +5,8 @@ import json
 from pprint import pprint
 from pathlib import Path
 
+import docker
+
 from dataclasses import dataclass, asdict
 from testcontainers.mysql import MySqlContainer
 from testcontainers.core.config import testcontainers_config as c
@@ -35,7 +37,6 @@ def tlist():
     pprint(data)
 
 
-DEPLOY_MYSQLD_PATH = get_project_root() / ".deploy_mysqld"
 DATADIR_BASE = get_project_root() / "datadir"
 
 
@@ -55,10 +56,6 @@ def clean(version):
     if os.path.exists(deploy.datadir):
         shutil.rmtree(deploy.datadir)
 
-    del data[version]
-    with open(DEPLOY_MYSQLD_PATH, "w") as f:
-        dump_deploy(data, f)
-
 
 @dataclass
 class Instance:
@@ -68,58 +65,37 @@ class Instance:
     datadir: str
 
 
-@main.command()
-def recover():
-    import docker
-
+def load_deploy():
     client = docker.from_env()
     target_versions = {f"mysql:{v}": v for v in os.listdir(DATADIR_BASE)}
     target_instance = {}
     for container in client.containers.list():
         for tag in container.image.tags:
-            if tag in target_versions:
-                port_maps = container.ports.get("3306/tcp", None)
-                if port_maps is None:
+            if tag not in target_versions:
+                continue
+
+            port_maps = container.ports.get("3306/tcp", None)
+            if port_maps is None:
+                continue
+
+            found = False
+            for p in port_maps:
+                if p.get("HostIp", None) != "0.0.0.0":
                     continue
+                port = p.get("HostPort", None)
+                if port is None:
+                    continue
+                target_instance[target_versions[tag]] = Instance(
+                    url=f"mysql://test:test@127.0.0.1:{port}/test",
+                    container_id=container.short_id,
+                    cmd=f"mysql -h 127.0.0.1 -P{port} -utest -ptest test",
+                    datadir=target_versions[tag],
+                )
+                found = True
+            if found:
+                break
 
-                found = False
-                for p in port_maps:
-                    if p.get("HostIp", None) == "0.0.0.0":
-                        port = p.get("HostPort", None)
-                        if port:
-                            target_instance[target_versions[tag]] = Instance(
-                                url=f"mysql://test:test@127.0.0.1:{port}/test",
-                                container_id=container.short_id,
-                                cmd=f"mysql -h 127.0.0.1 -P{port} -utest -ptest test",
-                                datadir=target_versions[tag],
-                            )
-                            found = True
-                    if found:
-                        break
-    with open(DEPLOY_MYSQLD_PATH, "w") as f:
-        dump_deploy(target_instance, f)
-
-
-def load_deploy():
-    if os.path.exists(DEPLOY_MYSQLD_PATH):
-        with open(DEPLOY_MYSQLD_PATH, "r") as f:
-            try:
-                data = json.load(f)
-                for k, v in data.items():
-                    data[k] = Instance(**v)
-
-                return data
-            except Exception as e:
-                print(e)
-                return {}
-    return {}
-
-
-def dump_deploy(data, f):
-    for k in data:
-        data[k] = asdict(data[k])
-
-    json.dump(data, f)
+    return target_instance
 
 
 def mDeploy(version):
@@ -136,14 +112,6 @@ def mDeploy(version):
     os.makedirs(datadir)
     mContainer.with_kwargs(remove=True, user=os.getuid(), userns_mode="host")
     mysql = mContainer.start()
-    with open(DEPLOY_MYSQLD_PATH, "w") as f:
-        deploy_container[version] = Instance(
-            url=mysql.get_connection_url().replace("localhost", "127.0.0.1"),
-            container_id=f"{mysql._container.short_id}",
-            cmd=f"mysql -h 127.0.0.1 -P{mysql.get_exposed_port(mysql.port)} -u{mysql.username} -p{mysql.password} test",
-            datadir=datadir.name,
-        )
-        dump_deploy(deploy_container, f)
 
 
 @main.command()
