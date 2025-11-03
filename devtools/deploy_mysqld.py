@@ -19,6 +19,17 @@ from pyinnodb import disk_struct
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.sdi.table import Table
 
+DATADIR_BASE = get_project_root() / "datadir"
+
+
+@dataclass
+class Instance:
+    url: str
+    container_id: str
+    cmd: str
+    datadir: str
+
+
 c.ryuk_disabled = True
 
 
@@ -35,9 +46,6 @@ def main():
 def tlist():
     data = load_deploy()
     pprint(data)
-
-
-DATADIR_BASE = get_project_root() / "datadir"
 
 
 @main.command()
@@ -57,43 +65,32 @@ def clean(version):
         shutil.rmtree(deploy.datadir)
 
 
-@dataclass
-class Instance:
-    url: str
-    container_id: str
-    cmd: str
-    datadir: str
-
-
 def load_deploy():
     client = docker.from_env()
     target_versions = {f"mysql:{v}": v for v in os.listdir(DATADIR_BASE)}
     target_instance = {}
-    for container in client.containers.list():
-        for tag in container.image.tags:
-            if tag not in target_versions:
-                continue
+    for tag, container in [
+        (t, c) for t in c.image.tags for c in client.containers.list()
+    ]:
+        if tag not in target_versions:
+            continue
 
-            port_maps = container.ports.get("3306/tcp", None)
-            if port_maps is None:
-                continue
+        port_maps = container.ports.get("3306/tcp", None)
+        if port_maps is None:
+            continue
 
-            found = False
-            for p in port_maps:
-                if p.get("HostIp", None) != "0.0.0.0":
-                    continue
-                port = p.get("HostPort", None)
-                if port is None:
-                    continue
-                target_instance[target_versions[tag]] = Instance(
-                    url=f"mysql://test:test@127.0.0.1:{port}/test",
-                    container_id=container.short_id,
-                    cmd=f"mysql -h 127.0.0.1 -P{port} -utest -ptest test",
-                    datadir=target_versions[tag],
-                )
-                found = True
-            if found:
-                break
+        for p in port_maps:
+            if p.get("HostIp", None) != "0.0.0.0":
+                continue
+            port = p.get("HostPort", None)
+            if port is None:
+                continue
+            target_instance[target_versions[tag]] = Instance(
+                url=f"mysql://test:test@127.0.0.1:{port}/test",
+                container_id=container.short_id,
+                cmd=f"mysql -h 127.0.0.1 -P{port} -utest -ptest test",
+                datadir=target_versions[tag],
+            )
 
     return target_instance
 
