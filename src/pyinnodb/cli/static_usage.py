@@ -43,7 +43,9 @@ def list_page(ctx, kind):
             ratios, 64, int((len(ratios) / 64) + 1), "Page NO."
         )
         fratios = [s for s in ratios if s > 0]
-        print(f"use {len(fratios)} index page, avg ratio: {sum(fratios)/len(fratios)}")
+        print(
+            f"use {len(fratios)} index page, avg ratio: {sum(fratios) / len(fratios)}"
+        )
 
 
 @main.command()

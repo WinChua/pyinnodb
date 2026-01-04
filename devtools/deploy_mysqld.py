@@ -5,6 +5,8 @@ import json
 from pprint import pprint
 from pathlib import Path
 
+import docker
+
 from dataclasses import dataclass, asdict
 from testcontainers.mysql import MySqlContainer
 from testcontainers.core.config import testcontainers_config as c
@@ -17,10 +19,28 @@ from pyinnodb import disk_struct
 from pyinnodb.disk_struct.index import MSDIPage
 from pyinnodb.sdi.table import Table
 
-c.ryuk_disabled = True
 
 def get_project_root():
     return Path(__file__).parent.parent
+
+
+DATADIR_BASE = get_project_root() / "datadir"
+
+
+@dataclass
+class Instance:
+    url: str
+    container_id: str
+    cmd: str
+    datadir: str
+
+
+c.ryuk_disabled = True
+
+
+def get_project_root():
+    return Path(__file__).parent.parent
+
 
 @click.group()
 def main():
@@ -32,8 +52,6 @@ def tlist():
     data = load_deploy()
     pprint(data)
 
-DEPLOY_MYSQLD_PATH=get_project_root() / ".deploy_mysqld"
-DATADIR_BASE=get_project_root() / "datadir"
 
 @main.command()
 @click.option("--version", type=click.STRING)
@@ -51,42 +69,38 @@ def clean(version):
     if os.path.exists(deploy.datadir):
         shutil.rmtree(deploy.datadir)
 
-    del data[version]
-    with open(DEPLOY_MYSQLD_PATH, "w") as f:
-        dump_deploy(data, f)
-
-
-@dataclass
-class Instance:
-    url: str
-    container_id: str
-    cmd: str
-    datadir: str
-
 
 def load_deploy():
-    if os.path.exists(DEPLOY_MYSQLD_PATH):
-        with open(DEPLOY_MYSQLD_PATH, "r") as f:
-            try:
-                data = json.load(f)
-                for k, v in data.items():
-                    data[k] = Instance(**v)
+    client = docker.from_env()
+    target_versions = {f"mysql:{v}": v for v in os.listdir(DATADIR_BASE)}
+    target_instance = {}
+    for container, tag in [
+        (c, t) for c in client.containers.list() for t in c.image.tags
+    ]:
+        if tag not in target_versions:
+            continue
 
-                return data
-            except Exception as e:
-                print(e)
-                return {}
-    return {}
+        port_maps = container.ports.get("3306/tcp", None)
+        if port_maps is None:
+            continue
+
+        for p in port_maps:
+            if p.get("HostIp", None) != "0.0.0.0":
+                continue
+            port = p.get("HostPort", None)
+            if port is None:
+                continue
+            target_instance[target_versions[tag]] = Instance(
+                url=f"mysql://test:test@127.0.0.1:{port}/test",
+                container_id=container.short_id,
+                cmd=f"mysql -h 127.0.0.1 -P{port} -utest -ptest test",
+                datadir=target_versions[tag],
+            )
+
+    return target_instance
 
 
-def dump_deploy(data, f):
-    for k in data:
-        data[k] = asdict(data[k])
-
-    json.dump(data, f)
-
-
-def mDeploy(version):
+def m_deploy(version):
     deploy_container = load_deploy()
     if version in deploy_container:
         print(
@@ -95,25 +109,17 @@ def mDeploy(version):
         return
 
     mContainer = MySqlContainer(f"mysql:{version}")
-    datadir = DATADIR_BASE / f"/datadir/{version}"
+    datadir = DATADIR_BASE / f"{version}"
     mContainer.with_volume_mapping(datadir, "/var/lib/mysql", "rw")
     os.makedirs(datadir)
     mContainer.with_kwargs(remove=True, user=os.getuid(), userns_mode="host")
     mysql = mContainer.start()
-    with open(DEPLOY_MYSQLD_PATH, "w") as f:
-        deploy_container[version] = Instance(
-            url=mysql.get_connection_url().replace("localhost", "127.0.0.1"),
-            container_id=f"{mysql._container.short_id}",
-            cmd=f"mysql -h 127.0.0.1 -P{mysql.get_exposed_port(mysql.port)} -u{mysql.username} -p{mysql.password} test",
-            datadir=datadir,
-        )
-        dump_deploy(deploy_container, f)
 
 
 @main.command()
 @click.option("--version", type=click.STRING, default="8.0.17")
 def deploy(version):
-    mDeploy(version)
+    m_deploy(version)
 
 
 @main.command()
@@ -122,7 +128,7 @@ def deploy(version):
 def connect(version, sql):
     deploy_container = load_deploy()
     if version not in deploy_container:
-        mDeploy(version)
+        m_deploy(version)
         deploy_container = load_deploy()
 
     if sql == "":
@@ -138,7 +144,7 @@ def connect(version, sql):
 def exec(version, sql, file):
     deploy_container = load_deploy()
     if version not in deploy_container:
-        mDeploy(version)
+        m_deploy(version)
         deploy_container = load_deploy()
     url = deploy_container.get(version).url
     engine = create_engine(url)
@@ -174,7 +180,7 @@ def exec(version, sql, file):
 def rand_data(version, table, size, idx, random_primary_key, varsize):
     deploy_container = load_deploy()
     if version not in deploy_container:
-        mDeploy(version)
+        m_deploy(version)
         deploy_container = load_deploy()
 
     table_ibd = deploy_container.get(version).datadir + f"/test/{table}.ibd"

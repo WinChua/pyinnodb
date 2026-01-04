@@ -51,7 +51,7 @@ class MFspPage(CC):
             return self.sdi_page_no
 
         for pn in range(self.fsp_header.highest_page_number):
-            f.seek(pn *const.PAGE_SIZE)
+            f.seek(pn * const.PAGE_SIZE)
             fil = MFil.parse_stream(f)
             if const.PageType(fil.page_type) == const.PageType.SDI:
                 return fil.offset
