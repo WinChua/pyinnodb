@@ -5,7 +5,7 @@ import typing
 from pyinnodb.const.index_type import IndexType
 from pyinnodb import const
 import enum
-from base64 import b64encode
+from base64 import b64encode, b64decode
 
 # header_size: 64
 # forminfo_offset: header_size+${names_length}
@@ -76,24 +76,87 @@ class MFrmColumn(CC):  # 17
         else:
             c.type = self.type_code - 225
         c.name = name
-        if c.type == const.dd_column_type.DDColumnType.NEWDECIMAL.value:
+        
+        # Generate column_type_utf8 based on type
+        dtype = const.dd_column_type.DDColumnType(c.type)
+        
+        if dtype == const.dd_column_type.DDColumnType.NEWDECIMAL:
             c.numeric_precision = self.length
             c.numeric_scale = (int(self.flags) >> 8) & 31
             if c.numeric_scale:
                 c.numeric_precision -= 1
             if c.numeric_precision:
                 c.numeric_precision -= 1
-        elif c.type == const.dd_column_type.DDColumnType.BIT.value:
+            c.column_type_utf8 = f"decimal({c.numeric_precision},{c.numeric_scale})"
+        elif dtype == const.dd_column_type.DDColumnType.BIT:
             c.numeric_precision = self.length
-        elif c.type in [
-            const.dd_column_type.DDColumnType.ENUM.value,
-            const.dd_column_type.DDColumnType.SET.value,
+            c.column_type_utf8 = f"bit({self.length})"
+        elif dtype == const.dd_column_type.DDColumnType.TINY:
+            c.column_type_utf8 = "tinyint"
+        elif dtype == const.dd_column_type.DDColumnType.SHORT:
+            c.column_type_utf8 = "smallint"
+        elif dtype == const.dd_column_type.DDColumnType.LONG:
+            c.column_type_utf8 = "int"
+        elif dtype == const.dd_column_type.DDColumnType.LONGLONG:
+            c.column_type_utf8 = "bigint"
+        elif dtype == const.dd_column_type.DDColumnType.INT24:
+            c.column_type_utf8 = "mediumint"
+        elif dtype == const.dd_column_type.DDColumnType.FLOAT:
+            c.column_type_utf8 = "float"
+        elif dtype == const.dd_column_type.DDColumnType.DOUBLE:
+            c.column_type_utf8 = "double"
+        elif dtype == const.dd_column_type.DDColumnType.YEAR:
+            c.column_type_utf8 = "year"
+        elif dtype == const.dd_column_type.DDColumnType.DATETIME2:
+            c.column_type_utf8 = "datetime"
+        elif dtype == const.dd_column_type.DDColumnType.TIME2:
+            c.column_type_utf8 = "time"
+        elif dtype == const.dd_column_type.DDColumnType.TIMESTAMP2:
+            c.column_type_utf8 = "timestamp"
+        elif dtype == const.dd_column_type.DDColumnType.DATE:
+            c.column_type_utf8 = "date"
+        elif dtype == const.dd_column_type.DDColumnType.VARCHAR:
+            c.column_type_utf8 = f"varchar({self.length})"
+        elif dtype == const.dd_column_type.DDColumnType.STRING:
+            c.column_type_utf8 = f"char({self.length})"
+        elif dtype == const.dd_column_type.DDColumnType.TINY_BLOB:
+            if self.flags & FieldFlag.BLOB.value:
+                c.column_type_utf8 = "tinyblob"
+            else:
+                c.column_type_utf8 = "tinytext"
+        elif dtype == const.dd_column_type.DDColumnType.BLOB:
+            if self.flags & FieldFlag.BLOB.value:
+                c.column_type_utf8 = "blob"
+            else:
+                c.column_type_utf8 = "text"
+        elif dtype == const.dd_column_type.DDColumnType.MEDIUM_BLOB:
+            if self.flags & FieldFlag.BLOB.value:
+                c.column_type_utf8 = "mediumblob"
+            else:
+                c.column_type_utf8 = "mediumtext"
+        elif dtype == const.dd_column_type.DDColumnType.LONG_BLOB:
+            if self.flags & FieldFlag.BLOB.value:
+                c.column_type_utf8 = "longblob"
+            else:
+                c.column_type_utf8 = "longtext"
+        elif dtype in [
+            const.dd_column_type.DDColumnType.ENUM,
+            const.dd_column_type.DDColumnType.SET,
         ]:
             if self.label_id <= len(labels):
-                for i, name in enumerate(labels[self.label_id - 1]):
-                    c.elements.append(ColumnElement(name=b64encode(name), index=i + 1))
-        elif c.type == const.dd_column_type.DDColumnType.STRING.value:
-            c.column_type_utf8 = f"char({self.length})"
+                for i, elem_name in enumerate(labels[self.label_id - 1]):
+                    c.elements.append(ColumnElement(name=b64encode(elem_name), index=i + 1))
+            # Generate ENUM/SET type string
+            if len(c.elements) > 0:
+                elem_names = [b64decode(e.name).decode('utf-8') for e in c.elements]
+                elem_str = ','.join([f"'{n}'" for n in elem_names])
+                type_name = "enum" if dtype == const.dd_column_type.DDColumnType.ENUM else "set"
+                c.column_type_utf8 = f"{type_name}({elem_str})"
+            else:
+                c.column_type_utf8 = "enum('')" if dtype == const.dd_column_type.DDColumnType.ENUM else "set('')"
+        else:
+            # Fallback for unknown types
+            c.column_type_utf8 = str(dtype.name).lower()
 
         c.is_nullable = bool(self.flags & FieldFlag.MAYBE_NULL.value)
 
