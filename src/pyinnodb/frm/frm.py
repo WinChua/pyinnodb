@@ -77,6 +77,10 @@ class MFrmColumn(CC):  # 17
             c.type = self.type_code - 225
         c.name = name
         
+        # Store charset info for binary type detection
+        # charset_id 63 = binary
+        is_binary_charset = (self.charset_id1 == 63 or self.charset_id2 == 63)
+        
         # Generate column_type_utf8 based on type
         dtype = const.dd_column_type.DDColumnType(c.type)
         
@@ -113,12 +117,27 @@ class MFrmColumn(CC):  # 17
             c.column_type_utf8 = "time"
         elif dtype == const.dd_column_type.DDColumnType.TIMESTAMP2:
             c.column_type_utf8 = "timestamp"
+        elif dtype == const.dd_column_type.DDColumnType.NEWDATE:
+            c.column_type_utf8 = "date"
         elif dtype == const.dd_column_type.DDColumnType.DATE:
             c.column_type_utf8 = "date"
+        elif dtype == const.dd_column_type.DDColumnType.VAR_STRING:
+            # VAR_STRING can be VARCHAR or VARBINARY
+            if is_binary_charset:
+                c.column_type_utf8 = f"varbinary({self.length})"
+            else:
+                c.column_type_utf8 = f"varchar({self.length})"
         elif dtype == const.dd_column_type.DDColumnType.VARCHAR:
-            c.column_type_utf8 = f"varchar({self.length})"
+            if is_binary_charset:
+                c.column_type_utf8 = f"varbinary({self.length})"
+            else:
+                c.column_type_utf8 = f"varchar({self.length})"
         elif dtype == const.dd_column_type.DDColumnType.STRING:
-            c.column_type_utf8 = f"char({self.length})"
+            # STRING can be CHAR or BINARY
+            if is_binary_charset:
+                c.column_type_utf8 = f"binary({self.length})"
+            else:
+                c.column_type_utf8 = f"char({self.length})"
         elif dtype == const.dd_column_type.DDColumnType.TINY_BLOB:
             if self.flags & FieldFlag.BLOB.value:
                 c.column_type_utf8 = "tinyblob"
@@ -148,10 +167,13 @@ class MFrmColumn(CC):  # 17
                     c.elements.append(ColumnElement(name=b64encode(elem_name), index=i + 1))
             # Generate ENUM/SET type string
             if len(c.elements) > 0:
-                elem_names = [b64decode(e.name).decode('utf-8') for e in c.elements]
-                elem_str = ','.join([f"'{n}'" for n in elem_names])
-                type_name = "enum" if dtype == const.dd_column_type.DDColumnType.ENUM else "set"
-                c.column_type_utf8 = f"{type_name}({elem_str})"
+                try:
+                    elem_names = [b64decode(e.name).decode('utf-8', errors='ignore') for e in c.elements]
+                    elem_str = ','.join([f"'{n}'" for n in elem_names])
+                    type_name = "enum" if dtype == const.dd_column_type.DDColumnType.ENUM else "set"
+                    c.column_type_utf8 = f"{type_name}({elem_str})"
+                except Exception:
+                    c.column_type_utf8 = "enum('')" if dtype == const.dd_column_type.DDColumnType.ENUM else "set('')"
             else:
                 c.column_type_utf8 = "enum('')" if dtype == const.dd_column_type.DDColumnType.ENUM else "set('')"
         else:

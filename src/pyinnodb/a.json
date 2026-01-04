@@ -1,0 +1,212 @@
+{
+    "gj": [
+        {
+            "down": 100,
+            "interval": "360m",
+            "status": 0,
+            "text": "很干净"
+        },
+        {
+            "down": 90,
+            "interval": "380m",
+            "status": 0,
+            "text": "很干净"
+        },
+        {
+            "down": 80,
+            "interval": "400m",
+            "status": 0,
+            "text": "基本干净"
+        },
+        {
+            "down": 70,
+            "interval": "430m",
+            "status": 0,
+            "text": "基本干净"
+        },
+        {
+            "down": 60,
+            "interval": "446m",
+            "status": 0,
+            "text": "基本干净"
+        },
+        {
+            "down": 50,
+            "interval": "480m",
+            "status": 1,
+            "text": "身上脏了"
+        },
+        {
+            "down": 40,
+            "interval": "600m",
+            "status": 1,
+            "text": "身上脏了"
+        },
+        {
+            "down": 30,
+            "interval": "800m",
+            "status": 1,
+            "text": "身上脏了"
+        },
+        {
+            "down": 20,
+            "interval": "1200m",
+            "status": 1,
+            "text": "身上脏了"
+        },
+        {
+            "down": 10,
+            "interval": "2000m",
+            "status": 2,
+            "text": "身上脏了"
+        },
+        {
+            "down": 0,
+            "interval": "2000m",
+            "status": 2,
+            "text": "身上脏了"
+        }
+    ],
+    "je": [
+        {
+            "down": 100,
+            "interval": "80m",
+            "status": 0,
+            "text": "吃饱饱了"
+        },
+        {
+            "down": 90,
+            "interval": "82m",
+            "status": 0,
+            "text": "吃饱饱了"
+        },
+        {
+            "down": 80,
+            "interval": "87m",
+            "status": 0,
+            "text": "有点饿了"
+        },
+        {
+            "down": 70,
+            "interval": "95m",
+            "status": 0,
+            "text": "有点饿了"
+        },
+        {
+            "down": 60,
+            "interval": "109m",
+            "status": 0,
+            "text": "有点饿了"
+        },
+        {
+            "down": 50,
+            "interval": "133m",
+            "status": 1,
+            "text": "饥饿中"
+        },
+        {
+            "down": 40,
+            "interval": "182m",
+            "status": 1,
+            "text": "饥饿中"
+        },
+        {
+            "down": 30,
+            "interval": "316m",
+            "status": 1,
+            "text": "饥饿中"
+        },
+        {
+            "down": 20,
+            "interval": "600m",
+            "status": 1,
+            "text": "饥饿中"
+        },
+        {
+            "down": 10,
+            "interval": "2000m",
+            "status": 2,
+            "text": "极度饥饿"
+        },
+        {
+            "down": 0,
+            "interval": "2000m",
+            "status": 2,
+            "text": "极度饥饿"
+        }
+    ],
+    "kx": [
+        {
+            "down": 100,
+            "interval": "120m",
+            "status": 0,
+            "text": "开心"
+        },
+        {
+            "down": 90,
+            "interval": "130m",
+            "status": 0,
+            "text": "开心"
+        },
+        {
+            "down": 80,
+            "interval": "150m",
+            "status": 0,
+            "text": "开心"
+        },
+        {
+            "down": 70,
+            "interval": "170m",
+            "status": 0,
+            "text": "开心"
+        },
+        {
+            "down": 60,
+            "interval": "240m",
+            "status": 0,
+            "text": "开心"
+        },
+        {
+            "down": 50,
+            "interval": "400m",
+            "status": 1,
+            "text": "伤心中"
+        },
+        {
+            "down": 40,
+            "interval": "750m",
+            "status": 1,
+            "text": "伤心中"
+        },
+        {
+            "down": 30,
+            "interval": "1200m",
+            "status": 1,
+            "text": "伤心中"
+        },
+        {
+            "down": 20,
+            "interval": "1500m",
+            "status": 1,
+            "text": "伤心中"
+        },
+        {
+            "down": 10,
+            "interval": "2000m",
+            "status": 1,
+            "text": "伤心中"
+        },
+        {
+            "down": 0,
+            "interval": "2000m",
+            "status": 2,
+            "text": "伤心中"
+        }
+    ],
+    "metatime": "2023-05-08 00:00:00",
+    "rTT": "1800",
+    "rOE": "604800",
+    "deadduration": "168h",
+    "rTTL": "86400",
+    "debuguin": "1,1934203186,1152921505246629550"
+}

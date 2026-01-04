@@ -202,8 +202,10 @@ class Table:
 
             idx.se_private_data = "root=3"
 
-            self.columns.append(get_sys_col("DB_TRX_ID", len(self.columns)))
-            self.columns.append(get_sys_col("DB_ROLL_PTR", len(self.columns)))
+            # Add system columns with correct ordinal_position (1-based)
+            sys_col_start_idx = len(self.columns)
+            self.columns.append(get_sys_col("DB_TRX_ID", sys_col_start_idx + 1))
+            self.columns.append(get_sys_col("DB_ROLL_PTR", sys_col_start_idx + 2))
 
             self.indexes = [idx]
 
