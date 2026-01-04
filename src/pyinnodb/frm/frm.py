@@ -71,6 +71,10 @@ class MFrmColumn(CC):  # 17
         c = Column()
         c.hidden = const.column_hidden_type.ColumnHiddenType.HT_VISIBLE.value
         c.ordinal_position = pos + 1
+        # Set srs_id_null to True to avoid unnecessary SRID comments in DDL
+        c.srs_id_null = True
+        # Set default_value_utf8_null to True to avoid unnecessary DEFAULT '' in DDL
+        c.default_value_utf8_null = True
         if self.type_code < 20:
             c.type = self.type_code + 1
         else:
