@@ -22,39 +22,48 @@ This directory contains the comprehensive test suite for PyInnoDB.
 
 ### Install test dependencies:
 ```bash
-pip install -r tests/requirements-test.txt
+uv pip install pytest pytest-cov coverage psutil
+```
+
+Or install all dev dependencies:
+```bash
+uv pip install -e ".[dev]"
 ```
 
 ### Run all tests:
 ```bash
-pytest
+# Using uv run to execute pytest in project context
+uv run pytest
+
+# Or if you have installed dev dependencies
+python -m pytest
 ```
 
 ### Run specific test categories:
 ```bash
 # Run only unit tests
-pytest tests/unit/
+uv run pytest tests/unit/
 
 # Run only integration tests
-pytest tests/integration/
+uv run pytest tests/integration/
 
 # Run only performance tests
-pytest -m performance
+uv run pytest -m performance
 
 # Run tests with coverage
-pytest --cov=src/pyinnodb --cov-report=html
+uv run pytest --cov=src/pyinnodb --cov-report=html
 
 # Run tests verbosely
-pytest -v
+uv run pytest -v
 ```
 
 ### Run tests with specific markers:
 ```bash
 # Skip slow tests
-pytest -m "not slow"
+uv run pytest -m "not slow"
 
 # Only run integration tests
-pytest -m integration
+uv run pytest -m integration
 ```
 
 ## Test Categories
