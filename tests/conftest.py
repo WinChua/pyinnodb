@@ -15,6 +15,9 @@ import struct
 from pathlib import Path
 from typing import BinaryIO, NamedTuple, Sequence
 
+def get_project_root():
+    return Path(__file__).parent.parent
+
 import pytest
 
 from pyinnodb import const
@@ -32,11 +35,12 @@ from pyinnodb.sdi.table import Table
 TESTS_DIR = Path(__file__).parent
 MYSQL5_DIR = TESTS_DIR / "mysql5"
 MYSQL8_DIR = TESTS_DIR / "mysql8"
+DATADIR_MYSQL8_TEST = get_project_root() / "datadir/8.0.17/test"
 
 MYSQL5_IBD = MYSQL5_DIR / "all_type.ibd"
 MYSQL5_FRM = MYSQL5_DIR / "all_type.frm"
-MYSQL8_IBD = MYSQL8_DIR / "all_type.ibd"
-MYSQL8_INSTANT_IBD = MYSQL8_DIR / "test_for_instant.ibd"
+MYSQL8_IBD = DATADIR_MYSQL8_TEST / "geometry_test.ibd" if DATADIR_MYSQL8_TEST.exists() else MYSQL8_DIR / "all_type.ibd"
+MYSQL8_INSTANT_IBD = DATADIR_MYSQL8_TEST / "test_for_instant.ibd" if DATADIR_MYSQL8_TEST.exists() else MYSQL8_DIR / "test_for_instant.ibd"
 
 
 # ---------------------------------------------------------------------------

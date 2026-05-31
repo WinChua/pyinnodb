@@ -63,10 +63,10 @@ class TestMSDIPage:
         sdi_page = MSDIPage.parse_stream(mysql8_ibd_file)
         ddl_result = sdi_page.ddl(mysql8_ibd_file, 0)
         assert "dd_object" in ddl_result
-        assert ddl_result["dd_object"]["name"] == "all_type"
+        assert ddl_result["dd_object"]["name"] == "geometry_test"
 
     def test_table_name(self, parsed_mysql8):
-        assert parsed_mysql8.table.name == "all_type"
+        assert parsed_mysql8.table.name == "geometry_test"
 
     def test_table_schema(self, parsed_mysql8):
         assert parsed_mysql8.table.schema_ref == "test"
